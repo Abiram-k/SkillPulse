@@ -7,7 +7,7 @@ import LandingPage from "./Pages/User/landingpage/LandingPage";
 import HomePage from "./Pages/User/homPage/HomePage";
 function App() {
   return (
-    <>
+    <> 
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
