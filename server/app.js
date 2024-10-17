@@ -6,6 +6,7 @@ const cookie = require("cookie-parser");
 const path = require("node:path");
 const cors = require("cors");
 const userRouter = require('./Routes/userRoutes')
+const adminRouter = require('./Routes/adminRoutes')
 const nodeMailer = require("nodemailer");
 const passport = require("passport");
 require('./config/passport');
@@ -33,7 +34,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', userRouter)
-
+app.use("/admin",adminRouter);
 
 mongoose.connect(process.env.MONGO_URL).then(() => {
     console.log("SuccessFully connected to mongoDB")

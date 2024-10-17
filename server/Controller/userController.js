@@ -2,7 +2,10 @@ const User = require('../models/userModel');
 const nodeMailer = require("nodemailer");
 const path = require("path");
 const dotenv = require('dotenv');
-dotenv.config({ path: path.resolve(__dirname, "../../.env") })
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 
 exports.baseRoute = (req, res) => {
@@ -60,6 +63,7 @@ The [SkillPulse] Team`,
 exports.signUp = async (req, res) => {
     console.log("hello signup clicked from backend")
     const { firstName, email } = req.body;
+    const otpExpiry = 30;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -74,6 +78,15 @@ exports.signUp = async (req, res) => {
         }
         req.session.user = req.body;
         req.session.otp = otp;
+
+        //to delte the otp after 30seconds;
+        setTimeout(() => {
+            if (req.session && req.session.otp) {
+                delete req.session.otp;
+                console.log('OTP expired');
+            }
+        }, otpExpiry * 1000);
+
         console.log(req.session.otp);
         console.log(req.session.user);
         return res.status(200).json({ message: "Proceeded to Otp verification" })
@@ -88,9 +101,13 @@ exports.otp = async (req, res) => {
     console.log("new User", newUser);
 
     try {
-        if (!req.session.user)
+        if (!req.session.otp) {
+            return res.status(400).json({ message: "Otp expired !" })
+        }
+        else if (!req.session.user) {
             return res.status(400).json({ message: "User not found" });
-        if (req.session.otp == otp) {
+        }
+        else if (req.session.otp == otp) {
             const user = await User.create(req.session.user)
             res.status(200).json({ message: "User Created Succesfully", user })
             req.session.otp = null;
@@ -134,10 +151,33 @@ exports.resendOtp = async (req, res) => {
 
 
 
-exports.login = (req, res) => {
-    const { email, password } = req.password;
-    console.log(email, password);
-}
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        console.log(email, password);
+        const user = await User.findOne({ email });
+        if (user) {
+            const isValidPassword = await bcrypt.compare(password, user.password);
+            if (!isValidPassword) {
+                return res.status(400).json({ message: "Password is incorrect" });
+            } else {
 
+                //jwt toke sign
+                const token = jwt.sign("usertoken", process.env.JWT_SECERETE, { expiresIn: "12d" })
+                res.cookie({
+                    name: "usertoken"
+                })
+                return res.status(200).json({ message: "Successfully Logged in", token });
+
+            }
+        }
+        else {
+            return res.status(400).json({ message: "User not found !" });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+    }
+}
 
 

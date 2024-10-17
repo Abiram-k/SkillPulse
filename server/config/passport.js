@@ -2,7 +2,7 @@ const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const User = require("../models/userModel");
 const path = require("path");
 const dotenv = require('dotenv');
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const passport = require("passport");
 // require('dotenv').config()
 
@@ -10,7 +10,7 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRETE,
     callbackURL: "http://localhost:3000/auth/google/callback",
-    passReqToCallback: true
+    passReqToCallback: true    
 },
 
     async (request, accessToken, refreshToken, profile, done) => {

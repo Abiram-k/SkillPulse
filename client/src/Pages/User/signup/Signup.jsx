@@ -8,7 +8,7 @@ const Signup = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [mobileNumber, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState({});
@@ -23,7 +23,7 @@ const Signup = () => {
 
     const firstnameFirstCharecter = firstName.charAt(0);
     const lastnameFirstCharecter = lastName.charAt(0);
-    if (!firstName && !lastName && !mobile && !email) {
+    if (!firstName && !lastName && !mobileNumber && !email) {
       error.all = "Please fill all the fields";
     }
     if (!firstName.trim()) {
@@ -46,10 +46,10 @@ const Signup = () => {
     } else if (password != confirmPassword) {
       error.password = "Password not match";
     }
-    if (!mobile.trim()) {
+    if (!mobileNumber.trim()) {
       error.mobile = "Mobile number is required.";
-    } else if (mobile.length < 10) {
-      error.mobile = "Please enter 10 digit mobile number";
+    } else if (mobileNumber.length != 10) {
+      error.mobile = "Please enter 10 digit mobile number.";
     }
     return error;
   };
@@ -59,23 +59,25 @@ const Signup = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessage({ serverMessage: "" });
-    }, 2000);
+    }, 3000);
     return () => clearTimeout(timer);
   }, [message]);
 
   const handleSubmit = async (e) => {
-    setSpinner(true);
-    setTimeout(() => {
-      setSpinner(false);
-    }, 3000);
     e.preventDefault();
-
+    
+   
     try {
       const formErrors = formValidate();
       console.log("FormErrors: ", formErrors);
       if (Object.keys(formErrors).length > 0) {
         setMessage(formErrors);
         return;
+      }else{
+        setSpinner(true);
+        setTimeout(() => {
+          setSpinner(false);
+        }, 3000);
       }
       console.log(message);
       //   if (message) {
@@ -88,7 +90,7 @@ const Signup = () => {
           firstName,
           lastName,
           email,
-          mobile,
+          mobileNumber,
           password,
         },
         {
@@ -96,10 +98,12 @@ const Signup = () => {
           withCredentials: true,
         }
       );
+      
       console.log("Response data is:", response.data);
       if (response.status === 200) {
         navigate("/otp");
         setMessage({ success: response.data.message });
+
         // setTimeout(() => {
         //   navigate("/otp");
         // }, 2000);
@@ -107,6 +111,8 @@ const Signup = () => {
     } catch (error) {
       setMessage({ serverError: error?.response?.data.message });
       console.log(error);
+      setSpinner(true);
+
       //   notification.style.display = "block";
       //   setTimeout(() => {
       //     notification.style.display = "none";
@@ -188,7 +194,7 @@ const Signup = () => {
           <input
             type="text"
             placeholder="Enter mobile number"
-            value={mobile}
+            value={mobileNumber}
             onChange={(e) => setMobile(e.target.value)}
             className="bg-transparent border-b border-gray-600 focus:outline-none w-full py-2"
           />

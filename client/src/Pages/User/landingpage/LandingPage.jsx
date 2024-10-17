@@ -49,40 +49,53 @@ const LandingPage = () => {
           <a href="#" className="hover:text-gray-400">
             ABOUT US
           </a>
-          <div className="flex flex-col lg:flex-row space-x-4 text-center space-y-8 lg:space-y-0 border-t-2 border-gray-500 lg:border-none">
-            <i className="fas fa-search "></i>
+          <div className="lg:flex space-x-1 align-middle justify-center hidden relative font-sans">
+            <i className="fas fa-search absolute right-3 top-3.5 text-gray-200"></i>
+            <input
+              type="text"
+              className="bg-transparent border-2 rounded border-gray-700 text-white p-2  focus:outline-none"
+              placeholder="Search for products"
+            />
+          </div>
+          <div className="flex flex-col  lg:flex-row space-x-4 text-center space-y-8 lg:space-y-0 border-t-2 border-gray-500 lg:border-none p-1 lg:p-0">
+            <a href="#"></a>
             <a
               href="/signup"
-              className="hover:text-gray-400 bg-red-500 p-2 rounded"
+              className="hover:text-red-800 bg-gray-800 p-2 rounded text-red-900 lg:font-bold lg:border border-red-700"
             >
               SIGNUP
             </a>
             <a
               href="/login"
-              className="hover:text-gray-400  bg-red-500 p-2 rounded"
+              className="hover:text-red-800 bg-gray-800 p-2 rounded text-red-900 lg:font-bold lg:border border-red-700"
             >
-              Login
+              LOGIN
             </a>
           </div>
         </nav>
       </header>
+
       <section className="relative ">
-        <img
-          src={banner}
-          alt="Gaming setup with colorful lights"
-          className="w-full h-auto"
-        />
-        <div className="absolute top-1/4 left-2/4 text-end me-10">
-          <h1 className="text-5xl font-bold">EXHALE WORRIES WITH GAMING</h1>
-          <p className="text-xl mt-2">
-            Deserve best interpret your music differently
-          </p>
-          <button className="mt-4 px-6 py-2 bg-red-600 text-white font-bold rounded">
-            ORDER NOW
-          </button>
-        </div>
-      </section>
-      <section className="flex justify-around py-8 bg-black border-gray-500 border-b-2">
+  <img
+    src={banner}
+    alt="Gaming setup with colorful lights"
+    className="w-full h-auto"
+  />
+  <div className="absolute top-1/4 right-8 transform -translate-y-1/4 px-4 text-left md:text-right lg:right-16 lg:top-80">
+    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+      EXHALE WORRIES WITH GAMING
+    </h1>
+    <p className="text-base sm:text-lg md:text-xl mt-2 ">
+      Deserve best interpret your music differently
+    </p>
+    <button className="mt-4 px-6 py-2 bg-red-600 text-white font-bold rounded text-center font-mono ">
+      ORDER NOW
+    </button>
+  </div>
+</section>
+
+
+      <section className="flex flex-wrap justify-around py-8 bg-black border-gray-500 border-b-2 gap-6">
         <div className="text-center">
           <img
             src="https://placehold.co/150x150"
@@ -116,11 +129,12 @@ const LandingPage = () => {
           <p>PhantomBass</p>
         </div>
       </section>
+
       <section
         className="py-8 bg-cover bg-center"
         style={{ backgroundImage: `url(${productBanner})` }}
       >
-        <div className="ps-12 bg-opacity-60  rounded-lg font-mono">
+        <div className="ps-12 bg-opacity-60 rounded-lg font-mono">
           <h2 className="text-3xl font-bold text-white">
             FireStrike Joystick – Unleash Precision Control
           </h2>
@@ -138,9 +152,14 @@ const LandingPage = () => {
           </ul>
         </div>
       </section>
-      <section className="grid grid-cols-3 gap-4 p-8 bg-black">
+
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-8 bg-black">
         <div className="bg-gray-800 p-4 rounded">
-          <img src="" alt="Vortex Controller" className="w-full h-auto" />
+          <img
+            src="https://placehold.co/300x200"
+            alt="Vortex Controller"
+            className="w-full h-auto"
+          />
           <div className="mt-4">
             <h3 className="text-xl font-bold">BOAT</h3>
             <p>Soundcore by Ankers</p>
@@ -226,8 +245,9 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
       <footer className="bg-black text-gray-400 py-8">
-        <div className="flex justify-around">
+        <div className="flex flex-wrap justify-around gap-6">
           <div className="text-center">
             <i className="fas fa-shipping-fast text-2xl"></i>
             <p>EXPRESS SHIPPING</p>
@@ -244,7 +264,7 @@ const LandingPage = () => {
             <p>Buy safely, any question is here to help!</p>
           </div>
         </div>
-        <div className="flex justify-around mt-8">
+        <div className="flex flex-wrap justify-around gap-6 mt-8">
           <div>
             <h3 className="font-bold">CUSTOMER SERVICE</h3>
             <ul className="mt-2 space-y-2">
@@ -258,35 +278,25 @@ const LandingPage = () => {
             <h3 className="font-bold">INFORMATION</h3>
             <ul className="mt-2 space-y-2">
               <li>About</li>
-              <li>Payments</li>
-              <li>Size guide</li>
-              <li>Administrator</li>
+              <li>Affiliates</li>
+              <li>Privacy Policy</li>
             </ul>
           </div>
           <div>
-            <h3 className="font-bold">FOLLOW US</h3>
-            <div className="flex space-x-4 mt-2 ">
-              <i className="fab fa-facebook-f"></i>
-              <i className="fab fa-instagram"></i>
-              <i className="fab fa-linkedin-in"></i>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-bold">CONTACT US</h3>
-            <ul className="mt-2 space-y-2">
-              <li>+91 6282004572</li>
-              <li>info@skillpulse.com</li>
-              <li>10:00 – 20:00 GMT+1</li>
-            </ul>
+            <h3 className="font-bold">NEWSLETTER</h3>
+            <input
+              type="email"
+              className="w-full p-2 mt-2 rounded text-black"
+              placeholder="Enter your email"
+            />
+            <button className="w-full mt-2 px-4 py-2 bg-red-600 text-white font-bold rounded">
+              Subscribe
+            </button>
           </div>
         </div>
-        <div className="text-center mt-8">
-          <img
-            src="https://placehold.co/100x50"
-            alt="Payment methods"
-            className="mx-auto"
-          />
-        </div>
+        <p className="text-center mt-8">
+          © 2023 FutureTech. All rights reserved.
+        </p>
       </footer>
     </div>
   );

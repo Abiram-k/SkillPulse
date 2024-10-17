@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { addUser } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
+import Notification from "../../../Components/Notification";
+import axios from "axios";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({});
   const navigate = useNavigate();
   // const dispatch = useDispatch();
   let error = {};
@@ -28,6 +30,7 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage({});
     const errors = formValidate();
     console.log("Error object for validation:", errors);
 
@@ -44,11 +47,13 @@ function Login() {
           withCredentials: true,
         }
       );
-      alert(response.data.message);
-      //   dispatch(addUser(response.data));
-      navigate("/home");
+      if (response.status === 200) {
+        //   dispatch(addUser(response.data));
+        setMessage({ response: response?.data?.message });
+        navigate("/home");
+      }
     } catch (err) {
-      alert(err.response?.data?.message || "Something went wrong");
+      setMessage({ response: err?.response?.data?.message });
     }
   };
   const handleGoogleAuth = () => {
@@ -59,6 +64,7 @@ function Login() {
       <h1 className="text-white sm:text-6xl sm:mb-10 mb-5 text-[24px]">
         SKILL PULSE
       </h1>
+      {message.response && <Notification message={message.response} />}
       <div
         className="bg-[#1C1C1C] rounded-lg shadow-lg sm:flex sm:items-center p-8 sm:flex-row "
         style={{ width: "600px", boxShadow: "0 0 20px rgba(255, 0, 0, 0.5)" }}

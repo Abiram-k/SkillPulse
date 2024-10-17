@@ -4,7 +4,7 @@ import axios from "axios";
 import "./otp.css";
 import { useNavigate } from "react-router-dom";
 function Otp() {
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(29);
   const [otp, setOtp] = useState();
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
@@ -22,7 +22,7 @@ function Otp() {
           return (t = 0);
         }
       });
-    }, 50);
+    }, 1000);
     const timeout = setTimeout(() => {
       clearInterval(interval);
     }, 30 * 1000);
