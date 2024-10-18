@@ -9,6 +9,11 @@ import Dashboard from "./Pages/Admin/dashboard/DashBoard";
 import AdminLogin from "./Pages/Admin/login/AdminLogin";
 import AdminLayout from "./Pages/Admin/adminLayout/AdminLayout";
 import Customers from "./Pages/coustumers/Customers";
+import Products from "./Pages/Admin/products/Products";
+import AddProduct from "./Pages/Admin/addProduct/AddProduct";
+import Category from "./Pages/Admin/categoryManagement/Category";
+import EditCategory from "./Pages/Admin/editCategory/EditCategory";
+import Provider from "./Components/Provider";
 function App() {
   return (
     <>
@@ -21,13 +26,32 @@ function App() {
           <Route path="/home" element={<HomePage />} />
 
           <Route path="admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminLayout/>}>
 
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="customers" element={<Customers />} />
-
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="products" element={<Products />} />
+            <Route path="products/add" element={<AddProduct />} />
+            <Route path="products/edit" element={<AddProduct />} />
+            {/* <Provider> */}
+            <Route
+              path="category"
+              element={
+                <Provider>
+                  <Category />
+                </Provider>
+              }
+            />
+            <Route
+              path="category/edit"
+              element={
+                <Provider>
+                  <EditCategory />
+                </Provider>
+              }
+            />
+            {/* </Provider> */}
           </Route>
-
         </Routes>
       </Router>
     </>

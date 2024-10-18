@@ -3,7 +3,7 @@ body{
   color: #fff;
   box-sizing: border-box;
   font-family: orbitron, Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
 }
 *{
   margin: 0;

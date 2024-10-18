@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import {
   Menu,
@@ -80,11 +81,7 @@ export default function Dashboard() {
               <NavItem icon={Image} text="Banner" redirect="bannerMangement" />
               <NavItem icon={Tag} text="Coupon" redirect="coupons" />
               <NavItem icon={CreditCard} text="Payments" redirect="payments" />
-              <NavItem
-                icon={ShoppingBag}
-                text="Category"
-                redirect="category"
-              />
+              <NavItem icon={ShoppingBag} text="Category" redirect="category" />
               <NavItem icon={Percent} text="Offers" redirect="offers" />
             </div>
             {/* <div className="absolute bottom-0 w-full p-4 space-y-2 bg-slate-200"> */}
@@ -109,7 +106,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        <Outlet/>
+        <Outlet />
       </main>
     </div>
   );
@@ -119,8 +116,8 @@ export default function Dashboard() {
 function NavItem({ icon: Icon, text, active, redirect }) {
   return (
     <>
-      <a
-        href={redirect}
+      <Link
+        to={redirect}
         className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
           active
             ? "bg-gray-800 text-white"
@@ -129,7 +126,7 @@ function NavItem({ icon: Icon, text, active, redirect }) {
       >
         <Icon className="h-5 w-5" />
         <span>{text}</span>
-      </a>
+      </Link>
     </>
   );
 }
