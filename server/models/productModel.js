@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  originalPrice: {
+  regularPrice: {
     type: Number,
     required: true
   },
@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  quantity: {
+  units: {
     type: Number,
     required: true,
     min: 0
@@ -49,9 +49,10 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   brand: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Brand',
-    required: true
+    // type: mongoose.Schema.Types.ObjectId,
+    // ref: 'Brand',
+    // required: true
+    type:String
   }
 }, {
   timestamps: true 

@@ -33,7 +33,7 @@ const addressSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    alternativeMobile: {
+    alternativeMobile: { 
         type: String,
         require: true
     }

@@ -9,12 +9,21 @@ const categorySchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
+        default: "Not Added",
+        required: false
     },
     isListed: {
         type: Boolean,
         require: true,
         default: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date,
+        default: null
     }
 })
 const Category = mongoose.model("category", categorySchema);

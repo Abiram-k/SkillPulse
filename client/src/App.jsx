@@ -8,12 +8,14 @@ import HomePage from "./Pages/User/homPage/HomePage";
 import Dashboard from "./Pages/Admin/dashboard/DashBoard";
 import AdminLogin from "./Pages/Admin/login/AdminLogin";
 import AdminLayout from "./Pages/Admin/adminLayout/AdminLayout";
-import Customers from "./Pages/coustumers/Customers";
+import Customers from "./Pages/Admin/coustumers/Customers";
 import Products from "./Pages/Admin/products/Products";
 import AddProduct from "./Pages/Admin/addProduct/AddProduct";
 import Category from "./Pages/Admin/categoryManagement/Category";
 import EditCategory from "./Pages/Admin/editCategory/EditCategory";
 import Provider from "./Components/Provider";
+// import ProductDetails from "./Pages/User/productDetails/ProductDetails";
+import EditProduct from "./Pages/Admin/editProduct/EditProduct";
 function App() {
   return (
     <>
@@ -24,7 +26,7 @@ function App() {
           <Route path="/otp" element={<Otp />} />
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<HomePage />} />
-
+          {/* <Route path="/productDetails" element={<ProductDetail/>}/> */}
           <Route path="admin/login" element={<AdminLogin />} />
 
           <Route path="/admin" element={<AdminLayout />}>
@@ -32,7 +34,7 @@ function App() {
             <Route path="customers" element={<Customers />} />
             <Route path="products" element={<Products />} />
             <Route path="products/add" element={<AddProduct />} />
-            <Route path="products/edit" element={<AddProduct />} />
+            <Route path="products/edit" element={<EditProduct />} />
             {/* <Provider> */}
             <Route
               path="category"

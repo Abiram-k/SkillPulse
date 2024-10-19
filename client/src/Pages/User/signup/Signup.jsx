@@ -104,32 +104,14 @@ const Signup = () => {
         navigate("/otp");
         setMessage({ success: response.data.message });
 
-        // setTimeout(() => {
-        //   navigate("/otp");
-        // }, 2000);
       }
     } catch (error) {
       setMessage({ serverError: error?.response?.data.message });
       console.log(error);
       setSpinner(true);
 
-      //   notification.style.display = "block";
-      //   setTimeout(() => {
-      //     notification.style.display = "none";
-      //   }, 2000);
     }
   };
-  // const handleGoogleAuth = async () => {
-  //   try {
-  //     await axios.get(
-  //       "http://localhost:3000/auth/google",
-  //       {},
-  //       { withCredentials: true }
-  //     );
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
   const handleGoogleAuth = () => {
     window.location.href = "http://localhost:3000/auth/google";
   };

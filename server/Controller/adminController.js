@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const User = require("../models/userModel");
 const Admin = require("../models/adminModel");
 const Category = require("../models/categoryModel");
+const Product = require("../models/productModel");
+const { listenerCount } = require("process");
 
 exports.login = async (req, res) => {
     try {
@@ -53,8 +55,11 @@ exports.blockUser = async (req, res) => {
 exports.addCategory = async (req, res) => {
     console.log("hai");
     try {
-        const { name, description } = req.body;
+        let { name, description } = req.body;
         console.log(name, description);
+        if (!description) {
+            description = undefined;
+        }
         const existCategory = await Category.findOne({
             name: {
                 $regex: `^${name}$`,
@@ -90,8 +95,11 @@ exports.getCategory = async (req, res) => {
 exports.deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log("category id is:", id);
-        const deletedCategory = await Category.findByIdAndDelete({ _id: id })
+        // console.log("category id is:", id);
+
+        const deletedCategory = await Category.
+            findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
+
         if (deletedCategory)
             return res.status(200).json({ message: "Category successfully deleted" });
     } catch (error) {
@@ -99,14 +107,30 @@ exports.deleteCategory = async (req, res) => {
         return res.status(500).json({ message: "failed to delete category" });
     }
 }
+exports.categoryRestore = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("category id is:", id);
+        const RestoredCategory = await Category.
+            findByIdAndUpdate({ _id: id }, { isDeleted: false, deletedAt: null });
+
+        if (RestoredCategory)
+            return res.status(200).json({ message: "Category successfully Restore" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "failed to Restore category" });
+    }
+}
+
 exports.editCategory = async (req, res) => {
     try {
-
-        const { id, name, description } = req.body;
-        console.group(id, name, description);
-        const isExistcategory = await Category.findOne({ name });
-        const category = await Category.findById(id);
-        if (isExistcategory && category.name !== name)
+        let { id, name, description } = req.body;
+        // console.group(id, name, description);
+        if (!description) {
+            description = undefined;
+        }
+        const isExistcategory = await Category.findOne({ name, _id: { $ne: id } });
+        if (isExistcategory)
             return res.status(400).json({ message: "Category already exists" });
 
         await Category.findByIdAndUpdate(id, { name, description });
@@ -114,4 +138,78 @@ exports.editCategory = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: error.message || "category not edited" })
     }
-} 
+}
+
+exports.listCategory = async (req, res) => {
+    try {
+
+        const { id } = req.params;
+        const category = await Category.findById(id);
+        console.log(category);
+        category.isListed = !category.isListed
+        category.save();
+        return res.status(200).json({ message: "success", category })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: error.message || "Failed to list/unlist Category" })
+    }
+}
+
+exports.getProduct = async (req, res) => {
+    try {
+        const products =await Product.find();
+        return res.status(200).json({ message: "successfully fetched all products", products });
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({ message: error.message || "Failed to fetch data" })
+    }
+}
+
+exports.addProduct = async (req, res) => {
+    try {
+        const {
+            productName,
+            productDescription,
+            salesPrice,
+            regularPrice,
+            units,
+            category,
+            brand
+        } = req.body;
+        console.log(
+            productName,
+            productDescription,
+            salesPrice,
+            regularPrice,
+            units,
+            category,
+            brand
+        )
+        const productImage = req.files.map((file) => file.path)
+        const existProduct = await Product.findOne({ productName });
+
+        const categoryDoc = await Category.findOne({ name: category })
+        if (!categoryDoc)
+            return res.status(400).json({ message: "Category not existing" });
+        if (existProduct) {
+            console.log("product exists");
+            return res.status(400).json({ message: "product already exists" });
+        }
+        else {
+            const product = await Product.create({
+                productName,
+                productDescription,
+                salesPrice,
+                regularPrice,
+                units,
+                category: categoryDoc._id,
+                brand,
+                productImage
+            });
+            console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
+            return res.status(200).json({ message: "product add successully" })
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message || "Error occurred while adding product" })
+    }
+}
