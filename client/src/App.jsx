@@ -14,26 +14,82 @@ import AddProduct from "./Pages/Admin/addProduct/AddProduct";
 import Category from "./Pages/Admin/categoryManagement/Category";
 import EditCategory from "./Pages/Admin/editCategory/EditCategory";
 import Provider from "./Components/Provider";
-// import ProductDetails from "./Pages/User/productDetails/ProductDetails";
 import EditProduct from "./Pages/Admin/editProduct/EditProduct";
 import ProductDetails from "./Pages/User/productDetails/ProductDetails";
 import UserLayout from "./Pages/User/userLayout/UserLayout";
+import ProtectUserHome from "./Protected/ProtectUserHome";
+import ProtectAuthUser from "./Protected/ProtectAuthUser";
+import AccountOverview from "./Pages/User/accountOverview/accountOverview";
+import GoogleAuthComponent from "./Pages/User/googleAuthComponent/googleAuthComponent";
+import Shop from "./Pages/User/shop/Shop";
+import SearchProducts from "./Pages/User/searchProducts/SearchProducts";
 function App() {
   return (
     <>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/otp" element={<Otp />} />
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/user" element={<UserLayout />}>
+          <Route path="/googleRedirect" element={<GoogleAuthComponent />} />
+          <Route
+            path="/login"
+            element={
+              <ProtectAuthUser>
+                <Login />
+              </ProtectAuthUser>
+            }
+          />
+
+          <Route
+            path="/signup"
+            element={
+              <ProtectAuthUser>
+                <Signup />
+              </ProtectAuthUser>
+            }
+          />
+          <Route
+            path="/otp"
+            element={
+              <ProtectAuthUser>
+                <Otp />
+              </ProtectAuthUser>
+            }
+          />
+
+          <Route
+            path="/"
+            element={
+              <ProtectAuthUser>
+                <LandingPage />
+              </ProtectAuthUser>
+            }
+          />
+          <Route
+            path="/user"
+            element={
+              <ProtectUserHome>
+                <UserLayout />
+              </ProtectUserHome>
+            }
+          >
+            <Route path="search" element={<SearchProducts />} />
+
+
             <Route
               path="home"
               element={
-                <Provider>
-                  <HomePage />
-                </Provider>
+                <ProtectUserHome>
+                  <Provider>
+                    <HomePage />
+                  </Provider>
+                </ProtectUserHome>
+              }
+            />
+            <Route
+              path="shop"
+              element={
+                <ProtectUserHome>
+                  <Shop />
+                </ProtectUserHome>
               }
             />
             <Route
@@ -44,6 +100,7 @@ function App() {
                 </Provider>
               }
             />
+            <Route path="profile" element={<AccountOverview />} />
           </Route>
 
           <Route path="admin/login" element={<AdminLogin />} />

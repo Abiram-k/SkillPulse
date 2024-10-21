@@ -235,6 +235,7 @@ const AddProduct = () => {
       <div className="mb-4">
         <label className="block mb-2">Upload Images :</label>
         <div className="grid grid-cols-3 gap-4">
+
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputone">
               <img
@@ -255,6 +256,7 @@ const AddProduct = () => {
             />
             <p className="bg-gray-200 p-2 rounded">Change image</p>
           </div>
+          
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputtwo">
               <img

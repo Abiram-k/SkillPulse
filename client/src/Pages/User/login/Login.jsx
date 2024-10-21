@@ -11,7 +11,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({});
   const navigate = useNavigate();
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   let error = {};
   const formValidate = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -48,7 +48,7 @@ function Login() {
         }
       );
       if (response.status === 200) {
-        //   dispatch(addUser(response.data));
+        dispatch(addUser(response.data.user));
         setMessage({ response: response?.data?.message });
         navigate("/user/home");
       }

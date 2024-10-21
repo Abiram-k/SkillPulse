@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import './otpInputBox.css'; // Optional for custom styling
+import React, { useState } from "react";
+import "./otpInputBox.css";
 
-const OtpInput = ({ length, handleOtpChange }) => {
+const OtpInput = ({ length, handleOtpChange, disable }) => {
   const [otp, setOtp] = useState(new Array(length).fill(""));
 
   const handleChange = (element, index) => {
@@ -11,12 +11,23 @@ const OtpInput = ({ length, handleOtpChange }) => {
     newOtp[index] = element.value;
     setOtp(newOtp);
 
-    // Send the updated OTP value to the parent component
     handleOtpChange(newOtp.join(""));
 
-    // Move focus to the next input
-    if (element.nextSibling && element.value) {
-      element.nextSibling.focus();
+    if (element.nextElementSibling && element.value) {
+      element.nextElementSibling.focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (otp[index] !== "") {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+        handleOtpChange(newOtp.join(""));
+      } else if (e.target.previousElementSibling) {
+        e.target.previousElementSibling.focus();
+      }
     }
   };
 
@@ -29,8 +40,10 @@ const OtpInput = ({ length, handleOtpChange }) => {
           maxLength="1"
           value={data}
           onChange={(e) => handleChange(e.target, index)}
+          onKeyDown={(e) => handleKeyDown(e, index)}
           onFocus={(e) => e.target.select()}
-          className="otp-field"
+          className="otp-field bg-transparent border-2 border-gray-500 rounded text-white"
+          disabled={disable}
         />
       ))}
     </div>

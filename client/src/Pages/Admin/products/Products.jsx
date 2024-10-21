@@ -151,7 +151,7 @@ function Products() {
                         <td className="p-2">{index + 1}</td>
                         <td className="p-2">{product.productName}</td>
                         <td className="p-2">
-                          {product.category.name || "not Fetched"}
+                          {product.category?.name || "not Fetched"}
                         </td>
                         <td className="p-2">{product.productDescription}</td>
                         <td className="p-2">{product.salesPrice}</td>

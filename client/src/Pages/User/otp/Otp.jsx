@@ -9,6 +9,7 @@ function Otp() {
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
   const [spinner, setSpinner] = useState(false);
+  const [input, setInput] = useState(false);
 
   const navigate = useNavigate();
   //for otp timer
@@ -19,7 +20,7 @@ function Otp() {
           return t - 1;
         } else {
           setResendOtp(true);
-          return (t = 0);
+          return;
         }
       });
     }, 1000);
@@ -35,6 +36,7 @@ function Otp() {
   const handleOtpChange = (value) => {
     setOtp(value);
   };
+
   const handleClick = async () => {
     try {
       const response = await axios.post(
@@ -55,8 +57,8 @@ function Otp() {
   };
 
   const handleResendOtp = async () => {
+    setInput(true);
     setSpinner(true);
-
     setTimeout(() => {
       setSpinner(false);
     }, 2000);
@@ -82,7 +84,7 @@ function Otp() {
   }, [message]);
 
   return (
-    <div className="text-center flex items-center flex-col justify-center h-screen px-4">
+    <div className="text-center flex items-center flex-col justify-center h-screen px-4 transition-transform duration-300">
       {/* popup notification */}
       {message.serverError && (
         <div
@@ -116,26 +118,35 @@ function Otp() {
         SKILL PULSE
       </h1>
       <div
-        className="bg-gray-900 text-white p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3"
+        className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3"
         style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}
       >
         <h2 className="text-2xl font-bold mb-2">OTP Verification</h2>
         <p className="mb-6">Enter the OTP to confirm</p>
-        <div className="flex items-center justify-end space-x-3 mb-4 text-black">
-          {/* <input
-            type="text"
-            placeholder="Enter OTP"
-            className="bg-transparent border-b-2 border-gray-600 focus:outline-none flex-grow mr-2"
-          /> */}
-          <OtpInput length={6} handleOtpChange={handleOtpChange} />
+        {input || timer ? (
+          <div className="flex items-center justify-end space-x-3 mb-4 text-white">
+            <OtpInput
+              length={6}
+              handleOtpChange={handleOtpChange}
+              disable={false}
+            />
 
-          <div className="bg-gray-400 p-2 rounded-full w-14 h-11">
-            <span className="">{timer}</span>
+            <div className=" p-2 rounded-full w-14 h-11">
+              <span className="">{timer}</span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center justify-end space-x-3 mb-4 text-black">
+            <OtpInput length={6} handleOtpChange={handleOtpChange} disable />
+            <div className=" p-2 rounded-full w-14 h-11">
+              <i class="fa-solid fa-clock-rotate-left text-red-600 text-lg"></i>
+            </div>
+          </div>
+        )}
+
         {resendOtp && (
           <p
-            className="mb-6 text-gray-400 hover:scale-105 cursor-pointer"
+            className="mb-6 rounded text-gray-400 hover:scale-125 cursor-pointer transform transition-transform duration-300"
             onClick={handleResendOtp}
           >
             Resend OTP ?

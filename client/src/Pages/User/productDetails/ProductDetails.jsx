@@ -21,8 +21,7 @@ const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [productData, setProductData] = useState([]);
   // const {data} = useContext(context)
-  const product = useSelector((state) => state.user.details);
-
+  const product = useSelector((state) => state.users.details);
   useEffect(() => {
     setProductData(product);
   }, [product]);
@@ -237,77 +236,7 @@ const ProductDetails = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-black border-t border-gray-800 mt-16 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-bold mb-4">CUSTOMER SERVICE</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Contact us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Shipping & Returns
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Terms & Conditions
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Delivery
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-4">INFORMATION</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Payments
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Size guide
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-4">FOLLOW US</h3>
-              <div className="flex space-x-4">
-                <Instagram className="w-6 h-6" />
-                <Facebook className="w-6 h-6" />
-                <Linkedin className="w-6 h-6" />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-4">CONTACT US</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>(+91) 9847658214</li>
-                <li>info@skillpulse.com</li>
-                <li>9am - 6pm (IST) M-Sat</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
+     
     </div>
   );
 };

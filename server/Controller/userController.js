@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { error } = require('console');
 const Product = require('../models/productModel');
+const Category = require('../models/categoryModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
@@ -82,12 +83,12 @@ exports.signUp = async (req, res) => {
         req.session.otp = otp;
 
         //to delte the otp after 30seconds;
-        setTimeout(() => {
-            if (req.session && req.session.otp) {
-                delete req.session.otp;
-                console.log('OTP expired');
-            }
-        }, otpExpiry * 1000);
+        // setTimeout(() => {
+        //     if (req.session && req.session.otp) {
+        //         delete req.session.otp;
+        //         console.log('OTP expired');
+        //     }
+        // }, otpExpiry * 1000);
 
         console.log(req.session.otp);
         console.log(req.session.user);
@@ -128,12 +129,15 @@ exports.resendOtp = async (req, res) => {
         const otp = generateOTP();
         req.session.otp = otp;
 
+        //toMake New Otp As Valide
         req.session.save((err) => {
             if (err) {
                 console.error("Session save error:", err);
                 return res.status(500).json({ message: "Failed to store session" });
             }
         });
+
+
         if (req.session.user) {
             const email = req.session.user.email
             const otpSent = await sendOTPEmail(email, otp);
@@ -158,25 +162,27 @@ exports.login = async (req, res) => {
         const { email, password } = req.body;
         console.log(email, password);
         const user = await User.findOne({ email });
+        console.log(user);
         if (user) {
             const isValidPassword = await bcrypt.compare(password, user.password);
             if (!isValidPassword) {
                 return res.status(400).json({ message: "Password is incorrect" });
             }
             else if (user.isBlocked) {
-                return res.status(400).json({ messag: "User blocked " });
+                return res.status(400).json({ message: "User were blocked " });
             }
             else {
-
                 // jwt toke sign
-                const token = jwt.sign({ user }, process.env.JWT_SECRETE, process.env.JWT_SECERETE, { expiresIn: '1h' })
-                res.cookie('userToken', token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'strict',
-                    maxAge: 3600000
-                });
-                return res.status(200).json({ message: "Successfully Logged in" });
+                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE, process.env.JWT_SECERETE, { expiresIn: '1h' })
+                res.cookie('userToken',
+                    token,
+                    {
+                        httpOnly: true,
+                        secure: false,
+                        sameSite: 'Lax',
+                        maxAge: 36000000
+                    });
+                return res.status(200).json({ message: "Successfully Logged in", user });
             }
         }
         else {
@@ -194,7 +200,8 @@ exports.login = async (req, res) => {
 exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find().populate("category");
-        return res.status(200).json({ message: "Sucessfully Fetched All Products", products })
+        const category = await Category.find()
+        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category })
     } catch (error) {
         return res.status(500).json({ message: "Failed To Fetch Product Data" })
     }

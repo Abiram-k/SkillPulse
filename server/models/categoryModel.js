@@ -12,6 +12,10 @@ const categorySchema = new mongoose.Schema({
         default: "Not Added",
         required: false
     },
+    image: {
+        type: String,
+        required: true
+    },
     isListed: {
         type: Boolean,
         require: true,

@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const session = require("express-session");
-const cookie = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 const path = require("node:path");
 const cors = require("cors");
 const userRouter = require('./Routes/userRoutes')
@@ -15,7 +15,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SESSION_SECRETE = process.env.SESSION_KEY;
-
+app.use(cookieParser());
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
@@ -35,7 +35,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', userRouter)
-app.use("/admin",adminRouter);
+app.use("/admin", adminRouter);
 
 mongoose.connect(process.env.MONGO_URL).then(() => {
     console.log("SuccessFully connected to mongoDB")

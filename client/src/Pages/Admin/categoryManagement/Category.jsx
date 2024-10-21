@@ -1,17 +1,20 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { context } from "../../../Components/Provider";
 import { useContext } from "react";
+import { Toast } from "../../../Components/Toast";
 const Category = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState({});
-
+  const [categoryImage, setCategoryImage] = useState("");
+  const [image, setImage] = useState(null);
+  const [spinner, setSpinner] = useState(false);
   const { setData } = useContext(context);
-
+  const navigate = useNavigate();
   const error = {};
   const validateForm = () => {
     if (name.trim() === "") error.name = "Category name is required *";
@@ -20,6 +23,24 @@ const Category = () => {
 
   const sendDataToEdit = (category) => {
     setData(category);
+  };
+
+  const handleProductImageChange = (e) => {
+    const imageFile = e.target.files[0];
+    if (imageFile) {
+      setImage(imageFile);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const imageFile = e.target.files[0];
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCategoryImage(reader.result);
+      };
+      reader.readAsDataURL(imageFile);
+    }
   };
 
   useEffect(() => {
@@ -39,19 +60,40 @@ const Category = () => {
   console.log(categories);
   const handleAddCategory = async (e) => {
     e.preventDefault();
+    setSpinner(true);
     const formError = validateForm();
-    setMessage(formError);
+    if (Object.keys(formError).length > 0) {
+      setMessage(formError);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("file", image);
     try {
-      const response = axios.post(
+      const response = await axios.post(
         "http://localhost:3000/admin/addCategory",
+        formData,
         {
-          name,
-          description,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
         // { withCredentials: true }
       );
-      
+      setSpinner(false);
+      navigate("/admin/category");
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
     } catch (error) {
+      setSpinner(false);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
       console.log(error);
     }
   };
@@ -119,6 +161,11 @@ const Category = () => {
 
   return (
     <main className="w-4/5 p-8">
+      {spinner && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <div className="bg-gray-200 p-4 rounded-lg shadow-md text-black h-80 overflow-y-scroll">
         <table className="w-full text-left ">
           <thead className="">
@@ -126,6 +173,7 @@ const Category = () => {
               <th className="p-2">S.No</th>
               <th className="p-2">Category Name</th>
               <th className="p-2">Description</th>
+              <th className="p-2">image</th>
               <th className="p-2">List / Unlist</th>
             </tr>
           </thead>
@@ -147,6 +195,16 @@ const Category = () => {
                     className={category.isDeleted ? "line-through p-2" : "p-2"}
                   >
                     {category.description}
+                  </td>
+                  <td className="p-2">
+                  <img
+                            src={
+                              category.image ||
+                              "https://placehold.co/50x50"
+                            }
+                            alt={category.name}
+                            className="w-12 h-12 object-cover mx-auto"
+                          />
                   </td>
                   <td className="p-2 flex items-center space-x-3 text-xl">
                     {!category.isDeleted && (
@@ -202,39 +260,75 @@ const Category = () => {
       </div>
       <div className="bg-gray-200 p-4 mt-8 rounded-lg shadow-md text-black">
         <h2 className="text-xl font-bold mb-4">Add New Category</h2>
-        <form className="flex items-center flex-col space-x-2 lg:space-x-24 space-y-3 lg:flex-row">
-          <div className="flex flex-col">
-            <label className="mr-2">Name :</label>
-            <input
-              type="text"
-              className="border-2 border-gray-400 p-2 rounded-lg flex-grow font-mono"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            {message.name && (
-              <p className="text-red-700 text-sm">{message.name}</p>
-            )}
+        <form className="flex flex-col space-y-6">
+  <div className="flex flex-col lg:flex-row lg:space-x-8 space-y-6 lg:space-y-0">
+    <div className="flex flex-col">
+      <label className="mr-2 font-mono">Name :</label>
+      <input
+        type="text"
+        className="border-2 border-gray-400 p-2 rounded-lg font-mono"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      {message.name && <p className="text-red-700 text-sm">{message.name}</p>}
+    </div>
+
+    <div className="flex flex-col">
+      <label className="mr-2 font-mono">Description :</label>
+      <input
+        type="text"
+        className="border-2 border-gray-400 p-2 rounded-lg font-mono"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      {message.description && (
+        <p className="text-red-700 text-sm">{message.description}</p>
+      )}
+    </div>
+  </div>
+
+  {/* Improved Image Upload Area */}
+  <div className="border-2 border-gray-300 rounded-lg p-4 flex flex-col items-center">
+    <label htmlFor="fileInputone" className="cursor-pointer group">
+      <div className="relative w-32 h-32 mb-4 border-2 border-dashed border-gray-300 rounded-lg flex justify-center items-center hover:bg-gray-100 group-hover:border-blue-500 transition-all">
+        <img
+          src={categoryImage || "https://placehold.co/100x100"}
+          alt="product image"
+          className={`object-cover w-full h-full rounded-lg ${!categoryImage ? 'opacity-50' : ''}`}
+        />
+        {!categoryImage && (
+          <div className="absolute inset-0 flex justify-center items-center">
+            <p className="text-gray-500 font-mono bold">Upload Image</p>
           </div>
-          <div className="flex flex-col">
-            <label className="mr-2">Description :</label>
-            <input
-              type="text"
-              className="border-2 border-gray-400 p-2 rounded-lg flex-grow font-mono "
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            {message.description && (
-              <p className="text-red-700 text-sm">{message.description}</p>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="bg-green-500 text-white p-2 rounded-lg ml-4"
-            onClick={handleAddCategory}
-          >
-            SAVE
-          </button>
-        </form>
+        )}
+      </div>
+    </label>
+    <input
+      id="fileInputone"
+      type="file"
+      accept="image/*"
+      onChange={(e) => {
+        handleImageChange(e);
+        handleProductImageChange(e);
+      }}
+      style={{ display: "none" }}
+    />
+    <p className="bg-gray-200 p-2 rounded font-mono">Change Image</p>
+  </div>
+
+  {/* Save Button at the Bottom */}
+  <div className="flex items-center justify-center">
+    <button
+      type="submit"
+      className="bg-green-500 text-white p-3 rounded-lg font-mono w-32 hover:bg-green-600 transition-all"
+      onClick={handleAddCategory}
+    >
+      SAVE
+    </button>
+  </div>
+</form>
+
+
       </div>
     </main>
   );
