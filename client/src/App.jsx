@@ -16,6 +16,8 @@ import EditCategory from "./Pages/Admin/editCategory/EditCategory";
 import Provider from "./Components/Provider";
 // import ProductDetails from "./Pages/User/productDetails/ProductDetails";
 import EditProduct from "./Pages/Admin/editProduct/EditProduct";
+import ProductDetails from "./Pages/User/productDetails/ProductDetails";
+import UserLayout from "./Pages/User/userLayout/UserLayout";
 function App() {
   return (
     <>
@@ -25,17 +27,47 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/otp" element={<Otp />} />
           <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<HomePage />} />
-          {/* <Route path="/productDetails" element={<ProductDetail/>}/> */}
+          <Route path="/user" element={<UserLayout />}>
+            <Route
+              path="home"
+              element={
+                <Provider>
+                  <HomePage />
+                </Provider>
+              }
+            />
+            <Route
+              path="productDetails"
+              element={
+                <Provider>
+                  <ProductDetails />
+                </Provider>
+              }
+            />
+          </Route>
+
           <Route path="admin/login" element={<AdminLogin />} />
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="customers" element={<Customers />} />
-            <Route path="products" element={<Products />} />
+            <Route
+              path="products"
+              element={
+                <Provider>
+                  <Products />
+                </Provider>
+              }
+            />
             <Route path="products/add" element={<AddProduct />} />
-            <Route path="products/edit" element={<EditProduct />} />
-            {/* <Provider> */}
+            <Route
+              path="products/edit"
+              element={
+                <Provider>
+                  <EditProduct />
+                </Provider>
+              }
+            />
             <Route
               path="category"
               element={

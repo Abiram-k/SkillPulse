@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useAsyncError } from "react-router-dom";
+import { Link, useAsyncError, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
 const AddProduct = () => {
@@ -18,7 +18,7 @@ const AddProduct = () => {
     image2: null,
     image3: null,
   });
-
+  const navigate = useNavigate();
   const error = {};
   const validateForm = () => {
     const salesPriceInt = Number(salesPrice);
@@ -105,6 +105,8 @@ const AddProduct = () => {
           icon: "success",
           title: `${response.data.message}`,
         });
+        navigate("/admin/products");
+
       }
     } catch (error) {
       // alert(error.response.data.message);

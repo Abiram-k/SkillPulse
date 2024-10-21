@@ -52,7 +52,8 @@ const productSchema = new mongoose.Schema({
     // type: mongoose.Schema.Types.ObjectId,
     // ref: 'Brand',
     // required: true
-    type:String
+    type:String,
+    default:"Brand not added"
   }
 }, {
   timestamps: true 

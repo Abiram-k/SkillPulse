@@ -157,7 +157,8 @@ exports.listCategory = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     try {
-        const products =await Product.find();
+        const products = await Product.find().populate("category")
+        // const categories = await Category.findById(products.category)
         return res.status(200).json({ message: "successfully fetched all products", products });
     } catch (error) {
         console.log(error.message)
@@ -207,9 +208,78 @@ exports.addProduct = async (req, res) => {
                 productImage
             });
             console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
-            return res.status(200).json({ message: "product add successully" })
+            return res.status(200).json({ message: "product added successully" })
         }
     } catch (error) {
         return res.status(500).json({ message: error.message || "Error occurred while adding product" })
+    }
+}
+
+exports.editProduct = async (req, res) => {
+    try {
+        const {
+            productName,
+            productDescription,
+            salesPrice,
+            regularPrice,
+            units,
+            category,
+            brand
+        } = req.body;
+        console.log(
+            productName,
+            productDescription,
+            salesPrice,
+            regularPrice,
+            units,
+            category,
+            brand, "hello"
+        )
+
+        const { id } = req.params;
+        console.log(req.files);
+        const productImage = req.files.map((file) => file.path)
+        const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
+
+        const categoryDoc = await Category.findOne({ name: category })
+        if (!categoryDoc)
+            return res.status(400).json({ message: "Category not existing" });
+        if (existProduct) {
+            console.log("product exists");
+            return res.status(400).json({ message: "product already exists" });
+        }
+        else {
+            await Product.findByIdAndUpdate(id, {
+                productName,
+                productDescription,
+                salesPrice,
+                regularPrice,
+                units,
+                category: categoryDoc._id,
+                brand,
+                productImage
+            });
+            console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
+            return res.status(200).json({ message: "product edited successully" })
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: error.message || "Error occurred while adding product" })
+    }
+}
+
+exports.handleProductListing = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await Product.findById(id);
+        product.isListed = !product.isListed;
+        product.save();
+        if (!product)
+            return res.status(400).json({ message: "No products were founded !" });
+        else
+            return res.status(200).json({ message: `product sucessfully ${product.isListed ? "Listed" : "Unlisted"}`, product })
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Failed to list/unilist product" })
     }
 }

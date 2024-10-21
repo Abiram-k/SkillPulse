@@ -50,6 +50,7 @@ const Category = () => {
         }
         // { withCredentials: true }
       );
+      
     } catch (error) {
       console.log(error);
     }

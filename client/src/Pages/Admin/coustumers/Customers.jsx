@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 const Customers = () => {
-  const [users, setUsers] = useState({});
-  // const [filterUser, setFilterUser] = useState("");
+  const [users, setUsers] = useState([]);
+  const searchFocus = useRef(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -18,6 +19,7 @@ const Customers = () => {
         alert(error.message);
       }
     })();
+    searchFocus.current.focus();
   }, []);
 
   const handleblocking = async (id) => {
@@ -63,10 +65,19 @@ const Customers = () => {
               <label htmlFor="sort" className="mr-2">
                 Sort
               </label>
+
               <select id="sort" className="border rounded p-1">
                 <option>Name</option>
               </select>
             </div>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="border rounded px-4 py-2 w-full lg:w-auto"
+              value={search}
+              ref={searchFocus}
+              onChange={(e) => setSearch(e.target.value)}
+            />
             <div>
               <label htmlFor="order" className="mr-2">
                 By
@@ -91,8 +102,8 @@ const Customers = () => {
               </select>
             </div>
           </div>
-          <div className="table-container  p-5 rounded">
-            <table className="w-full table-auto">
+          <div className="table-container  p-5 rounded ">
+            <table className="w-full table-auto ">
               <thead>
                 <tr>
                   <th className="bg-orange-500 text-white p-2">S.No</th>
@@ -107,37 +118,63 @@ const Customers = () => {
               </thead>
               <tbody className="font-sans">
                 {users.length > 0 ? (
-                  // filterUser === "Recently added"
-                  users.map((user, index) => (
-                    <tr
-                      className=" bg-white text-center border-b-2 border-gray-200"
-                      key={user._id}
-                    >
-                      <td className="p-2">{index + 1}</td>
-                      <td className="p-2">{user.firstName}</td>
-                      <td className="p-2">{user.email}</td>
-                      <td className="p-2">{user.mobileNumber}</td>
-                      <td className="p-2">
-                        <button
-                          className={
-                            user.isBlocked
-                              ? "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17"
-                              : "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22"
-                          }
-                          onClick={() => handleblocking(user._id)}
+                  users.filter(
+                    (filuser) =>
+                      search.length === 0 ||
+                      (filuser.email &&
+                        filuser.email
+                          .toLowerCase()
+                          .startsWith(search.toLowerCase()))
+                  ).length > 0 ? (
+                    users
+                      .filter(
+                        (filuser) =>
+                          search.length === 0 ||
+                          (filuser.email &&
+                            filuser.email
+                              .toLowerCase()
+                              .startsWith(search.toLowerCase()))
+                      )
+                      .map((user, index) => (
+                        <tr
+                          className="bg-white text-center border-b-2 border-gray-200"
+                          key={user._id}
                         >
-                          {user.isBlocked ? "Unblock" : "block"}
-                        </button>
+                          <td className="p-2">{index + 1}</td>
+                          <td className="p-2">{user.firstName}</td>
+                          <td className="p-2">{user.email}</td>
+                          <td className="p-2">{user.mobileNumber}</td>
+                          <td className="p-2">
+                            <button
+                              className={
+                                user.isBlocked
+                                  ? "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17"
+                                  : "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22"
+                              }
+                              onClick={() => handleblocking(user._id)}
+                            >
+                              {user.isBlocked ? "Unblock" : "Block"}
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="hover:bg-gray-300 bg-white text-center font-semibold"
+                      >
+                        No customers were founded !
                       </td>
                     </tr>
-                  ))
+                  )
                 ) : (
-                  <tr>
+                  <tr className="text-center">
                     <td
                       colSpan="6"
-                      className="hover:bg-gray-300 bg-white text-center"
+                      className="hover:bg-gray-300 bg-white text-center font-semibold"
                     >
-                      No users found
+                      No users were added yet !
                     </td>
                   </tr>
                 )}

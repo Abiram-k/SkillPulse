@@ -4,6 +4,8 @@ const path = require("path");
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { error } = require('console');
+const Product = require('../models/productModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
@@ -160,15 +162,21 @@ exports.login = async (req, res) => {
             const isValidPassword = await bcrypt.compare(password, user.password);
             if (!isValidPassword) {
                 return res.status(400).json({ message: "Password is incorrect" });
-            } else {
+            }
+            else if (user.isBlocked) {
+                return res.status(400).json({ messag: "User blocked " });
+            }
+            else {
 
-                //jwt toke sign
-                const token = jwt.sign("usertoken", process.env.JWT_SECERETE, { expiresIn: "12d" })
-                res.cookie({
-                    name: "usertoken"
-                })
-                return res.status(200).json({ message: "Successfully Logged in", token });
-
+                // jwt toke sign
+                const token = jwt.sign({ user }, process.env.JWT_SECRETE, process.env.JWT_SECERETE, { expiresIn: '1h' })
+                res.cookie('userToken', token, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'strict',
+                    maxAge: 3600000
+                });
+                return res.status(200).json({ message: "Successfully Logged in" });
             }
         }
         else {
@@ -181,3 +189,13 @@ exports.login = async (req, res) => {
 }
 
 
+//Product Fetching for listing
+
+exports.getProducts = async (req, res) => {
+    try {
+        const products = await Product.find().populate("category");
+        return res.status(200).json({ message: "Sucessfully Fetched All Products", products })
+    } catch (error) {
+        return res.status(500).json({ message: "Failed To Fetch Product Data" })
+    }
+}

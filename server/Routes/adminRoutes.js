@@ -14,5 +14,7 @@ router.put("/categoryRestore/:id", adminController.categoryRestore);
 router.put("/editCategory", adminController.editCategory);
 router.post("/handleCategoryListing/:id", adminController.listCategory)
 router.post("/addProduct", uploadImage.array("file"), adminController.addProduct)
+router.put("/editProduct/:id",uploadImage.array("file"), adminController.editProduct);
 router.get("/getProduct",adminController.getProduct);
+router.post("/handleProductListing/:id",adminController.handleProductListing);
 module.exports = router; 

@@ -50,7 +50,7 @@ function Login() {
       if (response.status === 200) {
         //   dispatch(addUser(response.data));
         setMessage({ response: response?.data?.message });
-        navigate("/home");
+        navigate("/user/home");
       }
     } catch (err) {
       setMessage({ response: err?.response?.data?.message });

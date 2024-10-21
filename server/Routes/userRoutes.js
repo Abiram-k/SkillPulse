@@ -9,7 +9,6 @@ router.post('/signUp', userController.signUp);
 router.post('/login', userController.login);
 router.post('/otp', userController.otp);
 router.post('/resendOtp', userController.resendOtp)
-
 router.get('/auth/google',
     passport.authenticate('google', {
         scope:
@@ -22,4 +21,5 @@ router.get('/auth/google/callback',
          (req, res) => {
             res.redirect('http://localhost:5173/home')
         });
+router.get("/products",userController.getProducts);
 module.exports = router;      
