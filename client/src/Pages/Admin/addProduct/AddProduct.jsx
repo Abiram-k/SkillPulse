@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useDebugValue, useEffect, useState } from "react";
 import { Link, useAsyncError, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
@@ -18,6 +18,7 @@ const AddProduct = () => {
     image2: null,
     image3: null,
   });
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const error = {};
   const validateForm = () => {
@@ -52,8 +53,6 @@ const AddProduct = () => {
     return error;
   };
 
- 
-
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
 
@@ -68,6 +67,18 @@ const AddProduct = () => {
       reader.readAsDataURL(imageFile); //base64 happening here.
     }
   };
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/admin/category"
+        );
+        setCategories(response?.data?.categories);
+      } catch (err) {
+        alert(err?.response?.data?.message);
+      }
+    })();
+  }, []);
 
   const handleAddproduct = async (e) => {
     e.preventDefault();
@@ -106,7 +117,6 @@ const AddProduct = () => {
           title: `${response.data.message}`,
         });
         navigate("/admin/products");
-
       }
     } catch (error) {
       // alert(error.response.data.message);
@@ -154,12 +164,21 @@ const AddProduct = () => {
         <div>
           <label className="flex items-center">
             Category:
-            <input
-              type="text"
+            <select
               className="ml-2 p-2 border rounded w-full focus:outline-none"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-            />
+            >
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <option key={category._id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">No category were added</option>
+              )}
+            </select>
           </label>
           {message.category && (
             <p className="text-red-600">{message.category}</p>
@@ -235,7 +254,6 @@ const AddProduct = () => {
       <div className="mb-4">
         <label className="block mb-2">Upload Images :</label>
         <div className="grid grid-cols-3 gap-4">
-
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputone">
               <img
@@ -256,7 +274,7 @@ const AddProduct = () => {
             />
             <p className="bg-gray-200 p-2 rounded">Change image</p>
           </div>
-          
+
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputtwo">
               <img

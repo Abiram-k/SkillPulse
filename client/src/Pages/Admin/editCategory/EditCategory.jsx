@@ -81,11 +81,11 @@ function EditCategory() {
     } catch (error) {
       console.log(error?.response?.data?.message);
       setSpinner(false);
-      //   Toast.fire({
-      //     icon: 'error',
-      //     title: `${error?.response?.data?.message}`
-      //   });
-      alert(error?.response?.data?.message);
+        Toast.fire({
+          icon: 'error',
+          title: `${error?.response?.data?.message}`
+        });
+      // alert(error?.response?.data?.message);
     }
   };
 

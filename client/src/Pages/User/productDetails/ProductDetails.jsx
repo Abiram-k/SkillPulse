@@ -14,7 +14,7 @@ import {
   Linkedin,
 } from "lucide-react";
 import { context } from "../../../Components/Provider";
-import { useContext,useEffect} from "react";
+import { useContext, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 const ProductDetails = () => {
@@ -26,7 +26,6 @@ const ProductDetails = () => {
     setProductData(product);
   }, [product]);
   console.log(product);
-
 
   console.log(productData);
   const productImages = [
@@ -96,72 +95,93 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       <main className="container mx-auto px-4 py-8">
-        {productData.map((product, index) => (
-          <div key={index} className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="relative">
-                <img src={product.productImage[0]} alt="Product" className="w-full rounded-lg" />
+      {productData.map((product, index) => (
+  <div
+    key={index}
+    className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4"
+  >
+    {/* Product Image and Thumbnails */}
+    <div className="space-y-4">
+      <div className="relative">
+        <img
+          src={product.productImage[selectedImage] || product.productImage[0]}
+          alt="Product"
+          className="w-full h-64 object-cover rounded-lg"
+        />
 
-                <div className="absolute top-4 left-4 bg-black/80 px-2 py-1 rounded">
-                  {product.units} Stock remaining
-                </div>
-              </div>
-              <div className="flex space-x-4">
-                {product.productImage.map((img, idx) => (
-                  <img
-                    key={index}
-                    src={img}
-                    alt={`Thumbnail ${index + 1}`}
-                    className={`w-20 h-20 rounded cursor-pointer ${
-                      selectedImage === idx ? "border-2 border-blue-500" : ""
-                    }`}
-                    onClick={() => setSelectedImage(idx)}
-                  />
-                ))}
-              </div>
-            </div>
+        {/* Stock Badge */}
+        <div
+          className={
+            product.units
+              ? "absolute top-4 left-4 bg-black/80 px-2 py-1 rounded font-mono text-xs text-white"
+              : "absolute top-4 left-4 bg-black/80 text-red-600 px-2 py-1 rounded font-mono text-xs"
+          }
+        >
+          {product.units ? `${product.units} Stock remaining` : "Out of stock"}
+        </div>
+      </div>
 
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-sm text-gray-400">{product.brand}</h2>{" "}
-                <h1 className="text-xl font-bold">
-                  {product.productName}
-                </h1>{" "}
-              </div>
-
-              <div className="flex items-baseline space-x-4">
-                <span className="text-2xl font-bold">
-                  ₹{product.salesPrice}
-                </span>{" "}
-                <span className="text-gray-400 line-through">
-                  ₹{product.regularPrice}
-                </span>{" "}
-                <span className="text-green-500">
-                  {product.discount || "99"}% off
-                </span>{" "}
-              </div>
-
-              <div className="flex items-center space-x-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className="w-5 h-5 text-yellow-400"
-                    fill={star <= product.rating ? "currentColor" : "none"}
-                  />
-                ))}
-              </div>
-
-              <div className="flex space-x-4">
-                <button className="bg-red-600 text-white px-8 py-2 rounded-full hover:bg-red-700">
-                  Add To Cart
-                </button>
-                <button className="bg-red-600 text-white px-8 py-2 rounded-full hover:bg-red-700">
-                  Buy Now
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Thumbnails */}
+      <div className="flex space-x-4 overflow-x-auto">
+        {product.productImage.map((img, idx) => (
+          <img
+            key={idx}
+            src={img}
+            alt={`Thumbnail ${idx + 1}`}
+            className={`w-20 h-20 rounded cursor-pointer ${
+              selectedImage === idx ? "border-2 border-blue-500" : ""
+            }`}
+            onClick={() => setSelectedImage(idx)}
+          />
         ))}
+      </div>
+    </div>
+
+    {/* Product Details */}
+    <div className="space-y-6">
+      {/* Brand and Name */}
+      <div>
+        <h2 className="text-sm text-gray-400">{product.brand}</h2>
+        <h1 className="text-xl font-bold">{product.productName}</h1>
+      </div>
+
+      {/* Pricing and Discount */}
+      <div className="flex items-baseline space-x-4">
+        <span className="text-2xl font-bold text-green-500">
+          ₹{product.salesPrice}
+        </span>
+        <span className="text-gray-400 line-through">
+          ₹{product.regularPrice}
+        </span>
+        <span className="text-green-500 text-sm">
+          {product.discount || 99}% off
+        </span>
+      </div>
+
+      {/* Rating */}
+      <div className="flex items-center space-x-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className="w-5 h-5 text-yellow-400"
+            fill={star <= product.rating ? "currentColor" : "none"}
+          />
+        ))}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex space-x-4">
+        <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
+          Add To Cart
+        </button>
+        <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
+          Buy Now
+        </button>
+      </div>
+    </div>
+  </div>
+))}
+
 
         {/* Similar Products */}
         <section className="mt-16">
@@ -235,8 +255,6 @@ const ProductDetails = () => {
           </div>
         </section>
       </main>
-
-     
     </div>
   );
 };

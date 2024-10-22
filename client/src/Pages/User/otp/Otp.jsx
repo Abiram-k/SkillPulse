@@ -3,35 +3,40 @@ import OtpInput from "./otpInputBox";
 import axios from "axios";
 import "./otp.css";
 import { useNavigate } from "react-router-dom";
+
 function Otp() {
-  const [timer, setTimer] = useState(29);
-  const [otp, setOtp] = useState();
+  const [timer, setTimer] = useState(5); // Initial timer
+  const [otp, setOtp] = useState(0);
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
   const [spinner, setSpinner] = useState(false);
   const [input, setInput] = useState(false);
+  const [resetKey, setResetKey] = useState(0); // Key to reset useEffect
 
   const navigate = useNavigate();
-  //for otp timer
+
+  // Timer countdown with reset capability
   useEffect(() => {
     const interval = setInterval(() => {
       setTimer((t) => {
         if (t > 0) {
           return t - 1;
         } else {
-          setResendOtp(true);
-          return;
+          setResendOtp(true); // Allow resend OTP when time is up
+          return 0;
         }
       });
     }, 1000);
+
     const timeout = setTimeout(() => {
       clearInterval(interval);
-    }, 30 * 1000);
+    }, 30 * 1000); // End after 30 seconds
+
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, []);
+  }, [resetKey]); // Reset timer when resetKey changes
 
   const handleOtpChange = (value) => {
     setOtp(value);
@@ -44,7 +49,6 @@ function Otp() {
         { otp },
         { withCredentials: true }
       );
-      console.log(response);
       if (response.status === 200) {
         navigate("/login");
       }
@@ -52,30 +56,36 @@ function Otp() {
       if (error.response.status === 400) {
         setMessage({ serverError: error.response.data.message });
       }
-      console.log(error);
     }
   };
 
   const handleResendOtp = async () => {
     setInput(true);
     setSpinner(true);
-    setTimeout(() => {
-      setSpinner(false);
-    }, 2000);
+    // setTimeout(() => {
+    //   setSpinner(false);
+    // }, 2000);
+    
+    setTimer(5); // Reset timer to initial value
+    setResendOtp(false); // Disable resend button during countdown
+    setResetKey((prevKey) => prevKey + 1); // Trigger useEffect to reset timer
+
     try {
       const response = await axios.post(
         "http://localhost:3000/resendOtp",
         {},
         { withCredentials: true }
       );
+      setSpinner(false);
       setMessage({ success: response.data.message });
     } catch (error) {
+            setSpinner(false);
       if (error.response.status === 400) {
         setMessage({ serverError: error.response.data.message });
       }
-      console.log(error);
     }
   };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessage({ serverMessage: "" });
@@ -111,18 +121,13 @@ function Otp() {
         </div>
       )}
 
-      <h1
-        className="text-white text-6xl font-bold mb-10 "
-        style={{ fontFamily: "Orbitron, sans-serif" }}
-      >
+      <h1 className="text-white text-6xl font-bold mb-10" style={{ fontFamily: "Orbitron, sans-serif" }}>
         SKILL PULSE
       </h1>
-      <div
-        className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3"
-        style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}
-      >
+      <div className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3" style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}>
         <h2 className="text-2xl font-bold mb-2">OTP Verification</h2>
         <p className="mb-6">Enter the OTP to confirm</p>
+        
         {input || timer ? (
           <div className="flex items-center justify-end space-x-3 mb-4 text-white">
             <OtpInput
@@ -130,7 +135,6 @@ function Otp() {
               handleOtpChange={handleOtpChange}
               disable={false}
             />
-
             <div className=" p-2 rounded-full w-14 h-11">
               <span className="">{timer}</span>
             </div>

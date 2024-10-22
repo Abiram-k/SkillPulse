@@ -23,5 +23,5 @@ router.get('/auth/google/callback',
     (req, res) => {
         res.redirect('http://localhost:5173/googleRedirect')
     });
-router.get("/products", verifyUser, isBlocked, userController.getProducts);
+router.get("/products", userController.getProducts);
 module.exports = router;      

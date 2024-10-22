@@ -6,12 +6,13 @@ import { addUser } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
 import axios from "axios";
+import { addAdmin } from "../../../redux/adminSlice";
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({});
   const navigate = useNavigate();
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   let error = {};
   const formValidate = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -48,8 +49,8 @@ const AdminLogin = () => {
         }
       );
       if (response.status === 200) {
-        //   dispatch(addUser(response.data));
-        alert("hello")
+        dispatch(addAdmin(response.data.adminData));
+        alert("hello");
         setMessage({ response: response?.data?.message });
         navigate("dashboard");
       }

@@ -1,23 +1,25 @@
 import React from "react";
 import { User, Package, MapPin, Wallet, LogOut } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../redux/userSlice";
 const AccountOverview = () => {
   const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logoutUser());
   };
+  const user = useSelector((state) => state.users.user);
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto p-4 flex gap-6">
-        {/* Sidebar */}
         <div className="w-64">
           <div className="bg-black rounded-lg p-4 mb-4">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
                 <User className="w-6 h-6 text-gray-800" />
               </div>
-              <span className="font-semibold">Abiram k</span>
+              <span className="font-semibold">
+                {user.firstName  || "Abiram k"}
+              </span>
             </div>
 
             <nav className="space-y-2">
@@ -61,13 +63,13 @@ const AccountOverview = () => {
 
           <h2 className="text-xl font-semibold mb-6">Personal Information</h2>
 
-          <form className="space-y-6">
+          <form className="space-y-6 font-mono">
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block mb-2">First Name</label>
                 <input
                   type="text"
-                  defaultValue="Abiram"
+                  defaultValue={user.firstName || Abiram}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 />
               </div>
@@ -75,7 +77,7 @@ const AccountOverview = () => {
                 <label className="block mb-2">Last Name</label>
                 <input
                   type="text"
-                  defaultValue="K"
+                  defaultValue={user.secondName || "K"}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 />
               </div>
@@ -97,6 +99,7 @@ const AccountOverview = () => {
                 <label className="block mb-2">Mobile Number</label>
                 <input
                   type="tel"
+                  defaultValue={user.mobileNumber || "992010921"}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 />
               </div>
@@ -104,6 +107,7 @@ const AccountOverview = () => {
                 <label className="block mb-2">Email</label>
                 <input
                   type="email"
+                  defaultValue={user.email || "user@gmail.com"}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 />
               </div>

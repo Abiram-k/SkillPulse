@@ -27,7 +27,7 @@ const Shop = () => {
     <div>
       <div className="carousel relative">
         <img
-          src={productBanner || "https://placehold.co/1200x400"}
+          src={ "https://placehold.co/1200x400"||productBanner }
           alt="Carousel Image"
           className="w-full"
         />

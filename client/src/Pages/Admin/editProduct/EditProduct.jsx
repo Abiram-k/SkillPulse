@@ -16,26 +16,24 @@ const EditProduct = () => {
   const [units, setUnits] = useState("");
   const [productImage, setProductImage] = useState([]);
   const [images, setImages] = useState({
-    image1: null,
-    image2: null,
-    image3: null,
+    image1: "",
+    image2: "",
+    image3: "",
   });
 
   const navigate = useNavigate();
   const { data } = useContext(context);
 
   useEffect(() => {
-    setId(data._id || "");
-    setName(data.productName || "");
-    setCategory( data.category.name ||"Not fetched" );
-    setDescription(data.productDescription || "");
-    setRegularPrice(data.regularPrice || "");
-    setSalesPrice(data.salesPrice || "");
-    setBrand(data.brand || "");
-    setUnits(data.units || "");
-    // console.log("DSAFDSAFASDf",data.productImage)
-    // console.log("DSAFDSAFASDf",data)
-    setProductImage(data.productImage || "");
+    setId(data?._id || "");
+    setName(data?.productName || "");
+    setCategory(data?.category?.name || "Not fetched");
+    setDescription(data?.productDescription || "");
+    setRegularPrice(data?.regularPrice || "");
+    setSalesPrice(data?.salesPrice || "");
+    setBrand(data?.brand || "");
+    setUnits(data?.units || "");
+    setProductImage(data?.productImage || []);
   }, [data]);
 
   const error = {};
@@ -47,7 +45,6 @@ const EditProduct = () => {
     if (category.trim() === "") error.category = "Category is required *";
     if (description.trim() === "")
       error.description = "description is required *";
-    if (category.trim() === "") error.category = "Category is required *";
     if (String(regularPrice).trim() === "")
       error.regularPrice = "regularPrice is required *";
     else if (isNaN(regularPriceInt))
@@ -72,27 +69,44 @@ const EditProduct = () => {
     return error;
   };
 
+  
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
-
     if (imageFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages((prevImages) => ({
-          ...prevImages,
-          [field]: reader.result, //field is image1,image2,image3
-        }));
-      };
-      reader.readAsDataURL(imageFile); //base64 happening here.
+      const imageUrl = URL.createObjectURL(imageFile);
+      setImages((prevImages) => ({
+        ...prevImages,
+        [field]: imageUrl, 
+      }));
+      setProductImage((prevImages) => {
+        const fieldIndex = field === "image1" ? 0 : field === "image2" ? 1 : 2;
+        const updatedImages = prevImages.map((img, index) =>
+          index === fieldIndex ? imageFile : img
+        );
+        if (fieldIndex >= prevImages.length) {
+          updatedImages.push(imageFile);
+        }
+        return updatedImages;
+      });
     }
   };
+
+
+  // const handleProductImageChange = (e) => {
+  //   const imageFile = e.target.files[0];
+  //   if (imageFile) {
+  //     setProductImage((prevImages) => {
+  //       return [...prevImages, imageFile];
+  //     });
+  //   }
+  // };
 
   const handleEditproduct = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
-
     setMessage(formErrors);
-    console.log("SDFASFASDFDSA",productImage);
+    if (Object.keys(formErrors).length > 0) return;
+    console.log("SDFASFASDFDSA", productImage);
     const formData = new FormData();
     formData.append("productName", name);
     formData.append("productDescription", description);
@@ -101,11 +115,11 @@ const EditProduct = () => {
     formData.append("regularPrice", regularPrice);
     formData.append("brand", brand);
     formData.append("units", units);
-    productImage.forEach((image, index) => {
-      formData.append("file", image);
+    // formData.append("file", productImages);
+    Object.values(productImage).forEach((image, index) => {
+      if (image) formData.append("file", image);
     });
     try {
-      // console.log(Object.keys(formErrors.length) )
       if (Object.keys(formErrors).length === 0) {
         setSpinner(true);
         const response = await axios.put(
@@ -124,34 +138,25 @@ const EditProduct = () => {
           icon: "success",
           title: `${response.data.message}`,
         });
+        navigate("/admin/products");
       }
-      navigate("/admin/products");
     } catch (error) {
       // alert(error.response.data.message);
       // if (!validateForm()) {
-      console.error(error)
+      console.error(error);
       setSpinner(false);
       Toast.fire({
         icon: "error",
-        title: `${error.response?.data.message } `,
-      });
-      // }
-      // console.log(error);
-      // alert(error.response.data.message);
-    }
-  };
-
-  const handleProductImageChange = (e) => {
-    const imageFile = e.target.files[0];
-    if (imageFile) {
-      setProductImage((prevImages) => {
-        return [...prevImages, imageFile];
+        title: `${error.response?.data.message} `,
       });
     }
   };
 
   return (
-    <form className="bg-gray-200 text-black  p-8 shadow-md rounded-lg font-sans" onSubmit={handleEditproduct}>
+    <form
+      className="bg-gray-200 text-black  p-8 shadow-md rounded-lg font-sans"
+      onSubmit={handleEditproduct}
+    >
       {spinner && (
         <div className="spinner-overlay">
           <div className="spinner"></div>
@@ -257,7 +262,11 @@ const EditProduct = () => {
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputone">
               <img
-                src={images.image1 || productImage[0] || "https://placehold.co/100x100"}
+                src={
+                  images.image1 ||
+                  productImage[0] ||
+                  "https://placehold.co/100x100"
+                }
                 alt="product image"
                 className="mb-2"
               />
@@ -268,7 +277,7 @@ const EditProduct = () => {
               accept="image/*"
               onChange={(e) => {
                 handleImageChange(e, "image1");
-                handleProductImageChange(e);
+                // handleProductImageChange(e);
               }}
               style={{ display: "none" }}
             />
@@ -277,7 +286,11 @@ const EditProduct = () => {
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputtwo">
               <img
-                src={images.image2 || productImage[1] || "https://placehold.co/100x100"}
+                src={
+                  images.image2 ||
+                  productImage[1] ||
+                  "https://placehold.co/100x100"
+                }
                 alt="product image"
                 className="mb-2"
               />
@@ -288,7 +301,7 @@ const EditProduct = () => {
               accept="image/*"
               onChange={(e) => {
                 handleImageChange(e, "image2");
-                handleProductImageChange(e);
+                // handleProductImageChange(e);
               }}
               style={{ display: "none" }}
             />
@@ -297,7 +310,11 @@ const EditProduct = () => {
           <div className="border rounded-lg p-4 flex flex-col items-center">
             <label htmlFor="fileInputThree">
               <img
-                src={images.image3 || productImage[2] || "https://placehold.co/100x100"}
+                src={
+                  images.image3 ||
+                  productImage[2] ||
+                  "https://placehold.co/100x100"
+                }
                 alt="product image"
                 className="mb-2"
               />
@@ -308,7 +325,7 @@ const EditProduct = () => {
               accept="image/*"
               onChange={(e) => {
                 handleImageChange(e, "image3");
-                handleProductImageChange(e);
+                // handleProductImageChange(e);
               }}
               style={{ display: "none" }}
             />

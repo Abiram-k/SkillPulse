@@ -55,7 +55,7 @@ const Category = () => {
           alert(error?.response.data.message);
         });
     })();
-  });
+  },[]);
 
   console.log(categories);
   const handleAddCategory = async (e) => {

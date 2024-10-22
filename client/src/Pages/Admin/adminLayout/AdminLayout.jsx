@@ -17,6 +17,7 @@ import {
   Percent,
 } from "lucide-react";
 import { Outlet } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 // Sample data for the chart
 const chartData = Array.from({ length: 12 }, (_, i) => ({
@@ -69,13 +70,13 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold mb-8">SkillPulse</h1>
           <nav className="lg:space-y-24 flex flex-col ">
             <div className="flex flex-col lg:space-y-3">
+              <NavItem icon={Menu} text="Dashboard" redirect="dashboard" />
               <NavItem
-                icon={Menu}
-                text="Dashboard"
+                icon={Users}
+                text="Customers"
                 active
-                redirect="dashboard"
+                redirect="customers"
               />
-              <NavItem icon={Users} text="Customers" redirect="customers" />
               <NavItem icon={Package} text="Products" redirect="products" />
               <NavItem icon={FileText} text="Orders" redirect="orders" />
               <NavItem icon={Image} text="Banner" redirect="bannerMangement" />
@@ -114,19 +115,22 @@ export default function Dashboard() {
 
 // Helper Components
 function NavItem({ icon: Icon, text, active, redirect }) {
-  return (
-    <>
-      <Link
-        to={redirect}
-        className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
-          active
-            ? "bg-gray-800 text-white"
-            : "hover:bg-gray-800 hover:text-white"
-        }`}
-      >
-        <Icon className="h-5 w-5" />
-        <span>{text}</span>
-      </Link>
-    </>
-  );
+  const dispatch = useDispatch();
+  if (text === "logout")
+    dispatch()
+    return (
+      <>
+        <Link
+          to={redirect}
+          className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+            active
+              ? "bg-gray-800 text-white"
+              : "hover:bg-gray-800 hover:text-white"
+          }`}
+        >
+          <Icon className="h-5 w-5" />
+          <span>{text}</span>
+        </Link>
+      </>
+    );
 }

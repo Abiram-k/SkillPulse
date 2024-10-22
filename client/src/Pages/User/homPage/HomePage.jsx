@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import banner from "../../../assets/homePageBanner.jpg";
 import productBanner from "../../../assets/homeProductBanner.webp";
-import { useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { context } from "../../../Components/Provider";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
@@ -57,62 +57,64 @@ const HomePage = () => {
           <p className="text-base sm:text-lg md:text-xl mt-2 text-gray-200 hidden lg:block">
             Deserve best, interpret your music differently
           </p>
-          <button className="mt-4 px-4 py-2 md:px-6 md:py-2 bg-red-600 text-white font-bold rounded">
+          <Link
+            to="/user/shop"
+            className="mt-4 px-4 py-2 md:px-6 md:py-2 bg-red-600 text-white font-bold rounded inline-block text-center hover:bg-red-700"
+          >
             ORDER NOW
-          </button>
+          </Link>
         </div>
       </section>
 
-        <h5 className=" text-center mt-5">Categories</h5>
-      <section className="flex flex-wrap justify-around py-8 bg-black border-gray-500 border-b-1">
+      <h5 className=" text-center mt-5 text-xl">Categories</h5>
+      <section className="flex flex-wrap justify-around gap-6 py-8 bg-black border-gray-500 border-b">
         {category.length > 0 ? (
           category.slice(0, 4).map((cat) => (
             <div
-
-              className="w-full sm:w-1/2 md:w-1/4 text-center mb-4 border-r-2 border-gray-400"
+              className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
               key={cat._id}
             >
               <img
-                src={ cat.image ||"https://placehold.co/150x150" }
-                // alt={product.category.description}
-                className="mx-auto rounded w-1/2 mb-2"
+                src={cat.image || "https://placehold.co/150x150"}
+                className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
+                alt={cat.name}
               />
-              <p className="text-white">{cat.name}</p>
+              <p className="text-white text-sm md:text-base font-semibold">
+                {cat.name}
+              </p>
             </div>
           ))
         ) : (
           <>
-            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
-              <img
-                src="https://placehold.co/150x150"
-                alt="RazorClaw X"
-                className="mx-auto"
-              />
-              <p className="text-white">RazorClaw X</p>
-            </div>
-            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
-              <img
-                src="https://placehold.co/150x150"
-                alt="HyperVox Graphics card"
-                className="mx-auto"
-              />
-              <p className="text-white">HyperVox Graphics card</p>
-            </div>
-            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
-              <img
-                src="https://placehold.co/150x150"
-                alt="Vortex Controller"
-                className="mx-auto"
-              />
-              <p className="text-white">Vortex Controller</p>
-            </div>
+            {["RazorClaw X", "HyperVox Graphics card", "Vortex Controller"].map(
+              (placeholder, index) => (
+                <div
+                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  key={index}
+                >
+                  <img
+                    src="https://placehold.co/150x150"
+                    alt={placeholder}
+                    className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
+                  />
+                  <p className="text-white text-sm md:text-base font-semibold">
+                    {placeholder}
+                  </p>
+                </div>
+              )
+            )}
           </>
         )}
       </section>
 
       <section
-        className="py-8 bg-cover bg-center"
-        style={{ backgroundImage: `url(${productBanner})` }}
+        className="py-8 bg-cover bg-center mb-10"
+        style={{
+          backgroundImage: `url(${
+            "https://digitalalliance.co.id/wp-content/uploads/2021/05/banner-category-gaming-gear-accessories-stands.jpg" ||
+            productBanner
+          })`,
+        }}
       >
         <div className="ps-12 bg-opacity-60  rounded-lg font-mono">
           <h2 className="text-3xl font-bold text-white">
@@ -133,31 +135,42 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-8 bg-black">
-        {products.length > 0 && products.isListed ? (
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black">
+        {products.length > 0 ? (
           products.map(
             (product) =>
               product.isListed && (
-                <div className="bg-gray-800 p-4 rounded" key={product._id}>
+                <div
+                  className="bg-gray-800 p-3 rounded shadow-lg transform hover:scale-105 transition-transform duration-300"
+                  key={product._id}
+                >
                   <img
                     src={
                       product.productImage[0] || "https://placehold.co/300x200"
                     }
                     alt={product.productDescription}
-                    className="w-full h-auto"
+                    className="w-full h-32 object-cover rounded cursor-pointer"
                     onClick={() => goToDetails(product)}
                   />
-                  <div className="mt-4">
-                    <h3 className="text-xl font-bold">{product.brand}</h3>
-                    <p>{product.productName}</p>
-                    <p className="text-lg font-bold">
+                  <div className="mt-2 text-center">
+                    <h3 className="text-sm font-semibold text-white">
+                      {product.brand}
+                    </h3>
+                    <p className="text-xs text-gray-300">
+                      {product.productName}
+                    </p>
+                    <p className="text-sm font-bold text-green-500">
                       ₹{product.salesPrice}
-                      <span className="line-through">
+                      <span className="line-through text-gray-400 ml-1">
                         ₹{product.regularPrice}
                       </span>
-                      20% off
+                      <span className="text-red-500 ml-1">20% off</span>
                     </p>
-                    <p>{product.salesPrice > 1000 ? "Free Delivery" : ""}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {product.salesPrice > 1000
+                        ? "Free Delivery"
+                        : "Delivery Charges Apply"}
+                    </p>
                   </div>
                 </div>
               )

@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import Pagination from "../../../Components/Pagination";
 const Customers = () => {
   const [users, setUsers] = useState([]);
   const searchFocus = useRef(null);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postPerPage, setPostPerPage] = useState(5);
 
   useEffect(() => {
     (async () => {
@@ -21,6 +24,10 @@ const Customers = () => {
     })();
     searchFocus.current.focus();
   }, []);
+
+  const lastPostIndex = currentPage * postPerPage;
+  const firstPostIndex = lastPostIndex - postPerPage;
+  const currentUsers = users.slice(firstPostIndex, lastPostIndex);
 
   const handleblocking = async (id) => {
     try {
@@ -57,7 +64,7 @@ const Customers = () => {
     }
   };
   return (
-    <div className="flex bg-white text-black">
+    <div className="flex bg-white text-black h-4/5">
       <div className="flex-1">
         <div className="p-8">
           <div className="flex justify-between items-center mb-4">
@@ -117,16 +124,16 @@ const Customers = () => {
                 </tr>
               </thead>
               <tbody className="font-sans">
-                {users.length > 0 ? (
-                  users.filter(
+                {currentUsers.length > 0 ? (
+                  currentUsers.filter(
                     (filuser) =>
-                      search.length === 0 ||
+                      search.length === 0 || //if search.length !== 0 second will execute
                       (filuser.email &&
                         filuser.email
                           .toLowerCase()
                           .startsWith(search.toLowerCase()))
                   ).length > 0 ? (
-                    users
+                    currentUsers
                       .filter(
                         (filuser) =>
                           search.length === 0 ||
@@ -182,15 +189,12 @@ const Customers = () => {
                 {/* Add more rows here */}
               </tbody>
             </table>
-
-            {/* Pagination */}
-            {/* <div className="pagination flex justify-between items-center mt-4">
-              <button className="bg-black text-white p-2 rounded" disabled>
-                &lt;
-              </button>
-              <span>1 of 10 Pages</span>
-              <button className="bg-black text-white p-2 rounded">&gt;</button>
-            </div> */}
+            <Pagination
+              totalPosts={users.length}
+              postsPerPage={postPerPage}
+              setCurrentPage={setCurrentPage}
+              currentPage={currentPage}
+            />
           </div>
         </div>
       </div>

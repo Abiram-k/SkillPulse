@@ -20,7 +20,10 @@ exports.login = async (req, res) => {
         if (!isMatch)
             return res.status(400).json({ message: "Check the password" })
 
-        return res.status(200).json({ message: "Login Successfull" });
+        const adminData = {
+            email, password
+        }
+        return res.status(200).json({ message: "Login Successfull", adminData });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message });
@@ -86,6 +89,7 @@ exports.addCategory = async (req, res) => {
 
 exports.getCategory = async (req, res) => {
     try {
+        console.log("ksdhflkjadskjdnnnnnnnnnnnnnnnnnnnnnnnnnnnns")
         const categories = await Category.find({});
         if (categories) {
             return res.json({ message: "succesully fetched all category", categories });
@@ -133,7 +137,7 @@ exports.editCategory = async (req, res) => {
         if (!description) {
             description = undefined;
         }
-        const image = req.file.path;
+        const image = req.file?.path;
         const isExistcategory = await Category.findOne({ name, _id: { $ne: id } });
         if (isExistcategory)
             return res.status(400).json({ message: "Category already exists" });
@@ -181,15 +185,15 @@ exports.addProduct = async (req, res) => {
             category,
             brand
         } = req.body;
-        console.log(
-            productName,
-            productDescription,
-            salesPrice,
-            regularPrice,
-            units,
-            category,
-            brand
-        )
+        // console.log(
+        //     productName,
+        //     productDescription,
+        //     salesPrice,
+        //     regularPrice,
+        //     units,
+        //     category,
+        //     brand
+        // )
         const productImage = req.files.map((file) => file.path)
         const existProduct = await Product.findOne({ productName });
 
@@ -228,7 +232,8 @@ exports.editProduct = async (req, res) => {
             regularPrice,
             units,
             category,
-            brand
+            brand,
+            file
         } = req.body;
         console.log(
             productName,
@@ -237,12 +242,22 @@ exports.editProduct = async (req, res) => {
             regularPrice,
             units,
             category,
-            brand, "hello"
+            brand,
+            file
         )
 
         const { id } = req.params;
-        console.log(req.files);
-        const productImage = req.files.map((file) => file.path)
+        let productImage = []
+        productImage = req.files.flatMap((file) => file.path)
+        if (file) {
+            if (Array.isArray(file)) {
+                productImage.push(...file);
+            } else {
+                productImage.push(file);
+            }
+        }
+        console.log("helllooooo req got !!!")
+
         const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
 
         const categoryDoc = await Category.findOne({ name: category })
@@ -263,7 +278,7 @@ exports.editProduct = async (req, res) => {
                 brand,
                 productImage
             });
-            console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
+            // console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
             return res.status(200).json({ message: "product edited successully" })
         }
     } catch (error) {

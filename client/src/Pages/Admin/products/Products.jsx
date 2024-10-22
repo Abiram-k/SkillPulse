@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { context } from "../../../Components/Provider";
 import { useContext, useRef } from "react";
+import Pagination from "../../../Components/Pagination";
 
 function Products() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postPerPage, setPostPerPage] = useState(5);
   const searchFocus = useRef(null);
   const { setData } = useContext(context);
 
@@ -34,8 +37,11 @@ function Products() {
       }
     })();
     searchFocus.current.focus();
-  }, []);
+  },[]);
 
+  const lastPostIndex = currentPage * postPerPage;
+  const firstPostIndex = lastPostIndex - postPerPage;
+  const currentProducts = products.slice(firstPostIndex, lastPostIndex);
   const handleListing = async (id) => {
     try {
       const response = await axios.post(
@@ -136,8 +142,8 @@ function Products() {
               </tr>
             </thead>
             <tbody>
-              {products.length > 0 ? (
-                products
+              {currentProducts.length > 0 ? (
+                currentProducts
                   .filter(
                     (product) =>
                       search.length === 0 ||
@@ -146,66 +152,58 @@ function Products() {
                         .startsWith(search.toLowerCase())
                   )
                   .map((product, index) => (
-                    <>
-                      <tr className="border-b" key={product._id}>
-                        <td className="p-2">{index + 1}</td>
-                        <td className="p-2">{product.productName}</td>
-                        <td className="p-2">
-                          {product.category?.name || "not Fetched"}
-                        </td>
-                        <td className="p-2">{product.productDescription}</td>
-                        <td className="p-2">{product.salesPrice}</td>
-                        <td className="p-2">{product.units}</td>
-                        <td className="p-2">
-                          <img
-                            src={
-                              product.productImage[0] ||
-                              "https://placehold.co/50x50"
-                            }
-                            alt={product.productName}
-                            className="w-12 h-12 object-cover mx-auto"
-                          />
-                        </td>
-                        <td className="p-2 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 align-middle justify-center">
-                          <Link to="edit">
-                            <i
-                              className="fas fa-edit mr-2"
-                              onClick={() => sendDataToEdit(product)}
-                            ></i>
-                          </Link>
-                          <button
-                            className={
-                              product.isListed
-                                ? "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22 w-1/2 font-mono"
-                                : "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17 w-1/2 font-mono"
-                            }
-                            onClick={() => handleListing(product._id)}
-                          >
-                            {product.isListed ? "Unlist" : "List"}
-                          </button>
-                        </td>
-                      </tr>
-
-                      <div className="flex justify-center mt-4">
-                        <button className="px-4 py-2 border rounded">
-                          {"<"}
+                    <tr className="border-b" key={index}>
+                      <td className="p-2">{index + 1}</td>
+                      <td className="p-2">{product.productName}</td>
+                      <td className="p-2">
+                        {product.category?.name || "not Fetched"}
+                      </td>
+                      <td className="p-2">{product.productDescription}</td>
+                      <td className="p-2">{product.salesPrice}</td>
+                      <td className="p-2">{product.units}</td>
+                      <td className="p-2">
+                        <img
+                          src={
+                            product.productImage[0] ||
+                            "https://placehold.co/50x50"
+                          }
+                          alt={product.productName}
+                          className="w-12 h-12 object-cover mx-auto"
+                        />
+                      </td>
+                      <td className="p-2 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 align-middle justify-center">
+                        <Link to="edit">
+                          <i
+                            className="fas fa-edit mr-2"
+                            onClick={() => sendDataToEdit(product)}
+                          ></i>
+                        </Link>
+                        <button
+                          className={
+                            product.isListed
+                              ? "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22  font-mono"
+                              : "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17 font-mono"
+                          }
+                          onClick={() => handleListing(product._id)}
+                        >
+                          {product.isListed ? "Unlist" : "List"}
                         </button>
-                        <span className="px-4 py-2">1</span>
-                        <button className="px-4 py-2 border rounded">
-                          {">"}
-                        </button>
-                      </div>
-                    </>
+                      </td>
+                    </tr>
                   ))
               ) : (
-                <tr className="border-b text-center">
-                  <td className="text-center font-bold  p-6">
-                    NO PRODUCT WERE ADDED YET !
-                  </td>
+                <tr>
+                  <td className="p-2">No product were listed yet</td>
                 </tr>
               )}
             </tbody>
           </table>
+          <Pagination
+            totalPosts={products.length}
+            postsPerPage={postPerPage}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+          />
         </div>
       </main>
     </>
