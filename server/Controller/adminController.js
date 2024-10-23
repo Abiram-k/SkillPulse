@@ -143,7 +143,7 @@ exports.editCategory = async (req, res) => {
     try {
         let { id, name, description } = req.body;
         // console.group(id, name, description);
-        if (!description) {
+        if (!description) { 
             description = undefined;
         }
         const image = req.file?.path;

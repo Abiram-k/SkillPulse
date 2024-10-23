@@ -1,10 +1,7 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useDebugValue, useEffect, useState } from "react";
+import { Link, useAsyncError, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
-import Cropper from "react-easy-crop";
-import { getCroppedImg } from "../utils/cropImage"; // Your helper to crop image
-
 const AddProduct = () => {
   const [message, setMessage] = useState({});
   const [spinner, setSpinner] = useState(false);
@@ -15,21 +12,14 @@ const AddProduct = () => {
   const [salesPrice, setSalesPrice] = useState("");
   const [brand, setBrand] = useState("");
   const [units, setUnits] = useState("");
-  const [categories, setCategories] = useState([]);
-
-  const [productImage, setProductImage] = useState([]); // Array of images to send to backend
+  const [productImage, setProductImage] = useState([]);
   const [images, setImages] = useState({
     image1: null,
     image2: null,
     image3: null,
   });
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-  const [image, setImage] = useState(null); // Image for cropping
-  const [currentField, setCurrentField] = useState(""); // Track which image is being cropped
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
-
   const error = {};
   const validateForm = () => {
     const salesPriceInt = Number(salesPrice);
@@ -61,6 +51,21 @@ const AddProduct = () => {
     }
     return error;
   };
+
+  const handleImageChange = (e, field) => {
+    const imageFile = e.target.files[0];
+
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImages((prevImages) => ({
+          ...prevImages,
+          [field]: reader.result, //field is image1,image2,image3
+        }));
+      };
+      reader.readAsDataURL(imageFile); //base64 happening here.
+    }
+  };
   useEffect(() => {
     (async () => {
       try {
@@ -73,73 +78,11 @@ const AddProduct = () => {
       }
     })();
   }, []);
-  // Handle image file change and set image for cropping
-  const handleImageChange = (e, field) => {
-    const imageFile = e.target.files[0];
-    setCurrentField(field); // Track which image field is being edited
-    if (imageFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result); // Set image to be cropped
-      };
-      reader.readAsDataURL(imageFile);
-    }
-  };
 
-  // Set cropped area after cropping completes
-  const handleCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
-
-  // Save the cropped image and update the state for display
-  const saveCroppedImage = async (e) => {
-    e.preventDefault(); // Prevent the default behavior to avoid page reload
-    try {
-      const croppedImage = await getCroppedImg(image, croppedAreaPixels);
-      const croppedFile = new File([croppedImage], `${currentField}.jpg`, {
-        type: "image/jpeg",
-      });
-
-      // Revoke previous object URL to prevent memory leaks
-      if (images[currentField]) {
-        URL.revokeObjectURL(images[currentField]);
-      }
-
-      // Update the image preview for the specific field
-      setImages((prevImages) => ({
-        ...prevImages,
-        [currentField]: URL.createObjectURL(croppedFile), // Preview the cropped image
-      }));
-
-      // Update the productImage array with the cropped file to send to backend
-      setProductImage((prevImages) => {
-        const updatedImages = [...prevImages];
-        const imageIndex = updatedImages.findIndex(
-          (img) => img.field === currentField
-        );
-
-        if (imageIndex > -1) {
-          updatedImages[imageIndex] = {
-            file: croppedFile,
-            field: currentField,
-          };
-        } else {
-          updatedImages.push({ file: croppedFile, field: currentField });
-        }
-
-        return updatedImages;
-      });
-
-      setImage(null); // Clear the crop modal after cropping is done
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  // Handle adding the product with images
-  const handleAddProduct = async (e) => {
+  const handleAddproduct = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
+
     setMessage(formErrors);
     console.log(productImage);
     const formData = new FormData();
@@ -149,38 +92,57 @@ const AddProduct = () => {
     formData.append("salesPrice", salesPrice);
     formData.append("regularPrice", regularPrice);
     formData.append("brand", brand);
-    formData.append("units", units); // Add product details like name, price, etc.
-
-    productImage.forEach((image) => {
-      formData.append("file", image.file); // Append cropped images to formData
+    formData.append("units", units);
+    productImage.forEach((image, index) => {
+      formData.append("file", image);
     });
-
     try {
+      // console.log(Object.keys(formErrors.length) )
       if (Object.keys(formErrors).length === 0) {
         setSpinner(true);
-
         const response = await axios.post(
           "http://localhost:3000/admin/addProduct",
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
             withCredentials: true,
           }
         );
         setSpinner(false);
 
-        Toast.fire({ icon: "success", title: `${response.data.message}` });
+        Toast.fire({
+          icon: "success",
+          title: `${response.data.message}`,
+        });
         navigate("/admin/products");
       }
     } catch (error) {
+      // alert(error.response.data.message);
+      // if (!validateForm()) {
       setSpinner(false);
+      Toast.fire({
+        icon: "error",
+        title: `${error.response?.data.message}`,
+      });
+      // }
+      // console.log(error);
+      // alert(error.response.data.message);
+    }
+  };
 
-      Toast.fire({ icon: "error", title: `${error.response?.data.message}` });
+  const handleProductImageChange = (e) => {
+    const imageFile = e.target.files[0];
+    if (imageFile) {
+      setProductImage((prevImages) => {
+        return [...prevImages, imageFile];
+      });
     }
   };
 
   return (
-    <form className="bg-gray-200 text-black p-8 shadow-md rounded-lg font-sans">
+    <form className="bg-gray-200 text-black  p-8 shadow-md rounded-lg font-sans">
       {spinner && (
         <div className="spinner-overlay">
           <div className="spinner"></div>
@@ -292,66 +254,79 @@ const AddProduct = () => {
       <div className="mb-4">
         <label className="block mb-2">Upload Images :</label>
         <div className="grid grid-cols-3 gap-4">
-          {["image1", "image2", "image3"].map((field, index) => (
-            <div
-              key={index}
-              className="border rounded-lg p-4 flex flex-col items-center"
-            >
-              <label htmlFor={`fileInput${index}`}>
-                <img
-                  src={images[field] || "https://placehold.co/100x100"}
-                  alt="product"
-                  className="mb-2"
-                  style={{ maxWidth: "100%", height: "auto" }} // Dynamically sized cropped image
-                />
-              </label>
-              <input
-                id={`fileInput${index}`}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, field)}
-                style={{ display: "none" }}
+          <div className="border rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputone">
+              <img
+                src={images.image1 || "https://placehold.co/100x100"}
+                alt="product image"
+                className="mb-2"
               />
-              <p className="bg-gray-200 p-2 rounded">Change image</p>
-            </div>
-          ))}
-        </div>
-      </div>
+            </label>
+            <input
+              id="fileInputone"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, "image1");
+                handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded">Change image</p>
+          </div>
 
-      {image && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Crop Image</h3>
-            <div
-              className="crop-container"
-              style={{ width: "100%", height: "400px", position: "relative" }}
-            >
-              <Cropper
-                image={image}
-                crop={crop}
-                zoom={zoom}
-                aspect={2 / 3} // Keep aspect ratio consistent
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={handleCropComplete}
+          <div className="border rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputtwo">
+              <img
+                src={images.image2 || "https://placehold.co/100x100"}
+                alt="product image"
+                className="mb-2"
               />
-            </div>
-            <button
-              onClick={saveCroppedImage}
-              className="mt-4 rounded bg-red-800 text-white p-3 ms-3 mb-5 "
-            >
-              Save Cropped Image
-            </button>
+            </label>
+            <input
+              id="fileInputtwo"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, "image2");
+                handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded">Change image</p>
+          </div>
+          <div className="border rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputThree">
+              <img
+                src={images.image3 || "https://placehold.co/100x100"}
+                alt="product image"
+                className="mb-2"
+              />
+            </label>
+            <input
+              id="fileInputThree"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, "image3");
+                handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded">Change image</p>
           </div>
         </div>
-      )}
-
+        {message.image && (
+          <p className="text-red-600 text-center">{message.image}</p>
+        )}
+      </div>
       <button
         className="bg-green-500 text-white p-4 rounded w-full flex justify-center"
         type="submit"
-        onClick={handleAddProduct}
+        // to="/admin/products"
+        onClick={(e) => handleAddproduct(e)}
       >
-        {spinner ? "Adding Product ..." : "Submit"}
+        Add Product
       </button>
     </form>
   );

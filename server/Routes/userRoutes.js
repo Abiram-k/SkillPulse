@@ -24,4 +24,5 @@ router.get('/auth/google/callback',
         res.redirect('http://localhost:5173/googleRedirect')
     });
 router.get("/products",verifyUser,isBlocked, userController.getProducts);
+router.get("/getSimilarProduct/:id",userController.getSimilarProduct);
 module.exports = router;

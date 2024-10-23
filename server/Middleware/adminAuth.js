@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 exports.verifyAdmin = async (req, res, next) => {
-    const token = req.cookies.adminToken;
+    // const token = req.cookies.adminToken;
     if (token) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRETE);

@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  details: [],
-  user: JSON.parse(localStorage.getItem("userData") || null),
+  details: JSON.parse(localStorage.getItem("productDetails")) || [], // Initialize as an empty array
+  user: JSON.parse(localStorage.getItem("userData")) || null,
 };
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -13,11 +14,14 @@ const userSlice = createSlice({
       localStorage.setItem("userData", JSON.stringify(action.payload));
     },
     setProductDetails: (state, action) => {
+      // Store one product at a time as an array
       state.details = [action.payload];
+      localStorage.setItem("productDetails", JSON.stringify(state.details)); // Persist updated array
     },
-    logoutUser: (state, action) => {
+    logoutUser: (state) => {
       state.user = null;
-      state.user = localStorage.removeItem("userData");
+      localStorage.removeItem("userData");
+      localStorage.removeItem("productDetails");
     },
   },
 });

@@ -209,15 +209,29 @@ exports.login = async (req, res) => {
 exports.getProducts = async (req, res) => {
     try {
         let isBlocked = req.body.isBlocked || false;
-        console.log(isBlocked)
+        // console.log(isBlocked)
         const products = await Product.find().populate("category");
         const product = await Product.find().select("name category");
 
-        console.log(product);
+        // console.log(product);
         const category = await Category.find()
 
         return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
     } catch (error) {
         return res.status(500).json({ message: "Failed To Fetch Product Data" })
+    }
+}
+
+exports.getSimilarProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const productData = await Product.findById(id);
+        const similarProducts = await Product.find({ category: productData?.category })
+        if (similarProducts.length === 0)
+            return res.status(404).json({ message: "No Similar products were founded !" })
+        return res.status(200).json({ message: "Product fetched successfully", similarProducts });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message || "Server error" });
     }
 }
