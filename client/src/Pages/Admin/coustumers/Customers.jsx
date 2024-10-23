@@ -7,7 +7,7 @@ const Customers = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(5);
-
+  const [slno, setSlNo] = useState(0);
   useEffect(() => {
     (async () => {
       try {
@@ -32,7 +32,8 @@ const Customers = () => {
   const handleblocking = async (id) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/admin/block/${id}`
+        `http://localhost:3000/admin/block/${id}`,
+        { withCredentials: true }
       );
       if (response.data.user.isBlocked) {
         Swal.fire({
@@ -120,7 +121,6 @@ const Customers = () => {
                   <th className="bg-orange-500 text-white p-2">
                     Block/Unblock
                   </th>
-                  {/* <th className="bg-orange-500 text-white p-2">Update</th> */}
                 </tr>
               </thead>
               <tbody className="font-sans">
@@ -185,8 +185,6 @@ const Customers = () => {
                     </td>
                   </tr>
                 )}
-
-                {/* Add more rows here */}
               </tbody>
             </table>
             <Pagination

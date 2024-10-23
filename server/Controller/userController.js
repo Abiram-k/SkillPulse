@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { error } = require('console');
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
+const { isBlocked } = require('../Middleware/isBlockedUser');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
@@ -66,9 +67,13 @@ The [SkillPulse] Team`,
 exports.signUp = async (req, res) => {
     console.log("hello signup clicked from backend")
     const { firstName, email } = req.body;
-    const otpExpiry = 30;
 
-    const existingUser = await User.findOne({ email });
+    // const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+        email:
+            { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
+    })
+
     if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
     } else {
@@ -161,9 +166,15 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log(email, password);
-        const user = await User.findOne({ email });
+        // const user = await User.findOne({ email });
+        const user = await User.findOne({
+            email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
+        });
         console.log(user);
-        if (user) {
+        if (!user) {
+            return res.status(400).json({ message: "User not found !" });
+        }
+        else {
             const isValidPassword = await bcrypt.compare(password, user.password);
             if (!isValidPassword) {
                 return res.status(400).json({ message: "Password is incorrect" });
@@ -184,9 +195,7 @@ exports.login = async (req, res) => {
                     });
                 return res.status(200).json({ message: "Successfully Logged in", user });
             }
-        }
-        else {
-            return res.status(400).json({ message: "User not found !" });
+
         }
     } catch (error) {
         console.log(error);
@@ -199,9 +208,15 @@ exports.login = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
     try {
+        let isBlocked = req.body.isBlocked || false;
+        console.log(isBlocked)
         const products = await Product.find().populate("category");
+        const product = await Product.find().select("name category");
+
+        console.log(product);
         const category = await Category.find()
-        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category })
+
+        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
     } catch (error) {
         return res.status(500).json({ message: "Failed To Fetch Product Data" })
     }

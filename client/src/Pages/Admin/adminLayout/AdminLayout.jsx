@@ -1,7 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import {
   Menu,
   Bell,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { logoutAdmin } from "../../../redux/adminSlice";
 
 // Sample data for the chart
 const chartData = Array.from({ length: 12 }, (_, i) => ({
@@ -31,7 +31,6 @@ const recentSales = [
   { id: 3, name: "Amy", amount: "₹45,922.00", time: "15 minutes ago" },
   { id: 4, name: "James B", amount: "₹61,231.00", time: "30 minutes ago" },
   { id: 5, name: "Megan Markle", amount: "₹263,099.00", time: "5 minutes ago" },
-  // Add more sales data as needed
 ];
 
 export default function Dashboard() {
@@ -39,7 +38,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex bg-slate-200">
-      {/* Hamburger Menu for Small Screens */}
       <button
         className="fixed top-4 left-4 z-20 text-black md:hidden"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -88,9 +86,8 @@ export default function Dashboard() {
             {/* <div className="absolute bottom-0 w-full p-4 space-y-2 bg-slate-200"> */}
             <div>
               <NavItem icon={Settings} text="Settings" redirect="settings" />
-              <NavItem icon={LogOut} text="Logout" redirect="/admin" />
+              <NavItem icon={LogOut} text="Logout" redirect="/admin/login" />
             </div>
-            {/* </div> */}
           </nav>
         </div>
       </aside>
@@ -116,21 +113,23 @@ export default function Dashboard() {
 // Helper Components
 function NavItem({ icon: Icon, text, active, redirect }) {
   const dispatch = useDispatch();
-  if (text === "logout")
-    dispatch()
-    return (
-      <>
-        <Link
-          to={redirect}
-          className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
-            active
-              ? "bg-gray-800 text-white"
-              : "hover:bg-gray-800 hover:text-white"
-          }`}
-        >
-          <Icon className="h-5 w-5" />
-          <span>{text}</span>
-        </Link>
-      </>
-    );
+  const handleLogout = () => {
+    dispatch(logoutAdmin());
+  };
+  return (
+    <>
+      <Link
+        to={redirect}
+        onClick={text == "Logout" && handleLogout}
+        className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+          active
+            ? "bg-gray-800 text-white"
+            : "hover:bg-gray-800 hover:text-white"
+        }`}
+      >
+        <Icon className="h-5 w-5" />
+        <span>{text}</span>
+      </Link>
+    </>
+  );
 }

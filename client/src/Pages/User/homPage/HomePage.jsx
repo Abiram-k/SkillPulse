@@ -6,11 +6,12 @@ import { context } from "../../../Components/Provider";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setProductDetails } from "../../../redux/userSlice";
+import { logoutUser, setProductDetails } from "../../../redux/userSlice";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
+  const [isBlocked, setIsBlocked] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   console.log(
@@ -27,7 +28,17 @@ const HomePage = () => {
         console.log("product from homepage:", products);
         setProducts(response.data.products);
         setCategory(response.data.category);
+
+        if (response.data.isBlocked) {
+          setIsBlocked(true);
+          navigate("/login");
+        }
       } catch (error) {
+        if (error?.response.data.isBlocked) {
+          setIsBlocked(true);
+          navigate("/login");
+        }
+
         Toast.fire({
           icon: "error",
           title: `${error?.response?.data.message}`,
@@ -36,9 +47,14 @@ const HomePage = () => {
       }
     })();
   }, []);
+
+  // useEffect(() => {
+  //   navigate("/login");
+  // }, [isBlocked, dispatch]);
+
   const goToDetails = (product) => {
-    // setData(product);
     dispatch(setProductDetails(product));
+    console.log("productDetails :", product);
     navigate("/user/productDetails");
   };
 

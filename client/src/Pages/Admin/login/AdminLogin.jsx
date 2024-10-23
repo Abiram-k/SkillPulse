@@ -1,8 +1,7 @@
 import React from "react";
 import loginImage from "../../../assets/login-image.jpg";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { addUser } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
 import axios from "axios";
@@ -50,7 +49,6 @@ const AdminLogin = () => {
       );
       if (response.status === 200) {
         dispatch(addAdmin(response.data.adminData));
-        alert("hello");
         setMessage({ response: response?.data?.message });
         navigate("dashboard");
       }

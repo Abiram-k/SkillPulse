@@ -69,14 +69,13 @@ const EditProduct = () => {
     return error;
   };
 
-  
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
     if (imageFile) {
       const imageUrl = URL.createObjectURL(imageFile);
       setImages((prevImages) => ({
         ...prevImages,
-        [field]: imageUrl, 
+        [field]: imageUrl,
       }));
       setProductImage((prevImages) => {
         const fieldIndex = field === "image1" ? 0 : field === "image2" ? 1 : 2;
@@ -90,7 +89,6 @@ const EditProduct = () => {
       });
     }
   };
-
 
   // const handleProductImageChange = (e) => {
   //   const imageFile = e.target.files[0];
@@ -129,6 +127,7 @@ const EditProduct = () => {
             headers: {
               "Content-Type": "multipart/form-data",
             },
+            withCredentials: true,
           }
         );
         // alert("hello");

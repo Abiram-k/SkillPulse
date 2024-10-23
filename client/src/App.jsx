@@ -23,6 +23,8 @@ import AccountOverview from "./Pages/User/accountOverview/accountOverview";
 import GoogleAuthComponent from "./Pages/User/googleAuthComponent/googleAuthComponent";
 import Shop from "./Pages/User/shop/Shop";
 import SearchProducts from "./Pages/User/searchProducts/SearchProducts";
+import ProtectedAuthAdmin from "./Protected/ProtectedAuthAdmin";
+import ProtectedDashboardAdmin from "./Protected/ProtectedDashboard";
 function App() {
   return (
     <>
@@ -73,7 +75,6 @@ function App() {
           >
             <Route path="search" element={<SearchProducts />} />
 
-
             <Route
               path="home"
               element={
@@ -103,45 +104,86 @@ function App() {
             <Route path="profile" element={<AccountOverview />} />
           </Route>
 
-          <Route path="admin/login" element={<AdminLogin />} />
-
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="customers" element={<Customers />} />
+          <Route
+            path="admin/login"
+            element={
+              <ProtectedAuthAdmin>
+                <AdminLogin />
+              </ProtectedAuthAdmin>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedDashboardAdmin>
+                <AdminLayout />
+              </ProtectedDashboardAdmin>
+            }
+          >
+            <Route
+              path="dashboard"
+              element={
+                <ProtectedDashboardAdmin>
+                  <Dashboard />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
+              path="customers"
+              element={
+                <ProtectedDashboardAdmin>
+                  <Customers />
+                </ProtectedDashboardAdmin>
+              }
+            />
             <Route
               path="products"
               element={
-                <Provider>
-                  <Products />
-                </Provider>
+                <ProtectedDashboardAdmin>
+                  <Provider>
+                    <Products />
+                  </Provider>
+                </ProtectedDashboardAdmin>
               }
             />
-            <Route path="products/add" element={<AddProduct />} />
+            <Route
+              path="products/add"
+              element={
+                <ProtectedDashboardAdmin>
+                  <AddProduct />
+                </ProtectedDashboardAdmin>
+              }
+            />
             <Route
               path="products/edit"
               element={
-                <Provider>
-                  <EditProduct />
-                </Provider>
+                <ProtectedDashboardAdmin>
+                  <Provider>
+                    <EditProduct />
+                  </Provider>
+                </ProtectedDashboardAdmin>
               }
             />
             <Route
               path="category"
               element={
-                <Provider>
-                  <Category />
-                </Provider>
+                <ProtectedDashboardAdmin>
+                  <Provider>
+                    <Category />
+                  </Provider>
+                </ProtectedDashboardAdmin>
               }
             />
             <Route
               path="category/edit"
               element={
-                <Provider>
-                  <EditCategory />
-                </Provider>
+                <ProtectedDashboardAdmin>
+                  <Provider>
+                    <EditCategory />
+                  </Provider>
+                </ProtectedDashboardAdmin>
               }
             />
-            {/* </Provider> */}
           </Route>
         </Routes>
       </Router>

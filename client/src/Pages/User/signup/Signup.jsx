@@ -65,20 +65,21 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-   
+
     try {
       const formErrors = formValidate();
       console.log("FormErrors: ", formErrors);
+      setSpinner(true);
       if (Object.keys(formErrors).length > 0) {
         setMessage(formErrors);
         return;
-      }else{
-        setSpinner(true);
-        setTimeout(() => {
-          setSpinner(false);
-        }, 3000);
       }
+      // else{
+      //   setSpinner(true);
+      //   setTimeout(() => {
+      //     setSpinner(false);
+      //   }, 3000);
+      // }
       console.log(message);
       //   if (message) {
       //     notification.style.display = "block";
@@ -98,18 +99,17 @@ const Signup = () => {
           withCredentials: true,
         }
       );
-      
+
+      setSpinner(false);
       console.log("Response data is:", response.data);
       if (response.status === 200) {
         navigate("/otp");
         setMessage({ success: response.data.message });
-
       }
     } catch (error) {
+      setSpinner(false);
       setMessage({ serverError: error?.response?.data.message });
       console.log(error);
-      setSpinner(true);
-
     }
   };
   const handleGoogleAuth = () => {

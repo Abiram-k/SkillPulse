@@ -1,17 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  admin: null,
+  admin: JSON.parse(localStorage.getItem("adminData") || null),
 };
 const adminSlice = createSlice({
-  name: "admins",
+  name: "admin",
   initialState,
   reducers: {
     addAdmin: (state, action) => {
       state.admin = action.payload;
+      localStorage.setItem("adminData", JSON.stringify(action.payload));
     },
     logoutAdmin: (state, action) => {
       state.admin = null;
+      localStorage.removeItem("adminData");
     },
   },
 });

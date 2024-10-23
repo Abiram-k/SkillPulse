@@ -20,6 +20,15 @@ exports.login = async (req, res) => {
         if (!isMatch)
             return res.status(400).json({ message: "Check the password" })
 
+        const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRETE, { expiresIn: '1h' });
+        res.cookie('adminToken',
+            token,
+            {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'Lax',
+                maxAge: 36000000
+            });
         const adminData = {
             email, password
         }
@@ -256,11 +265,12 @@ exports.editProduct = async (req, res) => {
                 productImage.push(file);
             }
         }
-        console.log("helllooooo req got !!!")
-
-        const existProduct = await Product.findOne({ productName, _id: { $ne: id } });
-
-        const categoryDoc = await Category.findOne({ name: category })
+        console.log("id:", id)
+        const existProduct = await Product.findOne({
+            productName: { $regex: new RegExp(`^${productName}$`), $options: 'i' },
+            _id: { $ne: id }
+        });
+        const categoryDoc = await Category.findOne({ name: { $regex: new RegExp(`^${category}$`, 'i') } })
         if (!categoryDoc)
             return res.status(400).json({ message: "Category not existing" });
         if (existProduct) {

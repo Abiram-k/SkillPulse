@@ -18,5 +18,4 @@ router.put("/editProduct/:id", uploadImage.array("file"), verifyAdmin, adminCont
 router.post("/addProduct", uploadImage.array("file"), verifyAdmin, adminController.addProduct);
 router.get("/getProduct", adminController.getProduct);
 router.post("/handleProductListing/:id", verifyAdmin, adminController.handleProductListing);
-
 module.exports = router; 

@@ -5,7 +5,11 @@ import "./otp.css";
 import { useNavigate } from "react-router-dom";
 
 function Otp() {
-  const [timer, setTimer] = useState(5); // Initial timer
+  const [timer, setTimer] = useState(
+    localStorage.getItem("otpTimer")
+      ? Number(localStorage.getItem("otpTimer"))
+      : 60
+  );
   const [otp, setOtp] = useState(0);
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
@@ -16,27 +20,34 @@ function Otp() {
   const navigate = useNavigate();
 
   // Timer countdown with reset capability
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer((t) => {
-        if (t > 0) {
-          return t - 1;
-        } else {
-          setResendOtp(true); // Allow resend OTP when time is up
-          return 0;
-        }
-      });
-    }, 1000);
+  useEffect(
+    () => {
+      const interval = setInterval(() => {
+        setTimer((t) => {
+          if (t > 0) {
+            const updatedTime = t - 1;
+            localStorage.setItem("otpTimer", updatedTime);
+            return updatedTime;
+          } else {
+            setResendOtp(true); // Allow resend OTP when time is up
+            return 0;
+          }
+        });
+      }, 1000);
 
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-    }, 30 * 1000); // End after 30 seconds
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+      }, 30 * 1000); // End after 30 seconds
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, [resetKey]); // Reset timer when resetKey changes
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    },
+    [
+      // resetKey
+    ]
+  ); // Reset timer when resetKey changes
 
   const handleOtpChange = (value) => {
     setOtp(value);
@@ -65,10 +76,8 @@ function Otp() {
     // setTimeout(() => {
     //   setSpinner(false);
     // }, 2000);
-    
-    setTimer(5); // Reset timer to initial value
-    setResendOtp(false); // Disable resend button during countdown
-    setResetKey((prevKey) => prevKey + 1); // Trigger useEffect to reset timer
+    setTimer(60); 
+    setResendOtp(false);
 
     try {
       const response = await axios.post(
@@ -79,7 +88,7 @@ function Otp() {
       setSpinner(false);
       setMessage({ success: response.data.message });
     } catch (error) {
-            setSpinner(false);
+      setSpinner(false);
       if (error.response.status === 400) {
         setMessage({ serverError: error.response.data.message });
       }
@@ -121,13 +130,19 @@ function Otp() {
         </div>
       )}
 
-      <h1 className="text-white text-6xl font-bold mb-10" style={{ fontFamily: "Orbitron, sans-serif" }}>
+      <h1
+        className="text-white text-6xl font-bold mb-10"
+        style={{ fontFamily: "Orbitron, sans-serif" }}
+      >
         SKILL PULSE
       </h1>
-      <div className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3" style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}>
+      <div
+        className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3"
+        style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}
+      >
         <h2 className="text-2xl font-bold mb-2">OTP Verification</h2>
         <p className="mb-6">Enter the OTP to confirm</p>
-        
+
         {input || timer ? (
           <div className="flex items-center justify-end space-x-3 mb-4 text-white">
             <OtpInput
