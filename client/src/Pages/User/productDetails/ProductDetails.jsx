@@ -1,18 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Star, Heart } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { setProductDetails } from "../../../redux/userSlice";
 
 const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [productData, setProductData] = useState([]);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [error, setError] = useState(null);
   const [magnifierVisible, setMagnifierVisible] = useState(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
-
+  const dispatch = useDispatch();
   const product = useSelector((state) => state.users.details);
-  console.log(product[0]._id, "product id");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/getSimilarProduct/${product[0]._id}`
+        );
+        setSimilarProducts(response.data.similarProducts);
+      } catch (error) {
+        setError("Failed to load similar products. Please try again later.");
+        if (error.response?.status === 404)
+          setError(error?.response?.data?.message);
+        console.error(error);
+      }
+    })();
+  }, [product]);
 
   const reviews = [
     {
@@ -38,36 +53,31 @@ const ProductDetails = () => {
     },
   ];
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/getSimilarProduct/${product[0]._id}`
-        );
-        setSimilarProducts(response.data.similarProducts);
-      } catch (error) {
-        setError("Failed to load similar products. Please try again later.");
-        if (error.response.status === 404)
-          setError(error?.response?.data?.message);
+  // Memoize mouse enter/leave and move handlers to prevent re-creation on each render
+  const handleMouseEnter = useCallback(() => setMagnifierVisible(true), []);
+  const handleMouseLeave = useCallback(() => setMagnifierVisible(false), []);
 
-        console.error(error);
+  const handleMouseMove = useCallback(
+    (e) => {
+      const { left, top } = e.target.getBoundingClientRect();
+      const x = e.clientX - left;
+      const y = e.clientY - top;
+
+      if (
+        Math.abs(x - magnifierPosition.x) > 5 ||
+        Math.abs(y - magnifierPosition.y) > 5
+      ) {
+        setMagnifierPosition({ x, y });
       }
-    })();
-  }, [product]);
+    },
+    [magnifierPosition.x, magnifierPosition.y]
+  );
 
-  const handleMouseEnter = () => setMagnifierVisible(true);
-  const handleMouseLeave = () => setMagnifierVisible(false);
-  const handleMouseMove = (e) => {
-    const { left, top } = e.target.getBoundingClientRect();
-    const x = e.clientX - left;
-    const y = e.clientY - top;
-    setMagnifierPosition({ x, y });
-  };
+  const gotoDetails = (product) => dispatch(setProductDetails(product));
 
   return (
     <div className="min-h-screen bg-black text-white">
       <main className="container mx-auto px-4 py-8">
-        {/* {error && <div className="text-red-500">{error}</div>} */}
         {product.length === 0 ? (
           <div>Loading...</div>
         ) : (
@@ -91,15 +101,15 @@ const ProductDetails = () => {
                         ""
                       }
                       alt="Product"
-                      className="w-full h-64 object-cover rounded-lg"
+                      className="w-full h-72 object-cover rounded-lg"
                     />
                     {magnifierVisible && (
                       <div
-                        className="absolute border-2 border-white rounded-full pointer-events-none"
+                        className="absolute rounded pointer-events-none"
                         style={{
                           left: `${magnifierPosition.x}px`,
                           top: `${magnifierPosition.y}px`,
-                          width: "300px", // Increased size of zoomed preview
+                          width: "300px",
                           height: "300px",
                           backgroundImage: `url(${
                             product.productImage[selectedImage] ||
@@ -108,7 +118,7 @@ const ProductDetails = () => {
                           backgroundPosition: `-${
                             magnifierPosition.x * 1.2
                           }px -${magnifierPosition.y * 1.2}px`,
-                          backgroundSize: "400%", // Increased background size for better zoom effect
+                          backgroundSize: "400%",
                         }}
                       />
                     )}
@@ -119,7 +129,7 @@ const ProductDetails = () => {
                         key={idx}
                         src={img}
                         alt={`Thumbnail ${idx + 1}`}
-                        className={`w-20 h-20 rounded cursor-pointer ${
+                        className={`w-20 h-20 rounded cursor-pointer  ${
                           selectedImage === idx
                             ? "border-2 border-blue-500"
                             : ""
@@ -132,8 +142,13 @@ const ProductDetails = () => {
               </div>
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-sm text-gray-400">{product.brand}</h2>
+                  <h2 className="text-sm text-gray-400">
+                    {"Brand not added" || product.brand}
+                  </h2>
                   <h1 className="text-xl font-bold">{product.productName}</h1>
+                  <p className="text-l font-semi-bold">
+                    {product.productDescription}
+                  </p>
                 </div>
                 <div className="flex items-baseline space-x-4">
                   <span className="text-2xl font-bold text-green-500">
@@ -146,6 +161,11 @@ const ProductDetails = () => {
                     {product.discount || 99}% off
                   </span>
                 </div>
+                  <h6 className="text-orange-500 text-sm font-sans">
+                    {product.units
+                      ? product.units + " Stocks left"
+                      : "Out of stock"}
+                  </h6>
                 <div className="flex items-center space-x-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
@@ -171,7 +191,7 @@ const ProductDetails = () => {
           <h2 className="text-2xl font-bold mb-8">Similar Products</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {similarProducts
-              .filter((product) => product._id !== productData[0]?._id)
+              .filter((product) => product._id !== product[0]?._id)
               .map((product) => (
                 <div
                   key={product._id}
@@ -182,6 +202,7 @@ const ProductDetails = () => {
                     src={product.productImage[0]}
                     alt={product.productName}
                     className="w-full h-48 object-contain mb-4"
+                    onClick={() => gotoDetails(product)}
                   />
                   <div className="space-y-2">
                     <h3 className="text-sm text-gray-400">{product.brand}</h3>
@@ -218,6 +239,7 @@ const ProductDetails = () => {
                       fill={star <= review.rating ? "currentColor" : "none"}
                     />
                   ))}
+                  //{" "}
                 </div>
                 <p className="mt-2">{review.comment}</p>
                 <p className="text-gray-400 text-sm mt-1">
@@ -233,3 +255,5 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
+
+// export default ProductDetails;

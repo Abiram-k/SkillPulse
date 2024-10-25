@@ -3,20 +3,23 @@ import OtpInput from "./otpInputBox";
 import axios from "axios";
 import "./otp.css";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { otpSuccess } from "../../../redux/userSlice";
 
 function Otp() {
   const [timer, setTimer] = useState(
-    localStorage.getItem("otpTimer")
-      ? Number(localStorage.getItem("otpTimer"))
-      : 60
+    // localStorage.getItem("otpTimer")
+      // ? Number(localStorage.getItem("otpTimer"))
+      // :
+       60
   );
-  const [otp, setOtp] = useState(0);
+  const [otp, setOtp] = useState(60);
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
   const [spinner, setSpinner] = useState(false);
   const [input, setInput] = useState(false);
   const [resetKey, setResetKey] = useState(0); // Key to reset useEffect
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // Timer countdown with reset capability
@@ -61,6 +64,7 @@ function Otp() {
         { withCredentials: true }
       );
       if (response.status === 200) {
+        dispatch(otpSuccess());
         navigate("/login");
       }
     } catch (error) {
@@ -73,10 +77,7 @@ function Otp() {
   const handleResendOtp = async () => {
     setInput(true);
     setSpinner(true);
-    // setTimeout(() => {
-    //   setSpinner(false);
-    // }, 2000);
-    setTimer(60); 
+    setTimer(60);
     setResendOtp(false);
 
     try {

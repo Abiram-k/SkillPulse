@@ -65,14 +65,14 @@ export default function Dashboard() {
         } md:translate-x-0 md:block`}
       >
         <div className="p-4 bg-slate-300">
-          <h1 className="text-2xl font-bold mb-8">SkillPulse</h1>
+          <button className="text-2xl font-bold mb-8">SkillPulse</button>
           <nav className="lg:space-y-24 flex flex-col ">
             <div className="flex flex-col lg:space-y-3">
               <NavItem icon={Menu} text="Dashboard" redirect="dashboard" />
               <NavItem
                 icon={Users}
                 text="Customers"
-                active
+                // active
                 redirect="customers"
               />
               <NavItem icon={Package} text="Products" redirect="products" />

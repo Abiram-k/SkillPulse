@@ -25,10 +25,13 @@ import Shop from "./Pages/User/shop/Shop";
 import SearchProducts from "./Pages/User/searchProducts/SearchProducts";
 import ProtectedAuthAdmin from "./Protected/ProtectedAuthAdmin";
 import ProtectedDashboardAdmin from "./Protected/ProtectedDashboard";
+import ProtectedOtp from "./Protected/ProtectOtp";
+import Breadcrumbs from "./Components/Breadcrumbs";
 function App() {
   return (
     <>
       <Router>
+        <Breadcrumbs />
         <Routes>
           <Route path="/googleRedirect" element={<GoogleAuthComponent />} />
           <Route
@@ -51,9 +54,11 @@ function App() {
           <Route
             path="/otp"
             element={
-              <ProtectAuthUser>
-                <Otp />
-              </ProtectAuthUser>
+              <ProtectedOtp>
+                <ProtectAuthUser>
+                  <Otp />
+                </ProtectAuthUser>
+              </ProtectedOtp>
             }
           />
 

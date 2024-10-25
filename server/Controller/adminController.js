@@ -6,6 +6,7 @@ const User = require("../models/userModel");
 const Admin = require("../models/adminModel");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
+const mongoose = require("mongoose")
 const { listenerCount } = require("process");
 
 exports.login = async (req, res) => {
@@ -68,7 +69,7 @@ exports.addCategory = async (req, res) => {
     try {
         let { name, description } = req.body;
         console.log(req.file)
-        const image = req.file.path;
+        const image = req.file?.path;
         console.log(name, description);
         if (!description) {
             description = undefined;
@@ -98,7 +99,6 @@ exports.addCategory = async (req, res) => {
 
 exports.getCategory = async (req, res) => {
     try {
-        console.log("ksdhflkjadskjdnnnnnnnnnnnnnnnnnnnnnnnnnnnns")
         const categories = await Category.find({});
         if (categories) {
             return res.json({ message: "succesully fetched all category", categories });
@@ -111,12 +111,13 @@ exports.getCategory = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
     try {
-        const { id } = req.params;
-        // console.log("category id is:", id);
-
+        console.log(await Category.find());
+        let { id } = req.params;
+        // id =new mongoose.Types.ObjectId(id)
+        console.log("category id is:", id);
         const deletedCategory = await Category.
             findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
-
+        console.log(deletedCategory)
         if (deletedCategory)
             return res.status(200).json({ message: "Category successfully deleted" });
     } catch (error) {
@@ -142,20 +143,28 @@ exports.categoryRestore = async (req, res) => {
 exports.editCategory = async (req, res) => {
     try {
         let { id, name, description } = req.body;
-        // console.group(id, name, description);
-        if (!description) { 
+        // const objectId = new mongoose.Types.ObjectId(id);
+        if (!description) {
             description = undefined;
         }
-        const image = req.file?.path;
         const isExistcategory = await Category.findOne({ name, _id: { $ne: id } });
-        if (isExistcategory)
+        if (isExistcategory) {
             return res.status(400).json({ message: "Category already exists" });
-        await Category.findByIdAndUpdate(id, { name, description, image });
-        return res.status(200).json({ message: "Successfully edited the category" })
+        }
+        const updateData = { name };
+        if (description) updateData.description = description;
+        if (req.file?.path) updateData.image = req.file.path;
+
+        const updatedCategory = await Category.findByIdAndUpdate(id, updateData, { new: true });
+
+        return res.status(200).json({
+            message: "Successfully edited the category",
+            updatedCategory,
+        });
     } catch (error) {
-        return res.status(500).json({ message: error.message || "category not edited" })
+        return res.status(500).json({ message: error.message || "Category not edited" });
     }
-}
+};
 
 exports.listCategory = async (req, res) => {
     try {
@@ -163,7 +172,7 @@ exports.listCategory = async (req, res) => {
         const { id } = req.params;
         const category = await Category.findById(id);
         console.log(category);
-        category.isListed = !category.isListed
+        category.isListed = !category?.isListed
         category.save();
         return res.status(200).json({ message: "success", category })
     } catch (error) {
@@ -220,7 +229,7 @@ exports.addProduct = async (req, res) => {
                 salesPrice,
                 regularPrice,
                 units,
-                category: categoryDoc._id,
+                category: categoryDoc,
                 brand,
                 productImage
             });
@@ -294,6 +303,36 @@ exports.editProduct = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: error.message || "Error occurred while adding product" })
+    }
+}
+
+exports.deleteProduct = async (req, res) => {
+    try {
+        let { id } = req.params;
+        console.log("product id is:", id);
+        const deletedProduct = await Product.
+            findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
+        console.log(deletedProduct)
+        if (deletedProduct)
+            return res.status(200).json({ message: "Product successfully deleted" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "failed to delete Product" });
+    }
+}
+
+exports.restoreProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("product id is:", id);
+        const RestoredProduct = await Product.
+            findByIdAndUpdate({ _id: id }, { isDeleted: false, deletedAt: null });
+
+        if (RestoredProduct)
+            return res.status(200).json({ message: "product successfully Restored" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "failed to Restore product" });
     }
 }
 

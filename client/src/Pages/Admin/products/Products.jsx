@@ -5,6 +5,7 @@ import axios from "axios";
 import { context } from "../../../Components/Provider";
 import { useContext, useRef } from "react";
 import Pagination from "../../../Components/Pagination";
+import { Toast } from "../../../Components/Toast";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -37,7 +38,7 @@ function Products() {
       }
     })();
     searchFocus.current.focus();
-  },[]);
+  }, [products]);
 
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
@@ -74,9 +75,57 @@ function Products() {
       );
     } catch (error) {
       console.log(error);
-      alert(error?.response?.data.message || "Error occured at line 115");
+      alert(error?.response?.data.message || "error admin/product");
     }
   };
+  const handleDelete = async (id) => {
+    const result = confirm("Are you sure to delete this product");
+    try {
+      if (result) {
+        const response = await axios.put(
+          `http://localhost:3000/admin/productDelete/${id}`,
+          {},
+          { withCredentials: true }
+        );
+        Toast.fire({
+          icon: "success",
+          title: `${response.data.message}`,
+        });
+      } else {
+        Toast.fire({
+          icon: "success",
+          title: `Cancelled the deletion`,
+        });
+      }
+    } catch (error) {
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    }
+  };
+  const handleRestore = async (id) => {
+    const result = confirm("Are you sure to restore categorie");
+    try {
+      if (result) {
+        const response = await axios.put(
+          `http://localhost:3000/admin/productRestore/${id}`,
+          {},
+          { withCredentials: true }
+        );
+        Toast.fire({
+          icon: "success",
+          title: `${response.data.message}`,
+        });
+      }
+    } catch (error) {
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    }
+  };
+
   return (
     <>
       <Link
@@ -154,13 +203,33 @@ function Products() {
                   .map((product, index) => (
                     <tr className="border-b" key={index}>
                       <td className="p-2">{index + 1}</td>
-                      <td className="p-2">{product.productName}</td>
-                      <td className="p-2">
-                        {product.category?.name || "not Fetched"}
-                      </td>
-                      <td className="p-2">{product.productDescription}</td>
-                      <td className="p-2">{product.salesPrice}</td>
-                      <td className="p-2">{product.units}</td>
+                      {product.isDeleted ? (
+                        <>
+                          <td className="p-2 line-through">
+                            {product.productName}
+                          </td>
+                          <td className="p-2 line-through">
+                            {product.category?.name || "not Fetched"}
+                          </td>
+                          <td className="p-2 line-through">
+                            {product.productDescription}
+                          </td>
+                          <td className="p-2 line-through">
+                            {product.salesPrice}
+                          </td>
+                          <td className="p-2 line-through">{product.units}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="p-2 ">{product.productName}</td>
+                          <td className="p-2 ">
+                            {product.category?.name || "not Fetched"}
+                          </td>
+                          <td className="p-2 ">{product.productDescription}</td>
+                          <td className="p-2 ">{product.salesPrice}</td>
+                          <td className="p-2 ">{product.units}</td>
+                        </>
+                      )}
                       <td className="p-2">
                         <img
                           src={
@@ -171,23 +240,40 @@ function Products() {
                           className="w-12 h-12 object-cover mx-auto"
                         />
                       </td>
-                      <td className="p-2 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 align-middle justify-center">
-                        <Link to="edit">
+                      <td className="p-2 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 align-middl justify-center relative">
+                        {!product.isDeleted && (
+                          <Link to="edit">
+                            <i
+                              className="fas fa-edit mr-2"
+                              onClick={() => sendDataToEdit(product)}
+                            ></i>
+                          </Link>
+                        )}
+                        {!product.isDeleted && (
+                          <button
+                            className={
+                              product.isListed
+                                ? "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22  font-mono"
+                                : "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17 font-mono"
+                            }
+                            onClick={() => handleListing(product._id)}
+                          >
+                            {product.isListed ? "Unlist" : "List"}
+                          </button>
+                        )}
+                        {product.isDeleted ? (
+                          <button
+                            onClick={() => handleRestore(product._id)}
+                            className="rounded bg-green-600 p-2  font-mono "
+                          >
+                            Restore
+                          </button>
+                        ) : (
                           <i
-                            className="fas fa-edit mr-2"
-                            onClick={() => sendDataToEdit(product)}
+                            className="fas fa-trash-alt top-5 right-0 absolute"
+                            onClick={() => handleDelete(product._id)}
                           ></i>
-                        </Link>
-                        <button
-                          className={
-                            product.isListed
-                              ? "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22  font-mono"
-                              : "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17 font-mono"
-                          }
-                          onClick={() => handleListing(product._id)}
-                        >
-                          {product.isListed ? "Unlist" : "List"}
-                        </button>
+                        )}
                       </td>
                     </tr>
                   ))

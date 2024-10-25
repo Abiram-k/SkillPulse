@@ -8,6 +8,7 @@ import axios from "axios";
 const LandingPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -15,13 +16,16 @@ const LandingPage = () => {
     dispatch(setProductDetails(product));
     navigate("/user/productDetails");
   };
-  
+
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("http://localhost:3000/products");
-        console.log(response.data);
+        const response = await axios.get("http://localhost:3000/products", {
+          withCredentials: true,
+        });
+        console.log("fdsfasdfasdf", response.data.products);
         setProducts(response.data.products);
+        setCategories(response.data.category);
       } catch (error) {
         console.log(error.message);
       }
@@ -119,20 +123,25 @@ const LandingPage = () => {
       </section>
 
       <section className="flex flex-wrap justify-around py-8 bg-black border-gray-500 border-b-2 gap-6">
-        {products.length > 0 ? (
-          products.map((product) => (
-            <div
-              className="w-full sm:w-1/2 md:w-1/4 text-center mb-4"
-              key={product._id}
-            >
-              <img
-                src="https://placehold.co/150x150"
-                alt={product.category.description}
-                className="mx-auto"
-              />
-              <p className="text-white">{product.category.name}</p>
-            </div>
-          ))
+        {categories?.length > 0 ? (
+          categories.map(
+            (category) =>
+              category.isListed && (
+                <div
+                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  key={category._id}
+                >
+                  <img
+                    src={category.image || "https://placehold.co/150x150"}
+                    className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
+                    alt={category.name}
+                  />
+                  <p className="text-white text-sm md:text-base font-semibold">
+                    {category.name}
+                  </p>
+                </div>
+              )
+          )
         ) : (
           <>
             <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
@@ -164,10 +173,15 @@ const LandingPage = () => {
       </section>
 
       <section
-        className="py-8 bg-cover bg-center"
-        style={{ backgroundImage: `url(${productBanner})` }}
+        className="py-8 bg-cover bg-center mb-10"
+        style={{
+          backgroundImage: `url(${
+            "https://digitalalliance.co.id/wp-content/uploads/2021/05/banner-category-gaming-gear-accessories-stands.jpg" ||
+            productBanner
+          })`,
+        }}
       >
-        <div className="ps-12 bg-opacity-60 rounded-lg font-mono">
+        <div className="ps-12 bg-opacity-60  rounded-lg font-mono">
           <h2 className="text-3xl font-bold text-white">
             FireStrike Joystick – Unleash Precision Control
           </h2>
@@ -190,27 +204,39 @@ const LandingPage = () => {
         {products.length > 0 ? (
           products.map(
             (product) =>
-              product.isListed && (
-                <div className="bg-gray-800 p-4 rounded" key={product._id}>
+              product.isListed &&
+              !product.isDeleted && (
+                <div
+                  className="bg-gray-800 p-3 rounded shadow-lg transform hover:scale-105 transition-transform duration-300"
+                  key={product._id}
+                >
                   <img
                     src={
                       product.productImage[0] || "https://placehold.co/300x200"
                     }
                     alt={product.productDescription}
-                    className="w-full h-auto"
+                    className="w-full h-32 object-cover rounded cursor-pointer"
                     onClick={() => goToDetails(product)}
                   />
-                  <div className="mt-4">
-                    <h3 className="text-xl font-bold">{product.brand}</h3>
-                    <p>{product.productName}</p>
-                    <p className="text-lg font-bold">
+                  <div className="mt-2 text-center flex flex-col gap-3">
+                    {/* <h3 className="text-sm font-semibold text-white">
+                      {product.brand || }
+                    </h3> */}
+                    <p className="text-xs text-gray-300">
+                      {product.productName}
+                    </p>
+                    <p className="text-sm font-bold text-green-500">
                       ₹{product.salesPrice}
-                      <span className="line-through">
+                      <span className="line-through text-gray-400 ml-1">
                         ₹{product.regularPrice}
                       </span>
-                      20% off
+                      <span className="text-red-500 ml-1">20% off</span>
                     </p>
-                    <p>{product.salesPrice > 1000 ? "Free Delivery" : ""}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {product.salesPrice > 1000
+                        ? "Free Delivery"
+                        : "Delivery Charges Apply"}
+                    </p>
                   </div>
                 </div>
               )

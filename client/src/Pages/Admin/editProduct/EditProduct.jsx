@@ -1,13 +1,8 @@
-
-
 import React, { useContext, useEffect, useState } from "react";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
 import { context } from "../../../Components/Provider";
 import { useNavigate } from "react-router-dom";
-import Cropper from "react-easy-crop";
-import { getCroppedImg } from "../utils/cropImage";
-
 const EditProduct = () => {
   const [id, setId] = useState("");
   const [message, setMessage] = useState({});
@@ -19,12 +14,12 @@ const EditProduct = () => {
   const [salesPrice, setSalesPrice] = useState("");
   const [brand, setBrand] = useState("");
   const [units, setUnits] = useState("");
-  const [images, setImages] = useState({ image1: "", image2: "", image3: "" });
-  const [imageToCrop, setImageToCrop] = useState("");
-  const [croppedImage, setCroppedImage] = useState(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [currentField, setCurrentField] = useState(null);
+  const [productImage, setProductImage] = useState([]);
+  const [images, setImages] = useState({
+    image1: "",
+    image2: "",
+    image3: "",
+  });
 
   const navigate = useNavigate();
   const { data } = useContext(context);
@@ -32,47 +27,44 @@ const EditProduct = () => {
   useEffect(() => {
     setId(data?._id || "");
     setName(data?.productName || "");
-    setCategory(data?.category?.name || "");
+    setCategory(data?.category?.name || "Not fetched");
     setDescription(data?.productDescription || "");
     setRegularPrice(data?.regularPrice || "");
     setSalesPrice(data?.salesPrice || "");
     setBrand(data?.brand || "");
     setUnits(data?.units || "");
-    setImages({
-      image1: data?.productImage[0] || "",
-      image2: data?.productImage[1] || "",
-      image3: data?.productImage[2] || "",
-    });
+    setProductImage(data?.productImage || []);
   }, [data]);
 
+  const error = {};
   const validateForm = () => {
-    const error = {};
-    const salesPriceStr = String(salesPrice);
-    const regularPriceStr = String(regularPrice);
-    const unitsStr = String(units);
-    const salesPriceInt = Number(salesPriceStr);
-    const regularPriceInt = Number(regularPriceStr);
-    const unitsInt = Number(unitsStr);
-
-    if (!name.trim()) error.name = "Name is required *";
-    if (!category.trim()) error.category = "Category is required *";
-    if (!description.trim()) error.description = "Description is required *";
-    if (!regularPriceStr.trim())
-      error.regularPrice = "Regular price is required *";
+    const salesPriceInt = Number(salesPrice);
+    const regularPriceInt = Number(regularPrice);
+    const unitsInt = Number(units);
+    if (name.trim() === "") error.name = "Name is required *";
+    if (category.trim() === "") error.category = "Category is required *";
+    if (description.trim() === "")
+      error.description = "description is required *";
+    if (String(regularPrice).trim() === "")
+      error.regularPrice = "regularPrice is required *";
     else if (isNaN(regularPriceInt))
-      error.regularPrice = "Regular price must be a number *";
+      error.regularPrice = "regular price must a number";
 
-    if (!salesPriceStr.trim()) error.salesPrice = "Sales price is required *";
-    else if (regularPriceInt < salesPriceInt)
+    if (String(salesPrice).trim() === "")
+      error.salesPrice = "salesPrice is required *";
+    else if (regularPrice < salesPrice)
       error.salesPrice =
         "Sales price must be less than or equal to regular price *";
     else if (isNaN(salesPriceInt))
-      error.salesPrice = "Sales price must be a number *";
+      error.salesPrice = "Sales price must a number";
 
-    if (!brand.trim()) error.brand = "Brand is required *";
+    if (brand.trim() === "") error.brand = "brand is required *";
+    if (String(units).trim() === "") error.units = "units is required *";
+    else if (isNaN(unitsInt)) error.units = "Units  must a number";
 
-    if (!unitsStr.trim()) error.units = "Units are required *";
-    else if (isNaN(unitsInt)) error.units = "Units must be a number *";
+    // if (Object.values(images).some((value) => !value)) {
+    //   error.image = "Upload at least three images *";
+    // }
 
     return error;
   };
@@ -81,50 +73,38 @@ const EditProduct = () => {
     const imageFile = e.target.files[0];
     if (imageFile) {
       const imageUrl = URL.createObjectURL(imageFile);
-      setImageToCrop(imageUrl);
-      setCurrentField(field);
-      setCroppedImage(null); // Reset cropped image
-      setZoom(1);
-      setCrop({ x: 0, y: 0 });
-    }
-  };
-
-  const handleCropComplete = async (croppedAreaPixels) => {
-    try {
-      const croppedImg = await getCroppedImg(imageToCrop, croppedAreaPixels);
-      setCroppedImage(croppedImg); // Save the cropped image
-    } catch (error) {
-      console.error("Error cropping image: ", error);
-    }
-  };
-
-  const handleSaveCroppedImage = () => {
-    if (currentField && croppedImage) {
-      const croppedImageFile = new File(
-        [croppedImage],
-        `${currentField}.jpg`,
-        { type: "image/jpeg" }
-      );
-      const imageUrl = URL.createObjectURL(croppedImageFile);
       setImages((prevImages) => ({
         ...prevImages,
-        [currentField]: imageUrl,
+        [field]: imageUrl,
       }));
-      // Reset states
-      setCroppedImage(null);
-      setImageToCrop("");
-      setCurrentField(null);
-      setZoom(1); // Reset zoom
-      setCrop({ x: 0, y: 0 }); // Reset crop
+      setProductImage((prevImages) => {
+        const fieldIndex = field === "image1" ? 0 : field === "image2" ? 1 : 2;
+        const updatedImages = prevImages.map((img, index) =>
+          index === fieldIndex ? imageFile : img
+        );
+        if (fieldIndex >= prevImages.length) {
+          updatedImages.push(imageFile);
+        }
+        return updatedImages;
+      });
     }
   };
 
-  const handleEditProduct = async (e) => {
+  // const handleProductImageChange = (e) => {
+  //   const imageFile = e.target.files[0];
+  //   if (imageFile) {
+  //     setProductImage((prevImages) => {
+  //       return [...prevImages, imageFile];
+  //     });
+  //   }
+  // };
+
+  const handleEditproduct = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
     setMessage(formErrors);
     if (Object.keys(formErrors).length > 0) return;
-
+    console.log("SDFASFASDFDSA", productImage);
     const formData = new FormData();
     formData.append("productName", name);
     formData.append("productDescription", description);
@@ -133,36 +113,48 @@ const EditProduct = () => {
     formData.append("regularPrice", regularPrice);
     formData.append("brand", brand);
     formData.append("units", units);
-    Object.keys(images).forEach((key) => {
-      if (images[key]) {
-        formData.append(key, images[key]); // Ensure to append image files, not URLs
-      }
+    // formData.append("file", productImages);
+    Object.values(productImage).forEach((image, index) => {
+      if (image) formData.append("file", image);
     });
-
     try {
-      setSpinner(true);
-      const response = await axios.put(
-        `http://localhost:3000/admin/editProduct/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-      setSpinner(false);
-      Toast.fire({ icon: "success", title: `${response.data.message}` });
-      navigate("/admin/products");
+      if (Object.keys(formErrors).length === 0) {
+        setSpinner(true);
+        const response = await axios.put(
+          `http://localhost:3000/admin/editProduct/${id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            withCredentials: true,
+          }
+        );
+        // alert("hello");
+        setSpinner(false);
+
+        Toast.fire({
+          icon: "success",
+          title: `${response.data.message}`,
+        });
+        navigate("/admin/products");
+      }
     } catch (error) {
+      // alert(error.response.data.message);
+      // if (!validateForm()) {
       console.error(error);
       setSpinner(false);
-      Toast.fire({ icon: "error", title: `${error.response?.data.message}` });
+      Toast.fire({
+        icon: "error",
+        title: `${error.response?.data.message} `,
+      });
     }
   };
 
   return (
     <form
-      className="bg-gray-200 text-black p-8 shadow-md rounded-lg font-sans"
-      onSubmit={handleEditProduct}
+      className="bg-gray-200 text-black  p-8 shadow-md rounded-lg font-sans"
+      onSubmit={handleEditproduct}
     >
       {spinner && (
         <div className="spinner-overlay">
@@ -171,86 +163,188 @@ const EditProduct = () => {
       )}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block mb-2">Upload Images:</label>
-          <div className="grid grid-cols-3 gap-4">
-            {["image1", "image2", "image3"].map((field, index) => (
-              <div
-                key={index}
-                className="border rounded-lg p-4 flex flex-col items-center"
-              >
-                <label htmlFor={`fileInput${index}`}>
-                  <img
-                    src={images[field] || "https://placehold.co/100x100"}
-                    alt="product"
-                    className="mb-2"
-                    style={{ maxWidth: "100%", height: "auto" }}
-                  />
-                </label>
-                <input
-                  id={`fileInput${index}`}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageChange(e, field)}
-                  style={{ display: "none" }}
-                />
-                <p className="bg-gray-200 p-2 rounded">Change image</p>
-                {currentField === field && imageToCrop && (
-                  <div
-                    className="crop-container"
-                    style={{
-                      width: "100%",
-                      height: "300px",
-                      position: "relative",
-                    }}
-                  >
-                    <Cropper
-                      image={imageToCrop} // Ensure the selected image is passed
-                      crop={crop}
-                      zoom={zoom}
-                      aspect={2 / 3}
-                      onCropChange={setCrop}
-                      onZoomChange={setZoom}
-                      onCropComplete={handleCropComplete}
-                    />
-                  </div>
-                )}
-                {currentField === field && croppedImage && (
-                  <>
-                    <button
-                      type="button"
-                      className="bg-blue-500 text-white mt-2 p-2 rounded"
-                      onClick={handleSaveCroppedImage}
-                    >
-                      Save Cropped Image
-                    </button>
-                    <img
-                      src={URL.createObjectURL(croppedImage)} // Show cropped image
-                      alt="Cropped"
-                      className="mt-2"
-                      style={{ maxWidth: "100%", height: "auto" }}
-                    />
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+          <label className="flex items-center">
+            Name:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          {message.name && <p className="text-red-600">{message.name}</p>}
         </div>
-        <div className="mb-4">
-          {/* Your other form fields */}
-          <button type="submit" className="bg-green-500 text-white p-2 rounded">
-            Update Product
-          </button>
+        <div>
+          <label className="flex items-center">
+            Category:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </label>
+          {message.category && (
+            <p className="text-red-600">{message.category}</p>
+          )}
+        </div>
+        <div>
+          <label className="flex items-center col-span-2">
+            Description:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </label>
+          {message.description && (
+            <p className="text-red-600">{message.description}</p>
+          )}
+        </div>
+        <div>
+          <label className="flex items-center">
+            Sale Price :
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={salesPrice}
+              onChange={(e) => setSalesPrice(e.target.value)}
+            />
+          </label>
+          {message.salesPrice && (
+            <p className="text-red-600">{message.salesPrice}</p>
+          )}
+        </div>
+        <div>
+          <label className="flex items-center">
+            Brand:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+            />
+          </label>
+          {message.brand && <p className="text-red-600">{message.brand}</p>}
+        </div>
+        <div>
+          <label className="flex items-center">
+            Regular Price :
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={regularPrice}
+              onChange={(e) => setRegularPrice(e.target.value)}
+            />
+          </label>
+          {message.regularPrice && (
+            <p className="text-red-600">{message.regularPrice}</p>
+          )}
+        </div>
+        <div>
+          <label className="flex items-center">
+            Units:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={units}
+              onChange={(e) => setUnits(e.target.value)}
+            />
+          </label>
+          {message.units && <p className="text-red-600">{message.units}</p>}
         </div>
       </div>
-      {message && (
-        <div className="text-red-600 mt-4">
-          {Object.values(message).map((msg, index) => (
-            <p key={index}>{msg}</p>
-          ))}
+      <div className="mb-4">
+        <label className="block mb-2">Upload Images :</label>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="border rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputone">
+              <img
+                src={
+                  images.image1 ||
+                  productImage[0] ||
+                  "https://placehold.co/100x100"
+                }
+                alt="product image"
+                className="mb-2"
+              />
+            </label>
+            <input
+              id="fileInputone"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, "image1");
+                // handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded">Change image</p>
+          </div>
+          <div className="border rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputtwo">
+              <img
+                src={
+                  images.image2 ||
+                  productImage[1] ||
+                  "https://placehold.co/100x100"
+                }
+                alt="product image"
+                className="mb-2"
+              />
+            </label>
+            <input
+              id="fileInputtwo"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, "image2");
+                // handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded">Change image</p>
+          </div>
+          <div className="border rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputThree">
+              <img
+                src={
+                  images.image3 ||
+                  productImage[2] ||
+                  "https://placehold.co/100x100"
+                }
+                alt="product image"
+                className="mb-2"
+              />
+            </label>
+            <input
+              id="fileInputThree"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, "image3");
+                // handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded">Change image</p>
+          </div>
         </div>
-      )}
+        {message.image && (
+          <p className="text-red-600 text-center">{message.image}</p>
+        )}
+      </div>
+      <button
+        className="bg-green-500 text-white p-4 rounded w-full flex justify-center"
+        type="submit"
+        // to="/admin/products"
+        // onClick={(e) => handleEditproduct(e)}
+      >
+        Submit
+      </button>
     </form>
   );
 };
 
-export default EditProduct;
+export default EditProduct

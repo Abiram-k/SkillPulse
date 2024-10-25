@@ -5,7 +5,8 @@ const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 exports.verifyAdmin = async (req, res, next) => {
-    // const token = req.cookies.adminToken;
+    const token = req.cookies.adminToken;
+    // console.log(token);
     if (token) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRETE);
@@ -13,7 +14,7 @@ exports.verifyAdmin = async (req, res, next) => {
             next();
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Failed to authenticat Admin" })
+            res.status(500).json({ message: "Failed to authenticate Admin" })
         }
     } else {
         console.log("Token not founded");

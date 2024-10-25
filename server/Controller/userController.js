@@ -8,6 +8,7 @@ const { error } = require('console');
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const { isBlocked } = require('../Middleware/isBlockedUser');
+const { listCategory } = require('./adminController');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
@@ -209,13 +210,11 @@ exports.login = async (req, res) => {
 exports.getProducts = async (req, res) => {
     try {
         let isBlocked = req.body.isBlocked || false;
-        // console.log(isBlocked)
-        const products = await Product.find().populate("category");
-        const product = await Product.find().select("name category");
-
-        // console.log(product);
+        const isListedCategory = Category.find({ isListed: true }).select("_id");
+        const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
+        const products = await Product.find({ category: { $in: isListedCategoryIds } }).populate("category");
+        console.log(products)
         const category = await Category.find()
-
         return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
     } catch (error) {
         return res.status(500).json({ message: "Failed To Fetch Product Data" })

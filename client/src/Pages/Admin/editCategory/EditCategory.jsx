@@ -68,7 +68,10 @@ function EditCategory() {
       const response = await axios.put(
         "http://localhost:3000/admin/editCategory",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
       );
       setSpinner(false);
       Toast.fire({
@@ -81,10 +84,10 @@ function EditCategory() {
     } catch (error) {
       console.log(error?.response?.data?.message);
       setSpinner(false);
-        Toast.fire({
-          icon: 'error',
-          title: `${error?.response?.data?.message}`
-        });
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data?.message}`,
+      });
       // alert(error?.response?.data?.message);
     }
   };
@@ -122,28 +125,30 @@ function EditCategory() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-     <div className="border rounded-lg p-4 flex flex-col items-center  justify-center">
-  <label htmlFor="fileInputone" className="w-full flex justify-center">
-    <img
-      src={
-        categoryImage || existingImage || "https://placehold.co/100x100"
-      }
-      alt="product image"
-      className="mb-2 w-1/3 h-auto rounded" // Ensures responsive scaling
-    />
-  </label>
-  <input
-    id="fileInputone"
-    type="file"
-    accept="image/*"
-    onChange={(e) => {
-      handleImageChange(e);
-      handleProductImageChange(e);
-    }}
-    style={{ display: "none" }}
-  />
-  <p className="bg-gray-200 p-2 rounded w-1/3 text-center">Change image</p>
-</div>
+        <div className="border rounded-lg p-4 flex flex-col items-center  justify-center">
+          <label htmlFor="fileInputone" className="w-full flex justify-center">
+            <img
+              src={
+                categoryImage || existingImage || "https://placehold.co/100x100"
+              }
+              alt="product image"
+              className="mb-2 w-1/3 h-auto rounded" // Ensures responsive scaling
+            />
+          </label>
+          <input
+            id="fileInputone"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              handleImageChange(e);
+              handleProductImageChange(e);
+            }}
+            style={{ display: "none" }}
+          />
+          <p className="bg-gray-200 p-2 rounded w-1/3 text-center">
+            Change image
+          </p>
+        </div>
 
         {message.name && <p className="text-red-700 text-sm">{message.name}</p>}
         <button

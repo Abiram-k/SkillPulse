@@ -9,8 +9,11 @@ router.post("/adminLogin", adminController.login);
 router.get("/customers", adminController.customers);
 router.get("/block/:id", verifyAdmin, adminController.blockUser);
 router.get("/category", adminController.getCategory)
-router.put("/categoryDelete/:id", adminController.deleteCategory);
-router.put("/categoryRestore/:id", adminController.categoryRestore);
+router.put("/categoryDelete/:id", verifyAdmin, adminController.deleteCategory);
+router.put("/productDelete/:id", verifyAdmin, adminController.deleteProduct);
+router.put("/productRestore/:id", verifyAdmin, adminController.restoreProduct);
+
+router.put("/categoryRestore/:id", verifyAdmin, adminController.categoryRestore);
 router.post("/handleCategoryListing/:id", verifyAdmin, adminController.listCategory)
 router.post("/addCategory", uploadImage.single("file"), verifyAdmin, adminController.addCategory);
 router.put("/editCategory", uploadImage.single("file"), verifyAdmin, adminController.editCategory);

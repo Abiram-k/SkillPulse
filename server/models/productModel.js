@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   productImage: {
-    type: [Array], 
+    type: [Array],
     required: true
   },
   productName: {
@@ -25,17 +25,25 @@ const productSchema = new mongoose.Schema({
   offer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Offer',
-    required: false 
+    required: false
   },
   ratings: {
     type: Number,
     default: 0,
     min: 0,
-    max: 5 
+    max: 5
   },
   isListed: {
     type: Boolean,
     default: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date,
+    default: null
   },
   units: {
     type: Number,
@@ -44,19 +52,19 @@ const productSchema = new mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    type:String,
-    ref: 'category', 
+    type: String,
+    ref: 'category',
     required: true
   },
   brand: {
     // type: mongoose.Schema.Types.ObjectId,
     // ref: 'Brand',
     // required: true
-    type:String,
-    default:"Brand not added"
+    type: String,
+    default: "Brand not added"
   }
 }, {
-  timestamps: true 
+  timestamps: true
 });
 
 const Product = mongoose.model('Product', productSchema);

@@ -17,7 +17,10 @@ const Category = () => {
   const navigate = useNavigate();
   const error = {};
   const validateForm = () => {
-    if (name.trim() === "") error.name = "Category name is required *";
+    if (name.trim() == "") error.name = "Category name is required *";
+    const firstLetter = name[0];
+    if(!isNaN(name)) error.name = "Category name must statrt with a letter *"
+    if (!image) error.image = "Upload a image for the category *";
     return error;
   };
 
@@ -46,7 +49,7 @@ const Category = () => {
   useEffect(() => {
     (async () => {
       await axios
-        .get("http://localhost:3000/admin/category")
+        .get("http://localhost:3000/admin/category", { withCredentials: true })
         .then((response) => {
           setCategories(response.data.categories);
         })
@@ -55,12 +58,11 @@ const Category = () => {
           alert(error?.response.data.message);
         });
     })();
-  },[]);
+  }, [categories]);
 
   console.log(categories);
   const handleAddCategory = async (e) => {
     e.preventDefault();
-    setSpinner(true);
     const formError = validateForm();
     if (Object.keys(formError).length > 0) {
       setMessage(formError);
@@ -72,22 +74,26 @@ const Category = () => {
     formData.append("description", description);
     formData.append("file", image);
     try {
-      const response = await axios.post(
-        "http://localhost:3000/admin/addCategory",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-        // { withCredentials: true }
-      );
-      setSpinner(false);
-      navigate("/admin/category");
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      if (Object.keys(formError).length == 0) {
+        setSpinner(true);
+
+        const response = await axios.post(
+          "http://localhost:3000/admin/addCategory",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            withCredentials: true,
+          }
+        );
+        setSpinner(false);
+        navigate("/admin/category");
+        Toast.fire({
+          icon: "success",
+          title: `${response.data.message}`,
+        });
+      }
     } catch (error) {
       setSpinner(false);
       Toast.fire({
@@ -103,7 +109,9 @@ const Category = () => {
     try {
       if (result) {
         const response = await axios.put(
-          `http://localhost:3000/admin/categoryRestore/${id}`
+          `http://localhost:3000/admin/categoryRestore/${id}`,
+          {},
+          { withCredentials: true }
         );
         alert(response.data.message);
       }
@@ -113,25 +121,41 @@ const Category = () => {
   };
   const handleDelete = async (id) => {
     const result = confirm("Are you sure to delete categorie");
+    // alert(result);
     try {
       if (result) {
         const response = await axios.put(
-          `http://localhost:3000/admin/categoryDelete/${id}`
+          `http://localhost:3000/admin/categoryDelete/${id}`,
+          {},
+          { withCredentials: true }
         );
-        alert(response.data.message);
+        Toast.fire({
+          icon: "success",
+          title: `${response.data.message}`,
+        });
+      } else {
+        Toast.fire({
+          icon: "success",
+          title: `Cancelled the deletion`,
+        });
       }
     } catch (error) {
-      alert(error.response?.data.message);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
     }
   };
   const handleListing = async (id) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/admin/handleCategoryListing/${id}`
+        `http://localhost:3000/admin/handleCategoryListing/${id}`,
+        {},
+        { withCredentials: true }
       );
       if (response.data.category.isListed) {
         Swal.fire({
-          title: "Blocked",
+          title: "Listed",
           text: `${response.data.category.name}
             "Listed successfully`,
           icon: "sucess",
@@ -139,7 +163,7 @@ const Category = () => {
         });
       } else {
         Swal.fire({
-          title: "Unblocked",
+          title: "Unlisted",
           text: `${response.data.category.name}
             "Unlisted successfully`,
           icon: "success",
@@ -155,7 +179,7 @@ const Category = () => {
       );
     } catch (error) {
       console.log(error);
-      alert(error?.response?.data.message || "Error occured at line 115");
+      alert(error?.response?.data.message || "Error occured at line 182");
     }
   };
 
@@ -197,22 +221,19 @@ const Category = () => {
                     {category.description}
                   </td>
                   <td className="p-2">
-                  <img
-                            src={
-                              category.image ||
-                              "https://placehold.co/50x50"
-                            }
-                            alt={category.name}
-                            className="w-12 h-12 object-cover mx-auto"
-                          />
+                    <img
+                      src={category.image || "https://placehold.co/50x50"}
+                      alt={category.name}
+                      className="w-12 h-12 object-cover mx-auto"
+                    />
                   </td>
                   <td className="p-2 flex items-center space-x-3 text-xl">
                     {!category.isDeleted && (
                       <button
                         className={
                           category.isListed
-                            ? "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22 w-1/3 font-mono"
-                            : "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17 w-1/3 font-mono"
+                            ? "bg-red-600 hover:bg-red-700 lg:p-2 p-1 rounded w-22 w-1/2 font-mono"
+                            : "bg-blue-600 hover:bg-blue-700 lg:p-2 p-1 rounded w-17 w-1/2 font-mono"
                         }
                         onClick={() => handleListing(category._id)}
                       >
@@ -236,10 +257,6 @@ const Category = () => {
                         Restore
                       </button>
                     ) : (
-                      // <i
-                      //   className="fa-solid fa-trash-can-arrow-up"
-                      //   onClick={() => handleRestore(category._id)}
-                      // ></i>
                       <i
                         className="fas fa-trash-alt"
                         onClick={() => handleDelete(category._id)}
@@ -261,74 +278,76 @@ const Category = () => {
       <div className="bg-gray-200 p-4 mt-8 rounded-lg shadow-md text-black">
         <h2 className="text-xl font-bold mb-4">Add New Category</h2>
         <form className="flex flex-col space-y-6">
-  <div className="flex flex-col lg:flex-row lg:space-x-8 space-y-6 lg:space-y-0">
-    <div className="flex flex-col">
-      <label className="mr-2 font-mono">Name :</label>
-      <input
-        type="text"
-        className="border-2 border-gray-400 p-2 rounded-lg font-mono"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      {message.name && <p className="text-red-700 text-sm">{message.name}</p>}
-    </div>
+          <div className="flex flex-col lg:flex-row lg:space-x-8 space-y-6 lg:space-y-0">
+            <div className="flex flex-col">
+              <label className="mr-2 font-mono">Name :</label>
+              <input
+                type="text"
+                className="border-2 border-gray-400 p-2 rounded-lg font-mono"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              {message.name && (
+                <p className="text-red-700 text-sm">{message.name}</p>
+              )}
+            </div>
 
-    <div className="flex flex-col">
-      <label className="mr-2 font-mono">Description :</label>
-      <input
-        type="text"
-        className="border-2 border-gray-400 p-2 rounded-lg font-mono"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      {message.description && (
-        <p className="text-red-700 text-sm">{message.description}</p>
-      )}
-    </div>
-  </div>
-
-  {/* Improved Image Upload Area */}
-  <div className="border-2 border-gray-300 rounded-lg p-4 flex flex-col items-center">
-    <label htmlFor="fileInputone" className="cursor-pointer group">
-      <div className="relative w-32 h-32 mb-4 border-2 border-dashed border-gray-300 rounded-lg flex justify-center items-center hover:bg-gray-100 group-hover:border-blue-500 transition-all">
-        <img
-          src={categoryImage || "https://placehold.co/100x100"}
-          alt="product image"
-          className={`object-cover w-full h-full rounded-lg ${!categoryImage ? 'opacity-50' : ''}`}
-        />
-        {!categoryImage && (
-          <div className="absolute inset-0 flex justify-center items-center">
-            <p className="text-gray-500 font-mono bold">Upload Image</p>
+            <div className="flex flex-col">
+              <label className="mr-2 font-mono">Description (optional):</label>
+              <input
+                type="text"
+                className="border-2 border-gray-400 p-2 rounded-lg font-mono"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
           </div>
-        )}
-      </div>
-    </label>
-    <input
-      id="fileInputone"
-      type="file"
-      accept="image/*"
-      onChange={(e) => {
-        handleImageChange(e);
-        handleProductImageChange(e);
-      }}
-      style={{ display: "none" }}
-    />
-    <p className="bg-gray-200 p-2 rounded font-mono">Change Image</p>
-  </div>
 
-  {/* Save Button at the Bottom */}
-  <div className="flex items-center justify-center">
-    <button
-      type="submit"
-      className="bg-green-500 text-white p-3 rounded-lg font-mono w-32 hover:bg-green-600 transition-all"
-      onClick={handleAddCategory}
-    >
-      SAVE
-    </button>
-  </div>
-</form>
+          {/* Improved Image Upload Area */}
+          <div className="border-2 border-gray-300 rounded-lg p-4 flex flex-col items-center">
+            <label htmlFor="fileInputone" className="cursor-pointer group">
+              <div className="relative w-32 h-32 mb-4 border-2 border-dashed border-gray-300 rounded-lg flex justify-center items-center hover:bg-gray-100 group-hover:border-blue-500 transition-all">
+                <img
+                  src={categoryImage || "https://placehold.co/100x100"}
+                  alt="product image"
+                  className={`object-cover w-full h-full rounded-lg ${
+                    !categoryImage ? "opacity-50" : ""
+                  }`}
+                />
+                {!categoryImage && (
+                  <div className="absolute inset-0 flex justify-center items-center">
+                    <p className="text-gray-500 font-mono bold">Upload Image</p>
+                  </div>
+                )}
+              </div>
+            </label>
+            <input
+              id="fileInputone"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e);
+                handleProductImageChange(e);
+              }}
+              style={{ display: "none" }}
+            />
+            <p className="bg-gray-200 p-2 rounded font-mono">Change Image</p>
+          </div>
+          {message.image && (
+            <p className="text-red-700 text-sm">{message.image}</p>
+          )}
 
-
+          {/* Save Button at the Bottom */}
+          <div className="flex items-center justify-center">
+            <button
+              type="submit"
+              className="bg-green-500 text-white p-3 rounded-lg font-mono w-32 hover:bg-green-600 transition-all"
+              onClick={handleAddCategory}
+            >
+              SAVE
+            </button>
+          </div>
+        </form>
       </div>
     </main>
   );

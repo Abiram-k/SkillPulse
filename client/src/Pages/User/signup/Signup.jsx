@@ -4,6 +4,8 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./signup.css";
+import { useDispatch } from "react-redux";
+import { signUpSuccess } from "../../../redux/userSlice";
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -15,6 +17,8 @@ const Signup = () => {
   const [spinner, setSpinner] = useState(false);
   const [serverMessage, setServerMessage] = useState();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   //Form Validation
 
   let error = {};
@@ -69,42 +73,35 @@ const Signup = () => {
     try {
       const formErrors = formValidate();
       console.log("FormErrors: ", formErrors);
-      setSpinner(true);
       if (Object.keys(formErrors).length > 0) {
         setMessage(formErrors);
         return;
       }
-      // else{
-      //   setSpinner(true);
-      //   setTimeout(() => {
-      //     setSpinner(false);
-      //   }, 3000);
-      // }
       console.log(message);
-      //   if (message) {
-      //     notification.style.display = "block";
-      //   setTimeout(() => (notification.style.display = "none"), 3000);
-      //   }
-      const response = await axios.post(
-        "http://localhost:3000/signUp",
-        {
-          firstName,
-          lastName,
-          email,
-          mobileNumber,
-          password,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+      if (Object.keys(formErrors.length != 0)) {
+        setSpinner(true);
+        const response = await axios.post(
+          "http://localhost:3000/signUp",
+          {
+            firstName,
+            lastName,
+            email,
+            mobileNumber,
+            password,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+          }
+        );
 
-      setSpinner(false);
-      console.log("Response data is:", response.data);
-      if (response.status === 200) {
-        navigate("/otp");
-        setMessage({ success: response.data.message });
+        setSpinner(false);
+        console.log("Response data is:", response.data);
+        if (response.status === 200) {
+          dispatch(signUpSuccess(response.data.message));
+          navigate("/otp");
+          setMessage({ success: response.data.message });
+        }
       }
     } catch (error) {
       setSpinner(false);

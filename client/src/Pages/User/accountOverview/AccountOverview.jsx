@@ -12,7 +12,7 @@ const AccountOverview = () => {
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto p-4 flex gap-6">
         <div className="w-64">
-          <div className="bg-black rounded-lg p-4 mb-4">
+          <div className="bg-black rounded-lg p-4 mb-4 mt-5">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
                 <User className="w-6 h-6 text-gray-800" />
@@ -69,7 +69,7 @@ const AccountOverview = () => {
                 <label className="block mb-2">First Name</label>
                 <input
                   type="text"
-                  defaultValue={user.firstName || Abiram}
+                  defaultValue={user.firstName || "Abiram"}
                   className="w-full bg-gray-700 rounded-lg p-2"
                 />
               </div>

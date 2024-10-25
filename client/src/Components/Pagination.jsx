@@ -7,7 +7,7 @@ function Pagination({ totalPosts, postsPerPage, setCurrentPage, currentPage }) {
     pages.push(i);
   }
   return (
-    <div className="flex justify-center mt-4">
+    <div className="flex justify-center mt-4 mb-5">
       {pages.length > 0
         ? pages.map((page, index) => (
             <button
