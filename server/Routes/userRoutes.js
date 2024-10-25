@@ -5,6 +5,7 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const { verifyUser } = require("../Middleware/userAuth");
 const { isBlocked } = require("../Middleware/isBlockedUser");
+const { uploadImage } = require("../Middleware/multer")
 
 router.get('/', userController.baseRoute);
 router.post('/signUp', userController.signUp);
@@ -23,6 +24,8 @@ router.get('/auth/google/callback',
     (req, res) => {
         res.redirect('http://localhost:5173/googleRedirect')
     });
-router.get("/products",verifyUser,isBlocked, userController.getProducts);
-router.get("/getSimilarProduct/:id",userController.getSimilarProduct);
+router.get("/products", verifyUser, isBlocked, userController.getProducts);
+router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
+router.post("/user", uploadImage.single("file"), userController.updateUser);
+router.get("/user/:id", userController.getUser);
 module.exports = router;

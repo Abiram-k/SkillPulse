@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require("../Controller/adminController");
 const { uploadImage } = require("../Middleware/multer")
 const { verifyAdmin } = require("../Middleware/adminAuth");
-const { single, multiple } = require("../Middleware/multer")
+
 
 router.post("/adminLogin", adminController.login);
 router.get("/customers", adminController.customers);

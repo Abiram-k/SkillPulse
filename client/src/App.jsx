@@ -19,7 +19,7 @@ import ProductDetails from "./Pages/User/productDetails/ProductDetails";
 import UserLayout from "./Pages/User/userLayout/UserLayout";
 import ProtectUserHome from "./Protected/ProtectUserHome";
 import ProtectAuthUser from "./Protected/ProtectAuthUser";
-import AccountOverview from "./Pages/User/accountOverview/accountOverview";
+import AccountOverview from "./Pages/User/accountOverview/AccountOverview";
 import GoogleAuthComponent from "./Pages/User/googleAuthComponent/googleAuthComponent";
 import Shop from "./Pages/User/shop/Shop";
 import SearchProducts from "./Pages/User/searchProducts/SearchProducts";
@@ -27,6 +27,11 @@ import ProtectedAuthAdmin from "./Protected/ProtectedAuthAdmin";
 import ProtectedDashboardAdmin from "./Protected/ProtectedDashboard";
 import ProtectedOtp from "./Protected/ProtectOtp";
 import Breadcrumbs from "./Components/Breadcrumbs";
+import ManageAddress from "./Pages/User/manageAdress/ManageAddress";
+import AccountLayout from "./Pages/User/accountLayout/AccountLayout";
+import AddAddress from "./Pages/User/manageAdress/AddAddress";
+import EditAddress from "./Pages/User/manageAdress/EditAddress";
+import Wishlist from "./Pages/User/wishlist/Wishlist";
 function App() {
   return (
     <>
@@ -91,6 +96,16 @@ function App() {
               }
             />
             <Route
+              path="wishlist"
+              element={
+                <ProtectUserHome>
+                  <Provider>
+                    <Wishlist />
+                  </Provider>
+                </ProtectUserHome>
+              }
+            />
+            <Route
               path="shop"
               element={
                 <ProtectUserHome>
@@ -98,6 +113,7 @@ function App() {
                 </ProtectUserHome>
               }
             />
+
             <Route
               path="productDetails"
               element={
@@ -106,7 +122,47 @@ function App() {
                 </Provider>
               }
             />
-            <Route path="profile" element={<AccountOverview />} />
+            <Route
+              path="profile"
+              element={
+                <ProtectUserHome>
+                  <AccountLayout />
+                </ProtectUserHome>
+              }
+            >
+              <Route
+                path=""
+                element={
+                  <ProtectUserHome>
+                    <AccountOverview />
+                  </ProtectUserHome>
+                }
+              />
+              <Route
+                path="manageAddress"
+                element={
+                  <ProtectUserHome>
+                    <ManageAddress />
+                  </ProtectUserHome>
+                }
+              />
+              <Route
+                path="addNew"
+                element={
+                  <ProtectUserHome>
+                    <AddAddress />
+                  </ProtectUserHome>
+                }
+              />
+              <Route
+                path="editAddress"
+                element={
+                  <ProtectUserHome>
+                    <EditAddress />
+                  </ProtectUserHome>
+                }
+              />
+            </Route>
           </Route>
 
           <Route

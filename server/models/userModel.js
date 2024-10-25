@@ -1,7 +1,16 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Adress = require('./addressModel');
+
+
+// const address = new mongoose.Schema({
+//     address:"dummy address"
+// })
 const userSchema = new mongoose.Schema({
+    profileImage: {
+        type: String,
+        default: "not uploaded"
+    },
     firstName: {
         type: String,
         require: true
@@ -23,6 +32,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    dateOfBirth: {
+        type:Date,
+        default:null
+    },
     profileImage: {
         type: String
     },
@@ -30,9 +43,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    googleid:{
-        type:String,
-        required:false
+    googleid: {
+        type: String,
+        required: false
     },
     adress: [{
         type: mongoose.Schema.Types.ObjectId, ref: "user", require: true
@@ -40,7 +53,7 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-      }
+    }
 })
 
 userSchema.pre('save', async function (next) {

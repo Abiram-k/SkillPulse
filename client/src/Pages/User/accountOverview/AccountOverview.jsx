@@ -1,66 +1,182 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { User, Package, MapPin, Wallet, LogOut } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../redux/userSlice";
+import axios from "axios";
+import { Toast } from "../../../Components/Toast";
+import { Link } from "react-router-dom";
 const AccountOverview = () => {
-  const dispatch = useDispatch();
-  const handleLogout = () => {
-    dispatch(logoutUser());
-  };
+ 
   const user = useSelector((state) => state.users.user);
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto p-4 flex gap-6">
-        <div className="w-64">
-          <div className="bg-black rounded-lg p-4 mb-4 mt-5">
+  // console.log(user, "from profile page");
+  const [profileImage, setProfileImage] = useState(null);
+  const [dbImage, setDbImage] = useState(null);
+  const [userProfile, setUserProfile] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  const [secondName, setSecondName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [spinner, setSpinner] = useState(false);
+  const [message, setMessage] = useState({});
+
+  const formValidate = () => {
+    let error = {};
+    const firstnameFirstCharecter = firstName.charAt(0);
+    const lastnameFirstCharecter = secondName.charAt(0);
+
+    if (firstName.trim() == "") error.firstName = "first name is required *";
+    else if (!isNaN(firstnameFirstCharecter)) {
+      error.firstName = "Name must start with a charecter *";
+    }
+
+    if (!isNaN(lastnameFirstCharecter)) {
+      error.lastName = "Last name must start with a charecter *";
+    }
+    if (!mobileNumber.trim())
+      error.mobileNumber = "Mobile number is required *";
+    else if (mobileNumber.length !== 10) {
+      error.mobileNumber = "Please enter a 10-digit mobile number *";
+    }
+    return error;
+  };
+
+  const handleImageChanges = (e) => {
+    handleImageChange(e);
+    // handleImageToDb(e);
+  };
+
+  const handleImageChange = (e) => {
+    const imageFile = e.target.files[0];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const maxSize = 1 * 1024 * 1024; // 1MB
+    if (
+      imageFile &&
+      allowedTypes.includes(imageFile.type) &&
+      imageFile.size <= maxSize
+    ) {
+      setDbImage(imageFile);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(imageFile);
+    } else {
+      setMessage({
+        image: "Please upload a JPEG, JPG, or PNG file under 1MB.",
+      });
+    }
+  };
+  // const handleImageToDb = (e) => {
+  //   const imageFile = e.target.files[0];
+  // };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/user/${user._id}`,
+          {
+            withCredentials: true,
+          }
+        );
+        setFirstName(response.data.userData.firstName);
+        setSecondName(response.data.userData.lastName);
+        setDateOfBirth(response.data.userData.dateOfBirth);
+        setEmail(response.data.userData.email);
+        setMobileNumber(response.data.userData.mobileNumber);
+        setUserProfile(response.data.userData);
+        setProfileImage(response.data.userData.profileImage);
+      } catch (error) {
+        console.log(error?.response?.data?.message);
+      }
+    })();
+  }, []);
+
+  const handleProfileChange = async (e) => {
+    e.preventDefault();
+    const formError = formValidate();
+    if (Object.keys(formError).length > 0) {
+      setMessage(formError);
+      return;
+    }
+    console.log(formError);
+    alert(formError);
+    try {
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", secondName);
+      formData.append("email", email);
+      formData.append("file", dbImage);
+      formData.append("mobileNumber", mobileNumber);
+      formData.append("dateOfBirth", dateOfBirth);
+      setSpinner(true);
+      const response = await axios.post(
+        "http://localhost:3000/user",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+          params: {
+            id: user._id,
+          },
+        }
+      );
+      setSpinner(false);
+      console.log(response.data.updatedUser);
+      setProfileImage(response.data.updatedUser);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    } catch (error) {
+      setSpinner(false);
+      alert(error.message);
+      console.log(error?.response?.data?.message);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response.data.message || "Error occured"}`,
+      });
+    }
+  };
+  return (  <div className="flex-1 bg-black rounded-lg p-6 font-mono">
+          {spinner && (
+            <div className="spinner-overlay">
+              <div className="spinner"></div>
+            </div>
+          )}
+          <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-gray-800" />
-              </div>
+              <label
+                htmlFor="fileInput"
+                className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden cursor-pointer bg-yellow-400"
+              >
+                {profileImage ? (
+                  <img
+                    src={profileImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-6 h-6 text-gray-800" />
+                )}
+              </label>
+              <input
+                id="fileInput"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChanges}
+                style={{ display: "none" }}
+              />
+
               <span className="font-semibold">
-                {user.firstName  || "Abiram k"}
+                {user.firstName || "Abiram k"}
               </span>
             </div>
-
-            <nav className="space-y-2">
-              <button className="w-full flex items-center gap-3 p-3 bg-red-100/10 rounded-lg text-left">
-                <User className="w-5 h-5" />
-                Account Overview
-              </button>
-              <button className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left">
-                <Package className="w-5 h-5" />
-                My Orders
-              </button>
-              <button className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left">
-                <MapPin className="w-5 h-5" />
-                Manage Addresses
-              </button>
-              <button className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left">
-                <Wallet className="w-5 h-5" />
-                Wallet
-              </button>
-            </nav>
-
-            <button
-              className="w-full mt-6 bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
-              onClick={handleLogout}
-            >
-              <LogOut className="w-5 h-5" />
-              LOGOUT
-            </button>
           </div>
-        </div>
-
-        <div className="flex-1 bg-black rounded-lg p-6">
-          <div className="flex justify-between items-center mb-8">
-            <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 text-gray-800" />
-            </div>
-            {/* <button className="px-4 py-2 border border-gray-600 rounded-lg">
-              Edit
-            </button> */}
-          </div>
-
+          {message.image && (
+            <p className="text-red-600 mb-4">{message.image}</p>
+          )}
           <h2 className="text-xl font-semibold mb-6">Personal Information</h2>
 
           <form className="space-y-6 font-mono">
@@ -69,17 +185,40 @@ const AccountOverview = () => {
                 <label className="block mb-2">First Name</label>
                 <input
                   type="text"
-                  defaultValue={user.firstName || "Abiram"}
                   className="w-full bg-gray-700 rounded-lg p-2"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
+                {message.firstName && (
+                  <p className="text-red-600">{message.firstName}</p>
+                )}
               </div>
               <div>
                 <label className="block mb-2">Last Name</label>
                 <input
                   type="text"
-                  defaultValue={user.secondName || "K"}
                   className="w-full bg-gray-700 rounded-lg p-2"
+                  value={secondName}
+                  onChange={(e) => setSecondName(e.target.value)}
                 />
+                {message.lastName && (
+                  <p className="text-red-600">{message.lastName}</p>
+                )}
+              </div>
+              <div>
+                <label className="block mb-2">password</label>
+                <input
+                  type="password"
+                  className="w-full bg-gray-700 rounded-lg p-2"
+                  defaultValue={"* * * * * * * *"}
+                  disabled
+                />
+                <Link
+                  to={"/user/changePassword"}
+                  className="text-orange-500 text-sm border-b-2 pb-1 border-orange-500"
+                >
+                  Change Password
+                </Link>
               </div>
             </div>
 
@@ -87,8 +226,9 @@ const AccountOverview = () => {
               <label className="block mb-2">Date of Birth</label>
               <input
                 type="date"
-                defaultValue="2001-09-21"
                 className="w-full bg-gray-700 rounded-lg p-2"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
               />
             </div>
 
@@ -99,27 +239,34 @@ const AccountOverview = () => {
                 <label className="block mb-2">Mobile Number</label>
                 <input
                   type="tel"
-                  defaultValue={user.mobileNumber || "992010921"}
                   className="w-full bg-gray-700 rounded-lg p-2"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
                 />
+                {message.mobileNumber && (
+                  <p className="text-red-600">{message.mobileNumber}</p>
+                )}
               </div>
               <div>
                 <label className="block mb-2">Email</label>
                 <input
                   type="email"
-                  defaultValue={user.email || "user@gmail.com"}
                   className="w-full bg-gray-700 rounded-lg p-2"
+                  defaultValue={email}
+                  disabled
                 />
               </div>
             </div>
 
-            <button className="bg-green-600 text-white px-6 py-2 rounded-lg ">
-              Submit
+            <button
+              className="bg-green-600 text-white px-6 py-2 rounded-lg "
+              onClick={handleProfileChange}
+            >
+              {spinner ? "Profile updating ..." : "Submit"}
             </button>
           </form>
         </div>
-      </div>
-    </div>
+    
   );
 };
 

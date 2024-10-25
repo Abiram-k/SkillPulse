@@ -74,7 +74,7 @@ function UserLayout() {
           <Link to="search">
             <i className="fas fa-search lg:text-xl"></i>
           </Link>
-          <Link to={"profile"}>
+          <Link to={"wishlist"}>
             <i className="fas fa-heart text-red-500 lg:text-xl"></i>
           </Link>
           <Link to={"profile"}>

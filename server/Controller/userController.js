@@ -204,6 +204,38 @@ exports.login = async (req, res) => {
     }
 }
 
+exports.updateUser = async (req, res) => {
+    try {
+        const { firstName, lastName, password, mobileNumber, dateOfBirth } = req.body;
+        const { id } = req.query;
+        const profileImage = req.file?.path;
+        const userData = {
+            firstName, lastName, password, mobileNumber, profileImage, dateOfBirth
+        }
+        console.log("User Data", userData)
+        const updatedUser = await User.findByIdAndUpdate(id, { $set: userData }, { new: true, upsert: true });
+        if (updatedUser)
+            return res.status(200).json({ message: "Profile successfully updated", updatedUser });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Filed to update your profile" })
+    }
+}
+
+exports.getUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        // console.log(id);
+        const userData = await User.findById(id);
+        // console.log(userData)
+        // if (userData)
+        return res.status(200).json({ message: "User successfully fetched", userData });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Failed to fetch user data !" })
+    }
+}
+
 
 //Product Fetching for listing
 

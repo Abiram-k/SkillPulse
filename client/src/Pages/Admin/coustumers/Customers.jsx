@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Pagination from "../../../Components/Pagination";
+import { User } from "lucide-react";
+
 const Customers = () => {
   const [users, setUsers] = useState([]);
   const searchFocus = useRef(null);
@@ -115,6 +117,7 @@ const Customers = () => {
               <thead>
                 <tr>
                   <th className="bg-orange-500 text-white p-2">S.No</th>
+                  <th className="bg-orange-500 text-white p-2">profile</th>
                   <th className="bg-orange-500 text-white p-2">Name</th>
                   <th className="bg-orange-500 text-white p-2">Email</th>
                   <th className="bg-orange-500 text-white p-2">Mobile</th>
@@ -148,6 +151,17 @@ const Customers = () => {
                           key={user._id}
                         >
                           <td className="p-2">{index + 1}</td>
+                          <td className="p-2 flex justify-center align-middle">
+                            {user.profileImage ? (
+                              <img
+                                src={user.profileImage}
+                                alt={user.firstName + "photo"}
+                                className="w-12 h-12 object-cover mx-auto rounded-full"
+                              />
+                            ) : (
+                              <User className="text-center w-8 h-8 text-gray-800 bg-gray-300 rounded-full p-1" />
+                            )}
+                          </td>
                           <td className="p-2">{user.firstName}</td>
                           <td className="p-2">{user.email}</td>
                           <td className="p-2">{user.mobileNumber}</td>

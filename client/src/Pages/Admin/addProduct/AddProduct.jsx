@@ -76,16 +76,26 @@ const AddProduct = () => {
   // Handle image file change and set image for cropping
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
-    setCurrentField(field); // Track which image field is being edited
-    if (imageFile) {
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const maxSize = 1 * 1024 * 1024;
+    if (
+      imageFile &&
+      allowedTypes.includes(imageFile.type) &&
+      imageFile.size <= maxSize
+    ) {
+      setCurrentField(field); // Track which image field is being edited
       const reader = new FileReader();
       reader.onloadend = () => {
         setImage(reader.result); // Set image to be cropped
       };
       reader.readAsDataURL(imageFile);
+    } else {
+      setMessage({
+        image: "Please upload a JPEG, JPG, or PNG file under 1MB.",
+      });
+      setImage((prevImages) => ({ ...prevImages, [field]: null }));
     }
   };
-
   // Set cropped area after cropping completes
   const handleCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -291,14 +301,14 @@ const AddProduct = () => {
       </div>
       <div className="mb-4">
         <label className="block mb-2">Upload Images :</label>
-        <div className="grid grid-cols-3 gap-4">
-          {["image1", "image2", "image3"].map((field, index) => (
+        <div className="grid grid-cols-4 gap-4">
+          {["image1", "image2", "image3", "image4"].map((field, index) => (
             <div
               key={index}
               className="border rounded-lg p-4 flex flex-col items-center"
             >
               <label htmlFor={`fileInput${index}`}>
-                <img
+                <img 
                   src={images[field] || "https://placehold.co/100x100"}
                   alt="product"
                   className="mb-2"
@@ -315,10 +325,13 @@ const AddProduct = () => {
               <p className="bg-gray-200 p-2 rounded">Change image</p>
             </div>
           ))}
+          {message.image && (
+            <p className="text-red-600 text-center">{message.image}</p>
+          )}
         </div>
       </div>
 
-      {image && (
+      {image && !message.image && (
         <div className="modal">
           <div className="modal-content">
             <h3>Crop Image</h3>
@@ -330,7 +343,7 @@ const AddProduct = () => {
                 image={image}
                 crop={crop}
                 zoom={zoom}
-                aspect={2 / 3} // Keep aspect ratio consistent
+                aspect={2 / 3}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={handleCropComplete}
@@ -345,7 +358,6 @@ const AddProduct = () => {
           </div>
         </div>
       )}
-
       <button
         className="bg-green-500 text-white p-4 rounded w-full flex justify-center"
         type="submit"
