@@ -77,7 +77,7 @@ function UserLayout() {
           <Link to={"wishlist"}>
             <i className="fas fa-heart text-red-500 lg:text-xl"></i>
           </Link>
-          <Link to={"profile"}>
+          <Link to={"cart"}>
             <i className="fas fa-shopping-cart lg:text-xl"></i>
           </Link>
           <Link to={"profile"}>

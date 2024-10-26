@@ -17,9 +17,15 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.5",
     "@mui/material": "^6.1.5",
+    "@radix-ui/react-alert-dialog": "^1.1.2",
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@reduxjs/toolkit": "^2.3.0",
     "axios": "^1.7.7",
     "canvas-toBlob": "^1.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "cropperjs": "^1.6.2",
     "lucide-react": "^0.453.0",
     "prop-types": "^15.8.1",
@@ -33,9 +39,11 @@
     "react-router-dom": "^6.27.0",
     "react-zoom": "^0.3.1",
     "recharts": "^2.13.0",
-    "sweetalert2": "^11.14.3"
+    "sweetalert2": "^11.14.3",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss-animate": "^1.0.7"
   },
-  "devDependencies": { 
+  "devDependencies": {
     "@eslint/js": "^9.11.1",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",

@@ -28,4 +28,9 @@ router.get("/products", verifyUser, isBlocked, userController.getProducts);
 router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
 router.post("/user", uploadImage.single("file"), userController.updateUser);
 router.get("/user/:id", userController.getUser);
+router.post("/address",uploadImage.none(), userController.addAddress);//none to handle form data ,with no files
+router.get("/address", userController.getAddress);
+router.delete("/address", userController.deleteAddress);
+router.get("/editAddress", userController.getEditAddress);
+router.post("/editAddress",uploadImage.none(), userController.editAddress);
 module.exports = router;

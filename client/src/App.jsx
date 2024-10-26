@@ -32,6 +32,7 @@ import AccountLayout from "./Pages/User/accountLayout/AccountLayout";
 import AddAddress from "./Pages/User/manageAdress/AddAddress";
 import EditAddress from "./Pages/User/manageAdress/EditAddress";
 import Wishlist from "./Pages/User/wishlist/Wishlist";
+import ShoppingCartPage from "./Pages/User/cart/ShoppingCartPage";
 function App() {
   return (
     <>
@@ -106,6 +107,14 @@ function App() {
               }
             />
             <Route
+              path="cart"
+              element={
+                <ProtectUserHome>
+                  <ShoppingCartPage />
+                </ProtectUserHome>
+              }
+            />
+            <Route
               path="shop"
               element={
                 <ProtectUserHome>
@@ -155,7 +164,7 @@ function App() {
                 }
               />
               <Route
-                path="editAddress"
+                path="editAddress/:address"
                 element={
                   <ProtectUserHome>
                     <EditAddress />

@@ -33,8 +33,8 @@ const userSchema = new mongoose.Schema({
         require: true
     },
     dateOfBirth: {
-        type:Date,
-        default:null
+        type: Date,
+        default: null
     },
     profileImage: {
         type: String
@@ -47,9 +47,46 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    adress: [{
-        type: mongoose.Schema.Types.ObjectId, ref: "user", require: true
+    address: [{
+        firstName: {
+            type: String,
+            required: true
+        },
+        secondName: {
+            type: String,
+            required: true
+        },
+        mobileNumber: {
+            type: String,
+            required: true
+        },
+        alternativeMobile: {
+            type: String,
+        },
+        city: {
+            type: String,
+            required: true
+        },
+        state: {
+            type: String,
+            required: true
+        },
+        address: {
+            type: String,
+            required: true,
+            unique: true
+        },
+        pincode: {
+            type: String,
+            required: true
+        },
+        type: {
+            type: String,
+            required: true
+        }
+
     }],
+
     createdAt: {
         type: Date,
         default: Date.now,

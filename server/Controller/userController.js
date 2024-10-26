@@ -204,6 +204,42 @@ exports.login = async (req, res) => {
     }
 }
 
+
+
+
+//Product Fetching for listing
+
+exports.getProducts = async (req, res) => {
+    try {
+        let isBlocked = req.body.isBlocked || false;
+        const isListedCategory = Category.find({ isListed: true }).select("_id");
+        const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
+        const products = await Product.find({ category: { $in: isListedCategoryIds } }).populate("category");
+        console.log(products)
+        const category = await Category.find()
+        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
+    } catch (error) {
+        return res.status(500).json({ message: "Failed To Fetch Product Data" })
+    }
+}
+
+exports.getSimilarProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const productData = await Product.findById(id);
+        const similarProducts = await Product.find({ category: productData?.category })
+        if (similarProducts.length === 0)
+            return res.status(404).json({ message: "No Similar products were founded !" })
+        return res.status(200).json({ message: "Product fetched successfully", similarProducts });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message || "Server error" });
+    }
+}
+
+/////////////////// User Profile ////////////////////////
+
+
 exports.updateUser = async (req, res) => {
     try {
         const { firstName, lastName, password, mobileNumber, dateOfBirth } = req.body;
@@ -236,33 +272,140 @@ exports.getUser = async (req, res) => {
     }
 }
 
-
-//Product Fetching for listing
-
-exports.getProducts = async (req, res) => {
+exports.addAddress = async (req, res) => {
     try {
-        let isBlocked = req.body.isBlocked || false;
-        const isListedCategory = Category.find({ isListed: true }).select("_id");
-        const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
-        const products = await Product.find({ category: { $in: isListedCategoryIds } }).populate("category");
-        console.log(products)
-        const category = await Category.find()
-        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
+        console.log("working...");
+        const { firstName, secondName, mobileNumber, alternativeMobile, city, state, address, pincode, type } = req.body;
+        const { id } = req.query;
+        const user = await User.findById(id);
+        // console.log(user.address);
+        if (!user.address) {
+            user.address = [];
+        } else {
+            if (user.address.some((addr) => addr.address === address)) {
+                console.log("User already exists")
+                return res.status(400).json({ message: "Address already exists" })
+            }
+        }
+        user.address.push({ firstName, secondName, mobileNumber, alternativeMobile, city, state, address, pincode, type });
+        await user.save();
+        console.log("Added successfully")
+        return res.status(200).json({ message: "Address added successfully" })
     } catch (error) {
-        return res.status(500).json({ message: "Failed To Fetch Product Data" })
+        console.log(error.message);
+        return res.status(500).json({ message: error.message || "Error occured while adding address" })
     }
 }
 
-exports.getSimilarProduct = async (req, res) => {
+exports.getAddress = async (req, res) => {
+
     try {
-        const { id } = req.params;
-        const productData = await Product.findById(id);
-        const similarProducts = await Product.find({ category: productData?.category })
-        if (similarProducts.length === 0)
-            return res.status(404).json({ message: "No Similar products were founded !" })
-        return res.status(200).json({ message: "Product fetched successfully", similarProducts });
+        const { id } = req.query;
+        const user = await User.findById(id);
+        // console.log(user)
+        const addresses = user.address;
+        // console.log(addresses);
+        if (!addresses)
+            return res.status(404).json({ message: "You can add address here" });
+        return res.status(200).json({ message: "Address successfully fetched", addresses });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: error.message || "Error occured while fetching address" })
+    }
+}
+
+exports.getEditAddress = async (req, res) => {
+    try {
+        const { id } = req.query;
+        // console.log(id);
+        const [addressObj] = await User.find({ "address._id": id }, { "address.$": 1 })
+        const [address] = addressObj.address
+        // console.log(address);
+        return res.status(200).json({ message: "Successfully fetched edit address details", address })
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Failed to fetch details,You can enter details" })
+    }
+
+}
+
+exports.editAddress = async (req, res) => {
+    console.log("working....");
+    try {
+        const {
+            firstName,
+            secondName,
+            mobileNumber,
+            alternativeMobile,
+            city,
+            state,
+            pincode,
+            type,
+            address
+        } = req.body;
+
+        console.log(
+            firstName,
+            secondName,
+            mobileNumber,
+            alternativeMobile,
+            city,
+            state,
+            address,
+            pincode,
+            type)
+        const { id } = req.query;
+
+        const user = await User.findOne({ "address._id": id });
+        console.log(user);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const addressIndex = user.address.findIndex(addr => addr._id.toString() === id);
+        console.log(addressIndex);
+
+        if (addressIndex === -1) {
+            return res.status(404).json({ message: "Address not found." });
+        }
+
+        user.address[addressIndex] = {
+            ...user.address[addressIndex],
+            firstName,
+            secondName,
+            mobileNumber,
+            alternativeMobile,
+            city,
+            state,
+            address,
+            pincode,
+            type
+        };
+        await user.save();
+
+        return res.status(200).json({ message: "Address updated successfully.", address: user.address[addressIndex] });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Failed to update address. Please try again later." });
+    }
+};
+
+exports.deleteAddress = async (req, res) => {
+    try {
+        const { id } = req.query;
+        console.log(id);
+
+        const user = await User.findOne({ "address._id": id });
+        const addressIndex = user.address.findIndex((addr, index) => addr._id.toString() == id);
+        
+        if (addressIndex == -1)
+            return res.status(404).json({ message: "address not founded" });
+        user.address.splice(addressIndex, 1);
+            await user.save();
+        return res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: error.message || "Server error" });
+        return res.status(500).json({ message: "Error occured while deleting address" })
     }
 }

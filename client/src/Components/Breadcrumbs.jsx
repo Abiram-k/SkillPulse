@@ -3,7 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 
 const Breadcrumbs = () => {
   const { pathname } = useLocation();
-  const pathnames = pathname.split("/").filter((x) => x && x != "user");
+  const pathnames = pathname
+    .split("/")
+    .filter((x) => x && x != "user" && !/[0-9]/.test(x));
   console.log("pathnames:", pathnames);
   let breadcrumbPath = "";
   if (

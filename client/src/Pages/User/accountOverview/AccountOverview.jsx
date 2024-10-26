@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { User, Package, MapPin, Wallet, LogOut } from "lucide-react";
+import {
+  User,
+  Package,
+  MapPin,
+  Wallet,
+  LogOut,
+  UserPen,
+  DoorOpen,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../redux/userSlice";
 import axios from "axios";
 import { Toast } from "../../../Components/Toast";
 import { Link } from "react-router-dom";
+import { DialogDemo } from "@/Components/DialogDemo";
 const AccountOverview = () => {
- 
   const user = useSelector((state) => state.users.user);
   // console.log(user, "from profile page");
   const [profileImage, setProfileImage] = useState(null);
@@ -19,6 +27,7 @@ const AccountOverview = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [spinner, setSpinner] = useState(false);
   const [message, setMessage] = useState({});
+  const [editMode, setEditMode] = useState(false);
 
   const formValidate = () => {
     let error = {};
@@ -139,134 +148,168 @@ const AccountOverview = () => {
       });
     }
   };
-  return (  <div className="flex-1 bg-black rounded-lg p-6 font-mono">
-          {spinner && (
-            <div className="spinner-overlay">
-              <div className="spinner"></div>
-            </div>
-          )}
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <label
-                htmlFor="fileInput"
-                className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden cursor-pointer bg-yellow-400"
-              >
-                {profileImage ? (
-                  <img
-                    src={profileImage}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-6 h-6 text-gray-800" />
-                )}
-              </label>
-              <input
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChanges}
-                style={{ display: "none" }}
-              />
 
-              <span className="font-semibold">
-                {user.firstName || "Abiram k"}
-              </span>
-            </div>
-          </div>
-          {message.image && (
-            <p className="text-red-600 mb-4">{message.image}</p>
-          )}
-          <h2 className="text-xl font-semibold mb-6">Personal Information</h2>
-
-          <form className="space-y-6 font-mono">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block mb-2">First Name</label>
-                <input
-                  type="text"
-                  className="w-full bg-gray-700 rounded-lg p-2"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-                {message.firstName && (
-                  <p className="text-red-600">{message.firstName}</p>
-                )}
-              </div>
-              <div>
-                <label className="block mb-2">Last Name</label>
-                <input
-                  type="text"
-                  className="w-full bg-gray-700 rounded-lg p-2"
-                  value={secondName}
-                  onChange={(e) => setSecondName(e.target.value)}
-                />
-                {message.lastName && (
-                  <p className="text-red-600">{message.lastName}</p>
-                )}
-              </div>
-              <div>
-                <label className="block mb-2">password</label>
-                <input
-                  type="password"
-                  className="w-full bg-gray-700 rounded-lg p-2"
-                  defaultValue={"* * * * * * * *"}
-                  disabled
-                />
-                <Link
-                  to={"/user/changePassword"}
-                  className="text-orange-500 text-sm border-b-2 pb-1 border-orange-500"
-                >
-                  Change Password
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-2">Date of Birth</label>
-              <input
-                type="date"
-                className="w-full bg-gray-700 rounded-lg p-2"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-              />
-            </div>
-
-            <h3 className="text-lg font-semibold pt-4">Contact Information</h3>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block mb-2">Mobile Number</label>
-                <input
-                  type="tel"
-                  className="w-full bg-gray-700 rounded-lg p-2"
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                />
-                {message.mobileNumber && (
-                  <p className="text-red-600">{message.mobileNumber}</p>
-                )}
-              </div>
-              <div>
-                <label className="block mb-2">Email</label>
-                <input
-                  type="email"
-                  className="w-full bg-gray-700 rounded-lg p-2"
-                  defaultValue={email}
-                  disabled
-                />
-              </div>
-            </div>
-
-            <button
-              className="bg-green-600 text-white px-6 py-2 rounded-lg "
-              onClick={handleProfileChange}
-            >
-              {spinner ? "Profile updating ..." : "Submit"}
-            </button>
-          </form>
+  const handleEditMode = () => {
+    setEditMode((editMode) => !editMode);
+  };
+  return (
+    <div className="flex-1 bg-black rounded-lg p-6 font-mono">
+      {spinner && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
         </div>
-    
+      )}
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <label
+            htmlFor="fileInput"
+            className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden cursor-pointer bg-yellow-400"
+          >
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-6 h-6 text-gray-800" />
+            )}
+          </label>
+          <input
+            id="fileInput"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChanges}
+            style={{ display: "none" }}
+          />
+
+          <span className="font-semibold">{user.firstName || "Abiram k"}</span>
+        </div>
+        <div className="flex gap-3">
+          <DialogDemo name="Change Password" className="mt-5" />
+          <button
+            className="bg-green-500 rounded p-2 hover:scale-110 transition-all duration-100 flex gap-2 justify-center align-middle"
+            onClick={handleEditMode}
+          >
+            {editMode ? (
+              <>
+                <DoorOpen />
+                Exit
+              </>
+            ) : (
+              <>
+                <UserPen />
+                Edit
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+      {message.image && <p className="text-red-600 mb-4">{message.image}</p>}
+
+      <h2 className="text-xl font-semibold mb-6">
+        {editMode ? (
+          <>
+            <span className="text-green-400">Edit</span> Personal Information
+          </>
+        ) : (
+          "Personal Information"
+        )}
+      </h2>
+
+      <form className="space-y-6 font-mono">
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block mb-2">First Name</label>
+            <input
+              type="text"
+              className="w-full bg-gray-700 rounded-lg p-2"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              disabled={!editMode}
+            />
+            {message.firstName && (
+              <p className="text-red-600">{message.firstName}</p>
+            )}
+          </div>
+          <div>
+            <label className="block mb-2">Last Name</label>
+            <input
+              type="text"
+              className="w-full bg-gray-700 rounded-lg p-2"
+              value={secondName}
+              onChange={(e) => setSecondName(e.target.value)}
+              disabled={!editMode}
+            />
+            {message.lastName && (
+              <p className="text-red-600">{message.lastName}</p>
+            )}
+          </div>
+          <div>
+            <label className="block mb-2">password</label>
+            <input
+              type="password"
+              className="w-full bg-gray-700 rounded-lg p-2"
+              defaultValue={"* * * * * * * *"}
+              disabled
+            />
+            {/* <Link
+              to={"/user/changePassword"}
+              className="text-orange-500 text-sm border-b-2 pb-1 border-orange-500"
+            >
+              Change Password
+            </Link> */}
+          </div>
+        </div>
+
+        <div>
+          <label className="block mb-2">Date of Birth</label>
+          <input
+            type="date"
+            className="w-full bg-gray-700 rounded-lg p-2"
+            value={dateOfBirth}
+            onChange={(e) => setDateOfBirth(e.target.value)}
+            disabled={!editMode}
+          />
+        </div>
+
+        <h3 className="text-lg font-semibold pt-4">Contact Information</h3>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block mb-2">Mobile Number</label>
+            <input
+              type="tel"
+              className="w-full bg-gray-700 rounded-lg p-2"
+              value={mobileNumber}
+              onChange={(e) => setMobileNumber(e.target.value)}
+              disabled={!editMode}
+            />
+            {message.mobileNumber && (
+              <p className="text-red-600">{message.mobileNumber}</p>
+            )}
+          </div>
+          <div>
+            <label className="block mb-2">Email</label>
+            <input
+              type="email"
+              className="w-full bg-gray-700 rounded-lg p-2"
+              defaultValue={email}
+              disabled
+            />
+          </div>
+        </div>
+
+        {editMode && (
+          <button
+            className="bg-green-600 text-white px-6 py-2 rounded-lg "
+            onClick={handleProfileChange}
+          >
+            {spinner ? "Profile updating ..." : "Submit"}
+          </button>
+        )}
+      </form>
+    </div>
   );
 };
 
