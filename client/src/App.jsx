@@ -33,6 +33,7 @@ import AddAddress from "./Pages/User/manageAdress/AddAddress";
 import EditAddress from "./Pages/User/manageAdress/EditAddress";
 import Wishlist from "./Pages/User/wishlist/Wishlist";
 import ShoppingCartPage from "./Pages/User/cart/ShoppingCartPage";
+import Checkout from "./Pages/User/checkout.jsx/CheckOut";
 function App() {
   return (
     <>
@@ -119,6 +120,14 @@ function App() {
               element={
                 <ProtectUserHome>
                   <Shop />
+                </ProtectUserHome>
+              }
+            />
+            <Route
+              path="checkout"
+              element={
+                <ProtectUserHome>
+                  <Checkout />
                 </ProtectUserHome>
               }
             />

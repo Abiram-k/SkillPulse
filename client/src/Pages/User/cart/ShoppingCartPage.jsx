@@ -1,39 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Trash2, Search, Heart, ShoppingCart, User } from "lucide-react";
+import axios from "axios";
+import { Toast } from "@/Components/Toast";
+import { useSelector } from "react-redux";
 
 const ShoppingCartPage = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Apple Beats Fit Pro - True Wireless Noise Cancelling Earbuds",
-      price: 11999,
-      quantity: 1,
-      image: "/api/placeholder/100/100",
-    },
-    {
-      id: 2,
-      name: "Gaming Keyboard",
-      price: 9999,
-      quantity: 1,
-      image: "/api/placeholder/100/100",
-    },
-    {
-      id: 1,
-      name: "Apple Beats Fit Pro - True Wireless Noise Cancelling Earbuds",
-      price: 11999,
-      quantity: 1,
-      image: "/api/placeholder/100/100",
-    },
-    {
-      id: 2,
-      name: "Gaming Keyboard",
-      price: 9999,
-      quantity: 1,
-      image: "/api/placeholder/100/100",
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
+  const [trigger, setTrigger] = useState(0);
+  const user = useSelector((state) => state.users.user);
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/cart`);
+        setCartItems(response.data.cartItems);
+        console.log("Cart itmes : ", response.data.cartItems);
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: `${error?.response?.data.message}`,
+        });
+      }
+    })();
+  }, [trigger]);
 
-  const updateQuantity = (id, change) => {
+  useEffect(() => {
+    console.log("Updated cart items:", cartItems);
+  }, []);
+
+  const updateQuantityOld = (id, change) => {
     setCartItems((items) =>
       items.map((item) =>
         item.id === id
@@ -43,8 +37,31 @@ const ShoppingCartPage = () => {
     );
   };
 
-  const removeItem = (id) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  const removeItem = async (id) => {
+    alert(id);
+    alert(user._id);
+    setTrigger((t) => t + 1);
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/cartItem/${id}`,
+        {
+          withCredentials: true,
+          params: {
+            userId: user._id,
+          },
+        }
+      );
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    } catch (error) {
+      console.log(error);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
   };
 
   const subtotal = cartItems.reduce(
@@ -55,67 +72,86 @@ const ShoppingCartPage = () => {
   const gst = subtotal * 0.05;
   const total = subtotal - discount + gst;
 
+  const updateQuantity = async (productId, value) => {
+    setTrigger((t) => t + 1);
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/updateQuantity/${productId}`,
+        {},
+        { withCredentials: true, params: { userId: user._id, value } }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white font-mono">
       <main className="container mx-auto px-4 py-8">
-        <div className="flex flex-wrap gap-8">
-          <div className="flex-grow">
+        <div className="flex flex-wrap gap-8 justify-center align-middle">
+          <div className="flex-grow max-w-4xl">
             <h1 className="text-4xl font-bold mb-6 mt-3">YOUR CART</h1>
-            <p className="mb-8">Total {cartItems.length} Items In Your Cart</p>
-
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-gray-900 rounded-lg p-4 flex items-center justify-between"
-                >
-                  <div className="flex items-center space-x-4">
+            <p className="mb-8">
+              Total {cartItems[0]?.products.length} Items In Your Cart
+            </p>
+            <div className="space-y-6">
+              {cartItems &&
+                cartItems[0]?.products.map((item) => (
+                  <div
+                    key={item?.product._id}
+                    className="flex items-center bg-gray-900 rounded-lg p-4 space-x-4"
+                  >
                     <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-24 h-24 object-cover rounded"
+                      src={item?.product.productImage[0] || ""}
+                      alt={item?.product.name}
+                      className="w-28 h-28 object-cover rounded"
                     />
-                    <div>
-                      <h3 className="text-lg">{item.name}</h3>
-                      <p className="text-xl mt-2">
-                        ₹{item.price.toLocaleString()}
+                    <div className="flex-grow">
+                      <h3 className="text-lg">{item?.product.productName}</h3>
+                      <p className="text-md mt-2">
+                        {item?.product.productDescription}
                       </p>
+                      <div className="flex gap-2">
+                        <p className="text-xl mt-2">
+                          ₹{item?.product.salesPrice.toLocaleString()}
+                        </p>
+                        <p className="text-xl mt-2 line-through text-gray-400">
+                          ₹{item?.product.regularPrice.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => updateQuantity(item?.product._id, -1)}
+                          className="bg-gray-800 px-3 py-1 rounded"
+                        >
+                          -
+                        </button>
+                        <span>{item?.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item?.product._id, 1)}
+                          className="bg-gray-800 px-3 py-1 rounded"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => removeItem(item?.product._id)}
+                        className="text-red-500 hover:text-red-400"
+                      >
+                        <Trash2 className="w-6 h-6" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, -1)}
-                        className="bg-gray-800 px-3 py-1 rounded"
-                      >
-                        -
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, 1)}
-                        className="bg-gray-800 px-3 py-1 rounded"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-400"
-                    >
-                      <Trash2 className="w-6 h-6" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
-
             <button className="mt-8 bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700">
               Checkout
             </button>
           </div>
 
-          {/* Order Summary */}
-          <div className="w-full md:w-80">
+          <div className="w-full md:w-80 my-auto">
             <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
               Checkout Details
             </div>
@@ -123,8 +159,20 @@ const ShoppingCartPage = () => {
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span>{cartItems.length} Items</span>
-                  <span>{subtotal.toLocaleString()} ₹</span>
+                  <span>
+                    {cartItems[0]?.products.reduce(
+                      (acc, item) => item.quantity + acc,
+                      0
+                    )}{" "}
+                    Items
+                  </span>
+                  <span>
+                    {cartItems[0]?.products.reduce(
+                      (acc, item) => item.quantity * item.product.salesPrice,
+                      0
+                    )}{" "}
+                    ₹
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
@@ -150,8 +198,6 @@ const ShoppingCartPage = () => {
           </div>
         </div>
       </main>
-
-     
     </div>
   );
 };

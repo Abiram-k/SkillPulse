@@ -3,6 +3,8 @@ import { Star, Heart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setProductDetails } from "../../../redux/userSlice";
+import { Toast } from "@/Components/Toast";
+import { useOutletContext } from "react-router-dom";
 
 const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -10,9 +12,12 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const [magnifierVisible, setMagnifierVisible] = useState(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+  const [limitAddToCart, setLimitAddToCart] = useState(0);
   const dispatch = useDispatch();
-  const product = useSelector((state) => state.users.details);
-
+  const product = useSelector((state) => state.users.details); // this is an array object,so first element is the product object
+  const user = useSelector((state) => state.users.user);
+  console.log(product, "From product details page");
+  const { setCartCount } = useOutletContext();
   useEffect(() => {
     (async () => {
       try {
@@ -74,6 +79,39 @@ const ProductDetails = () => {
   );
 
   const gotoDetails = (product) => dispatch(setProductDetails(product));
+
+  const handleAddToCart = async () => {
+
+    setLimitAddToCart((prevCount) => prevCount + 1);
+    setCartCount((prevCount) => prevCount + 1); //outlet provider
+    alert("product uint : " + product[0].units);
+    alert("Limit : " + limitAddToCart);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/addToCart/${product[0]._id}`,
+        {},
+        {
+          withCredentials: true,
+          params: {
+            userId: user._id,
+          },
+        }
+      );
+      console.log(response.data);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    } catch (error) {
+      console.log(error?.response?.data?.massage);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data?.message}`,
+      });
+      console.log(error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -161,11 +199,11 @@ const ProductDetails = () => {
                     {product.discount || 99}% off
                   </span>
                 </div>
-                  <h6 className="text-orange-500 text-sm font-sans">
-                    {product.units
-                      ? product.units + " Stocks left"
-                      : "Out of stock"}
-                  </h6>
+                <h6 className="text-orange-500 text-sm font-sans">
+                  {product.units
+                    ? product.units + " Stocks left"
+                    : "Out of stock"}
+                </h6>
                 <div className="flex items-center space-x-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
@@ -176,8 +214,14 @@ const ProductDetails = () => {
                   ))}
                 </div>
                 <div className="flex space-x-4">
-                  <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
-                    Add To Cart
+                  <button
+                    className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
+                    onClick={handleAddToCart}
+                    disabled={limitAddToCart == product.units}
+                  >
+                    {limitAddToCart === product.units
+                      ? `${product.units} added / 0 left`
+                      : "Add To Cart"}
                   </button>
                   <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
                     Buy Now

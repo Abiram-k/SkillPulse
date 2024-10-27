@@ -6,6 +6,7 @@ import { Toast } from "../../../Components/Toast";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setProductDetails } from "../../../redux/userSlice";
+import { Heart } from "lucide-react";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -55,6 +56,26 @@ const HomePage = () => {
     dispatch(setProductDetails(product));
     console.log("productDetails :", product);
     navigate("/user/productDetails");
+  };
+
+  const handleAddToWishList = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/wishList",
+        {},
+        { withCredentials: true }
+      );
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    } catch (error) {
+      console.log(error);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
   };
 
   return (
@@ -171,98 +192,13 @@ const HomePage = () => {
                     className="w-full h-32 object-cover rounded cursor-pointer"
                     onClick={() => goToDetails(product)}
                   />
-                  <div className="mt-2 text-center flex flex-col gap-3">
-                    {/* <h3 className="text-sm font-semibold text-white">
-                      {product.brand || }
-                    </h3> */}
-                    <p className="text-xs text-gray-300">
-                      {product.productName}
-                    </p>
-                    <p className="text-sm font-bold text-green-500">
-                      ₹{product.salesPrice}
-                      <span className="line-through text-gray-400 ml-1">
-                        ₹{product.regularPrice}
-                      </span>
-                      <span className="text-red-500 ml-1">20% off</span>
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {product.salesPrice > 1000
-                        ? "Free Delivery"
-                        : "Delivery Charges Apply"}
-                    </p>
-                  </div>
-                </div>
-              )
-          )
-        ) : (
-          <>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="PC Case"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT</h3>
-                <p>Soundcore by Ankerlife</p>
-                <p className="text-lg font-bold">
-                  ₹3,199 <span className="line-through">₹4,999</span> 90% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="Vortex Controller"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT </h3>
-                <p>Soundcore by Ankers</p>
-                <p className="text-lg font-bold">
-                  ₹11,295 <span className="line-through">₹13,999</span> 20% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="Keyboard"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT</h3>
-                <p>BOAT Newly Launched</p>
-                <p className="text-lg font-bold">
-                  ₹3999 <span className="line-through">₹8999</span> 75% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-          </>
-        )}
-        {products.length > 0 ? (
-          products.map(
-            (product) =>
-              product.isListed &&
-              !product.isDeleted && (
-                <div
-                  className="bg-gray-800 p-3 rounded shadow-lg transform hover:scale-105 transition-transform duration-300"
-                  key={product._id}
-                >
-                  <img
-                    src={
-                      product.productImage[0] || "https://placehold.co/300x200"
-                    }
-                    alt={product.productDescription}
-                    className="w-full h-32 object-cover rounded cursor-pointer"
-                    onClick={() => goToDetails(product)}
+                  <Heart
+                    className="absolute top-2 right-3 w-6 h-6 
+                     text-red-600 fill-red-600
+                     "
+                    onClick={handleAddToWishList}
                   />
+
                   <div className="mt-2 text-center">
                     {/* <h3 className="text-sm font-semibold text-white">
                       {product.brand}
@@ -295,6 +231,8 @@ const HomePage = () => {
                 className="w-full h-auto"
                 onClick={() => goToDetails()}
               />
+              <Heart className="absolute top-2 right-3 w-6 h-6" />
+
               <div className="mt-4">
                 <h3 className="text-xl font-bold">BOAT</h3>
                 <p>Soundcore by Ankerlife</p>
@@ -311,6 +249,8 @@ const HomePage = () => {
                 className="w-full h-auto"
                 onClick={() => goToDetails()}
               />
+              <Heart className="absolute top-2 right-3 w-6 h-6" />
+
               <div className="mt-4">
                 <h3 className="text-xl font-bold">BOAT </h3>
                 <p>Soundcore by Ankers</p>
@@ -327,98 +267,8 @@ const HomePage = () => {
                 className="w-full h-auto"
                 onClick={() => goToDetails()}
               />
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT</h3>
-                <p>BOAT Newly Launched</p>
-                <p className="text-lg font-bold">
-                  ₹3999 <span className="line-through">₹8999</span> 75% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-          </>
-        )}
-        {products.length > 0 ? (
-          products.map(
-            (product) =>
-              product.isListed &&
-              !product.isDeleted && (
-                <div
-                  className="bg-gray-800 p-3 rounded shadow-lg transform hover:scale-105 transition-transform duration-300"
-                  key={product._id}
-                >
-                  <img
-                    src={
-                      product.productImage[0] || "https://placehold.co/300x200"
-                    }
-                    alt={product.productDescription}
-                    className="w-full h-32 object-cover rounded cursor-pointer"
-                    onClick={() => goToDetails(product)}
-                  />
-                  <div className="mt-2 text-center">
-                    {/* <h3 className="text-sm font-semibold text-white">
-                      {product.brand}
-                    </h3> */}
-                    <p className="text-xs text-gray-300">
-                      {product.productName}
-                    </p>
-                    <p className="text-sm font-bold text-green-500">
-                      ₹{product.salesPrice}
-                      <span className="line-through text-gray-400 ml-1">
-                        ₹{product.regularPrice}
-                      </span>
-                      <span className="text-red-500 ml-1">20% off</span>
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {product.salesPrice > 1000
-                        ? "Free Delivery"
-                        : "Delivery Charges Apply"}
-                    </p>
-                  </div>
-                </div>
-              )
-          )
-        ) : (
-          <>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="PC Case"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT</h3>
-                <p>Soundcore by Ankerlife</p>
-                <p className="text-lg font-bold">
-                  ₹3,199 <span className="line-through">₹4,999</span> 90% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="Vortex Controller"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT </h3>
-                <p>Soundcore by Ankers</p>
-                <p className="text-lg font-bold">
-                  ₹11,295 <span className="line-through">₹13,999</span> 20% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="Keyboard"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
+              <Heart className="absolute top-2 right-3 w-6 h-6" />
+
               <div className="mt-4">
                 <h3 className="text-xl font-bold">BOAT</h3>
                 <p>BOAT Newly Launched</p>

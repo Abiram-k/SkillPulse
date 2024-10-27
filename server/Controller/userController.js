@@ -9,6 +9,7 @@ const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const { isBlocked } = require('../Middleware/isBlockedUser');
 const { listCategory } = require('./adminController');
+const Cart = require('../models/cartModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
@@ -357,14 +358,14 @@ exports.editAddress = async (req, res) => {
         const { id } = req.query;
 
         const user = await User.findOne({ "address._id": id });
-        console.log(user);
+        // console.log(user);
 
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
 
         const addressIndex = user.address.findIndex(addr => addr._id.toString() === id);
-        console.log(addressIndex);
+        // console.log(addressIndex);
 
         if (addressIndex === -1) {
             return res.status(404).json({ message: "Address not found." });
@@ -398,14 +399,47 @@ exports.deleteAddress = async (req, res) => {
 
         const user = await User.findOne({ "address._id": id });
         const addressIndex = user.address.findIndex((addr, index) => addr._id.toString() == id);
-        
+
         if (addressIndex == -1)
             return res.status(404).json({ message: "address not founded" });
         user.address.splice(addressIndex, 1);
-            await user.save();
+        await user.save();
         return res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error occured while deleting address" })
+    }
+}
+
+exports.addToCart = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("productid :", id)
+        const { userId } = req.query;
+        console.log("userId :", userId);
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        let cart = await Cart.findOne({ user: userId });
+
+        console.log(cart)
+        if (cart) {
+            const productIndex = cart.products.findIndex((p) => p.product.toString() == id);
+            if (productIndex != -1)
+                cart.products[productIndex].quantity += 1;
+            else
+                cart.products.push({ product: id, quantity: 1 });
+        } else {
+            cart = new Cart({
+                products: [{ product: id, quantity: 1 }],
+                user: userId
+            })
+        }
+        await cart.save();
+        return res.status(200).json({ message: "Product added to cart", cart })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: 'Server error' });
     }
 }

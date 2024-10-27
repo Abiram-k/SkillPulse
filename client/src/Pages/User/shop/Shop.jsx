@@ -6,6 +6,7 @@ import { setProductDetails } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../Components/Pagination";
+import { Heart } from "lucide-react";
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -265,6 +266,8 @@ const Shop = () => {
                   className="w-full h-32 object-cover rounded cursor-pointer"
                   onClick={() => goToDetails(product)}
                 />
+                <Heart className="absolute top-2 right-3 w-6 h-6" />
+
                 <div className="mt-2 text-center">
                   {/* <h3 className="text-sm font-semibold text-white">
                     {product.brand}
@@ -295,6 +298,8 @@ const Shop = () => {
                   alt="Product Image"
                   className="w-full h-40 object-cover mb-4"
                 />
+                <Heart className="absolute top-2 right-3 w-6 h-6" />
+
                 <div className="text-lg font-bold">Product Name</div>
                 <div className="text-sm text-gray-400">Product Description</div>
                 <div className="text-xl font-bold mt-2">
@@ -319,6 +324,8 @@ const Shop = () => {
               alt="Product Image"
               className="w-full h-40 object-cover mb-4"
             />
+            <Heart className="absolute top-2 right-3 w-6 h-6" />
+
             <div className="text-lg font-bold">Product Name</div>
             <div className="text-sm text-gray-400">Product Description</div>
             <div className="text-xl font-bold mt-2">

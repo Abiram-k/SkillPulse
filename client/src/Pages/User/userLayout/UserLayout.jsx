@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import paymentTag from "../../../assets/paymentTags.png";
+import { BadgeDemo } from "@/Components/BadgeDemo";
 
 function UserLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   return (
     <>
@@ -77,15 +79,18 @@ function UserLayout() {
           <Link to={"wishlist"}>
             <i className="fas fa-heart text-red-500 lg:text-xl"></i>
           </Link>
-          <Link to={"cart"}>
-            <i className="fas fa-shopping-cart lg:text-xl"></i>
-          </Link>
+          <div className="relative">
+            <Link to={"cart"}>
+              {cartCount > 0 && <BadgeDemo quantity={cartCount} />}
+              <i className="fas fa-shopping-cart lg:text-xl"></i>
+            </Link>
+          </div>
           <Link to={"profile"}>
             <i className="fas fa-user-circle lg:text-xl"></i>
           </Link>
         </div>
       </div>
-      <Outlet />
+      <Outlet context={{ setCartCount }} />
       <footer className="bg-black text-gray-400 py-8 flex flex-col space-y-11 border-t-2 border-gray-700">
         <div className="flex flex-wrap justify-around gap-8">
           {/* Shipping Section */}
