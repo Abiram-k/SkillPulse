@@ -131,6 +131,14 @@ function App() {
                 </ProtectUserHome>
               }
             />
+            <Route
+              path="cart/checkout"
+              element={
+                <ProtectUserHome>
+                  <Checkout />
+                </ProtectUserHome>
+              }
+            />
 
             <Route
               path="productDetails"

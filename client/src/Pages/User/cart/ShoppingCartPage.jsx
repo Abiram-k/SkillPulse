@@ -2,16 +2,23 @@ import React, { useEffect, useState } from "react";
 import { Trash2, Search, Heart, ShoppingCart, User } from "lucide-react";
 import axios from "axios";
 import { Toast } from "@/Components/Toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { checkoutItems } from "@/redux/userSlice";
+import AlertDialogueButton from "@/Components/AlertDialogueButton";
 
 const ShoppingCartPage = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [trigger, setTrigger] = useState(0);
+  const [trigger, setTrigger] = useState(1);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/cart`);
+        const response = await axios.get(
+          `http://localhost:3000/cart/${user._id}`
+        );
         setCartItems(response.data.cartItems);
         console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
@@ -85,6 +92,20 @@ const ShoppingCartPage = () => {
     }
   };
 
+  const handleCheckout = () => {
+    if (cartItems[0].products.length == 0) {
+      Toast.fire({
+        icon: "error",
+        title: `Add some items and checkout`,
+      });
+    } else {
+      // alert("check for data ,sended to checkout");
+      // console.log("Data to Checkout", cartItems[0].products);
+      dispatch(checkoutItems(cartItems[0]?.products));
+      navigate("checkout");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white font-mono">
       <main className="container mx-auto px-4 py-8">
@@ -95,58 +116,67 @@ const ShoppingCartPage = () => {
               Total {cartItems[0]?.products.length} Items In Your Cart
             </p>
             <div className="space-y-6">
-              {cartItems &&
-                cartItems[0]?.products.map((item) => (
-                  <div
-                    key={item?.product._id}
-                    className="flex items-center bg-gray-900 rounded-lg p-4 space-x-4"
-                  >
-                    <img
-                      src={item?.product.productImage[0] || ""}
-                      alt={item?.product.name}
-                      className="w-28 h-28 object-cover rounded"
-                    />
-                    <div className="flex-grow">
-                      <h3 className="text-lg">{item?.product.productName}</h3>
-                      <p className="text-md mt-2">
-                        {item?.product.productDescription}
+              {cartItems[0]?.products.map((item) => (
+                <div
+                  key={item?.product._id}
+                  className="flex items-center bg-gray-900 rounded-lg p-4 space-x-4"
+                >
+                  <img
+                    src={item?.product.productImage[0] || ""}
+                    alt={item?.product.name}
+                    className="w-28 h-28 object-cover rounded"
+                  />
+                  <div className="flex-grow">
+                    <h3 className="text-lg">{item?.product.productName}</h3>
+                    <p className="text-md mt-2">
+                      {item?.product.productDescription}
+                    </p>
+                    <div className="flex gap-2">
+                      <p className="text-xl mt-2">
+                        ₹{item?.product.salesPrice.toLocaleString()}
                       </p>
-                      <div className="flex gap-2">
-                        <p className="text-xl mt-2">
-                          ₹{item?.product.salesPrice.toLocaleString()}
-                        </p>
-                        <p className="text-xl mt-2 line-through text-gray-400">
-                          ₹{item?.product.regularPrice.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => updateQuantity(item?.product._id, -1)}
-                          className="bg-gray-800 px-3 py-1 rounded"
-                        >
-                          -
-                        </button>
-                        <span>{item?.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item?.product._id, 1)}
-                          className="bg-gray-800 px-3 py-1 rounded"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => removeItem(item?.product._id)}
-                        className="text-red-500 hover:text-red-400"
-                      >
-                        <Trash2 className="w-6 h-6" />
-                      </button>
+                      <p className="text-xl mt-2 line-through text-gray-400">
+                        ₹{item?.product.regularPrice.toLocaleString()}
+                      </p>
                     </div>
                   </div>
-                ))}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => updateQuantity(item?.product._id, -1)}
+                        className="bg-gray-800 px-3 py-1 rounded"
+                      >
+                        -
+                      </button>
+                      <span>{item?.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item?.product._id, 1)}
+                        className="bg-gray-800 px-3 py-1 rounded"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="bg-red-600 p-1 rounded flex space-x-1 justify-center align-middle">
+                      <Trash2 className="w-5 h-5" />
+                      <AlertDialogueButton
+                        name="Delete"
+                        onClick={() => removeItem(item?.product._id)}
+                      />
+                    </div>
+                    {/* <button
+                      className="text-red-500 hover:text-red-400"
+                    > */}
+                    {/* <Trash2 className="w-6 h-6" /> */}
+                    {/* </button> */}
+                  </div>
+                </div>
+              ))}
             </div>
-            <button className="mt-8 bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700">
+            <button
+              to={"checkout"}
+              className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
+              onClick={handleCheckout}
+            >
               Checkout
             </button>
           </div>

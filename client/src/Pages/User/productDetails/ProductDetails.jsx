@@ -84,8 +84,7 @@ const ProductDetails = () => {
 
     setLimitAddToCart((prevCount) => prevCount + 1);
     setCartCount((prevCount) => prevCount + 1); //outlet provider
-    alert("product uint : " + product[0].units);
-    alert("Limit : " + limitAddToCart);
+ 
 
     try {
       const response = await axios.post(

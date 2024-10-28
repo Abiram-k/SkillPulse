@@ -299,21 +299,43 @@ exports.addAddress = async (req, res) => {
 }
 
 exports.getAddress = async (req, res) => {
-
     try {
-        const { id } = req.query;
+        const { id, addrId } = req.query;
         const user = await User.findById(id);
-        // console.log(user)
-        const addresses = user.address;
-        // console.log(addresses);
-        if (!addresses)
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        let addresses = user.address || [];
+        let selectedAddress;
+        if (addrId) {
+            selectedAddress = addresses.find((addr) => addr._id.toString() === addrId);
+            console.log(selectedAddress)
+            if (!selectedAddress) {
+                return res.status(404).json({ message: "Address not found" });
+            }
+            user.deliveryAddress = addrId;
+            await user.save();
+        } else {
+            selectedAddress = addresses.find(
+                (addr) => addr._id.toString() === user.deliveryAddress
+            ) || addresses[0];
+        }
+        if (!addresses.length) {
             return res.status(404).json({ message: "You can add address here" });
-        return res.status(200).json({ message: "Address successfully fetched", addresses });
+        }
+        return res.status(200).json({
+            message: "Address successfully fetched",
+            addresses,
+            selectedAddress,
+        });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ message: error.message || "Error occured while fetching address" })
+        return res.status(500).json({
+            message: error.message || "Error occurred while fetching address",
+        });
     }
-}
+};
+
 
 exports.getEditAddress = async (req, res) => {
     try {
@@ -404,7 +426,7 @@ exports.deleteAddress = async (req, res) => {
             return res.status(404).json({ message: "address not founded" });
         user.address.splice(addressIndex, 1);
         await user.save();
-        return res.status(200).json({ message: "User deleted successfully" });
+        return res.status(200).json({ message: "Address deleted successfully" });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error occured while deleting address" })

@@ -38,7 +38,7 @@ router.get("/editAddress", userController.getEditAddress);
 router.post("/editAddress", uploadImage.none(), userController.editAddress);
 
 router.post("/addToCart/:id", userController.addToCart);
-router.get("/cart", cartController.getCart);
+router.get("/cart/:id", cartController.getCart);
 router.post("/updateQuantity/:productId", cartController.updateQuantity);
 router.delete("/cartItem/:productId", cartController.removeCartItem);
 

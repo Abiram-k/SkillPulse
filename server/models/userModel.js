@@ -83,10 +83,13 @@ const userSchema = new mongoose.Schema({
         type: {
             type: String,
             required: true
-        }
+        },
+
 
     }],
-
+    deliveryAddress: {
+        type: String,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

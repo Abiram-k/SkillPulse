@@ -20,8 +20,7 @@ const AlertDialogueButton = ({ name, onClick }) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure to {name} ?</AlertDialogTitle>
           <AlertDialogDescription className="font-mono">
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            This action cannot be undone
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
