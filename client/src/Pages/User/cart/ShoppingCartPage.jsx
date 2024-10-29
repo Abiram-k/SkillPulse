@@ -172,6 +172,7 @@ const ShoppingCartPage = () => {
                 </div>
               ))}
             </div>
+            
             <button
               to={"checkout"}
               className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"

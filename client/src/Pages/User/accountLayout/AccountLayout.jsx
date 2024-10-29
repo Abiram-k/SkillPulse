@@ -13,7 +13,7 @@ function AccountLayout() {
   const handleLogout = () => {
     dispatch(logoutUser());
   };
-  
+
   useEffect(() => {
     (async () => {
       try {
@@ -30,7 +30,7 @@ function AccountLayout() {
     })();
   }, []);
   return (
-    <div className="min-h-screen  text-white">
+    <div className="min-h-screen  text-white ">
       <div className="container mx-auto p-4 flex gap-6">
         <div className="w-64">
           <div className="bg-black rounded-lg p-4 mb-4 mt-5">
@@ -49,22 +49,31 @@ function AccountLayout() {
                   <User className="w-6 h-6 text-gray-800" />
                 )}
               </label>
-             
+
               <span className="font-semibold">
                 {user.firstName || "Abiram k"}
               </span>
             </div>
 
             <nav className="space-y-2">
-              <Link to={""} className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left">
+              <Link
+                to={""}
+                className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left"
+              >
                 <User className="w-5 h-5" />
                 Account Overview
               </Link>
-              <button className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left">
+              <Link
+                to={"myOrders"}
+                className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left"
+              >
                 <Package className="w-5 h-5" />
                 My Orders
-              </button>
-              <Link to={"manageAddress"} className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left">
+              </Link>
+              <Link
+                to={"manageAddress"}
+                className="w-full flex items-center gap-3 p-3 hover:bg-gray-700 rounded-lg text-left"
+              >
                 <MapPin className="w-5 h-5" />
                 Manage Addresses
               </Link>

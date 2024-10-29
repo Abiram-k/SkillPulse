@@ -102,8 +102,9 @@ const EditAddress = () => {
     // console.log(currentAddress._id);
     try {
       if (Object.keys(formErrors).length == 0) {
-        const response = await axios.post(
-          `http://localhost:3000/editAddress?id=${currentAddress._id}`,
+        const response = await axios.put(
+          // changed some routes from post to put
+          `http://localhost:3000/address?id=${currentAddress._id}`,
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },

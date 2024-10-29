@@ -12,7 +12,7 @@ const OrderSchema = new mongoose.Schema({
         unique: true
     },
     orderDate: {
-        type: Date,
+        type: String,
         required: true,
         default: Date.now
     },
@@ -34,7 +34,7 @@ const OrderSchema = new mongoose.Schema({
             productStatus: {
                 type: String,
                 required: false,
-                enum: ['processing,shipped,delivered,cancelled,returned'],
+                enum: ['processing', 'shipped', 'delivered', 'cancelled', 'returned'],
                 default: 'processing'
             }
         }
@@ -74,7 +74,6 @@ const OrderSchema = new mongoose.Schema({
         address: {
             type: String,
             required: true,
-            unique: true
         },
         pincode: {
             type: String,
@@ -89,7 +88,7 @@ const OrderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['processing,shipped,delivered,cancelled,returned'],
+        enum: ['processing','shipped','delivered','cancelled','returned'],
         default: "processing"
     }
 

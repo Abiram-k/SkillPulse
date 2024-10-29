@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const Adress = require('./addressModel');
 
-
-// const address = new mongoose.Schema({
-//     address:"dummy address"
-// })
 const userSchema = new mongoose.Schema({
     profileImage: {
         type: String,

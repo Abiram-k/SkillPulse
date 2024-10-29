@@ -4,12 +4,14 @@ import { ChangeAddress } from "@/Components/ChangeAddress";
 import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Toast } from "@/Components/Toast";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedAddress, setSelectedAddress] = useState({});
+  const [checkoutComplete, setCheckoutComplete] = useState(false);
 
   const checkoutItems = useSelector((state) => state.users.checkoutItems);
   const dispatch = useDispatch();
@@ -34,23 +36,41 @@ const Checkout = () => {
           }`
         );
         setAddresses(response.data.addresses);
-        // alert(response.data.selectedAddress.address);
         setSelectedAddress(response.data.selectedAddress);
-        // localStorage.setItem(
-        //   "selectedAddress",
-        //   JSON.stringify(response.data.selectedAddress)
-        // );
       } catch (error) {
         console.log(error);
       }
     })();
-  }, [user?._id, selectedAddressId]);
+  }, [user?._id, selectedAddressId, checkoutComplete]);
 
   const handleSelectedAddress = (selectedAddress) => {
     setSelectedAddressId(selectedAddress);
   };
 
-  return (
+  //logic for place order and req to store order in order collection
+  const handlePlaceOrder = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/order/${user._id}`,
+        checkoutItems,
+        { withCredentials: true }
+      );
+      setCheckoutComplete((prev) => !prev);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
+  };
+
+  return !checkoutComplete ? (
     <div className="min-h-screen bg-black text-white mt-5 font-mono">
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex justify-between">
@@ -140,7 +160,10 @@ const Checkout = () => {
               </div>
               {Object.keys(selectedAddress).length === 0 ? (
                 <div className="bg-gray-900 p-4 rounded">
-                  <Link to={"/user/profile/addNew"} className="lg:p-3 p-2 text-white rounded bg-blue-500 font-semibold">
+                  <Link
+                    to={"/user/profile/addNew"}
+                    className="lg:p-3 p-2 text-white rounded bg-blue-500 font-semibold"
+                  >
                     Add Address
                   </Link>
                 </div>
@@ -211,7 +234,10 @@ const Checkout = () => {
             </div>
 
             <div className="flex space-x-4">
-              <button className="bg-red-600 text-white px-8 py-3 rounded-md w-full">
+              <button
+                className="bg-red-600 text-white px-8 py-3 rounded-md w-full"
+                onClick={handlePlaceOrder}
+              >
                 Place order
               </button>
               <button className="bg-red-600 text-white px-8 py-3 rounded-md">
@@ -253,6 +279,27 @@ const Checkout = () => {
         </div>
       </div>
     </div>
+  ) : (
+    <main className="flex-grow flex flex-col items-center  text-center p-4 h-screen space-y-3.5 lg:mt-28">
+      <div className="bg-gray-800 rounded-full px-6 py-2 mb-4">
+        <span className="text-xl font-bold">Order Completed</span>
+        <span className="block text-green-500">Arriving By Wed, Apr 2024</span>
+      </div>
+      <button className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8">
+        View order
+      </button>
+      <div className="text-6xl text-green-500 mb-4">
+        <i className="fas fa-check-circle"></i>
+      </div>
+      <h1 className="text-2xl font-bold mb-2">Your order is Completed</h1>
+      <p className="mb-4 font-mono">
+        Thank You for your order, Sit tight we are processing your order we will
+        update you with your order in email
+      </p>
+      <button className="bg-red-600 text-white rounded-full px-6 py-2">
+        Continue Shopping
+      </button>
+    </main>
   );
 };
 

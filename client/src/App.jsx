@@ -33,7 +33,8 @@ import AddAddress from "./Pages/User/manageAdress/AddAddress";
 import EditAddress from "./Pages/User/manageAdress/EditAddress";
 import Wishlist from "./Pages/User/wishlist/Wishlist";
 import ShoppingCartPage from "./Pages/User/cart/ShoppingCartPage";
-import Checkout from "./Pages/User/checkout.jsx/CheckOut";
+import Checkout from "./Pages/User/checkout/CheckOut";
+import ManageOrders from "./Pages/User/manageOrders/manageOrders";
 function App() {
   return (
     <>
@@ -161,6 +162,14 @@ function App() {
                 element={
                   <ProtectUserHome>
                     <AccountOverview />
+                  </ProtectUserHome>
+                }
+              />
+              <Route
+                path="Myorders"
+                element={
+                  <ProtectUserHome>
+                    <ManageOrders />
                   </ProtectUserHome>
                 }
               />
