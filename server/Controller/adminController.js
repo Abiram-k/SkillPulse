@@ -6,6 +6,7 @@ const User = require("../models/userModel");
 const Admin = require("../models/adminModel");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
+const Orders = require("../models/orderModel");
 const mongoose = require("mongoose")
 const { listenerCount } = require("process");
 
@@ -349,5 +350,43 @@ exports.handleProductListing = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ message: "Failed to list/unilist product" })
+    }
+}
+exports.editStatus = async (req, res) => {
+    try {
+        const { id } = req.query;
+        const { orderId, productId, updatedStatus } = req.body;
+
+        console.log("product Id: ", productId)
+        console.log("order Id: ", orderId)
+        const updatingOrder = await Orders.findOne({ user: id, orderId })
+        console.log(updatingOrder);
+
+        if (!updatingOrder) {
+            console.log("Order not found");
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+
+        if (!updatedStatus) {
+            console.log("No status were founded");
+        } else {
+            const productIndex = updatingOrder.orderItems.findIndex((product) => product.product.toString() == productId);
+
+            if (productIndex === -1) {
+                console.log("Product not found in order items");
+                return res.status(404).json({ message: "Product not found" });
+            }
+            console.log("test flag", updatedStatus)
+            updatingOrder.orderItems[productIndex].productStatus = updatedStatus;
+            console.log(updatingOrder);
+            await updatingOrder.save();
+            console.log("saved")
+            return res.status(200).json({ message: "updated order status" })
+        }
+    } catch (error) {
+        console.log(error.message);
+
+        return res.status(500).json({ message: "Error occured while updating status" });
     }
 }

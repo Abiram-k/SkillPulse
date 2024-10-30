@@ -106,6 +106,33 @@ const ShoppingCartPage = () => {
     }
   };
 
+  const totalPrice = () => {
+    return cartItems[0]?.products.reduce(
+      (acc, item) => acc + item.product.salesPrice * item.quantity,
+      0
+    );
+  };
+  const calculateDeliveryCharge = () => {
+    if (totalPrice() < 1000) return Math.round((2 / 100) * totalPrice());
+    else return 0;
+  };
+
+  const calculateGST = (gstRate) => {
+    return Math.round(
+      (gstRate / 100) *
+        cartItems[0]?.products.reduce(
+          (acc, item) => acc + item.product.salesPrice * item.quantity,
+          0
+        )
+    );
+  };
+  const cartTotalPrice = () => {
+    const gstRate = 18;
+    const total =
+      totalPrice() + calculateGST(gstRate) + calculateDeliveryCharge();
+    // alert(total);
+    return total;
+  };
   return (
     <div className="min-h-screen bg-black text-white font-mono">
       <main className="container mx-auto px-4 py-8">
@@ -163,16 +190,11 @@ const ShoppingCartPage = () => {
                         onClick={() => removeItem(item?.product._id)}
                       />
                     </div>
-                    {/* <button
-                      className="text-red-500 hover:text-red-400"
-                    > */}
-                    {/* <Trash2 className="w-6 h-6" /> */}
-                    {/* </button> */}
                   </div>
                 </div>
               ))}
             </div>
-            
+
             <button
               to={"checkout"}
               className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
@@ -197,29 +219,27 @@ const ShoppingCartPage = () => {
                     )}{" "}
                     Items
                   </span>
-                  <span>
-                    {cartItems[0]?.products.reduce(
-                      (acc, item) => item.quantity * item.product.salesPrice,
-                      0
-                    )}{" "}
-                    ₹
-                  </span>
+                  <span>{totalPrice()} ₹</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="text-green-600">
+                    {totalPrice() > 1000
+                      ? "Free"
+                      : calculateDeliveryCharge() + " ₹"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>GST Amount</span>
-                  <span>{gst.toLocaleString()} ₹</span>
+                  <span>GST Amount (18%)</span>
+                  <span>{calculateGST(18)} ₹</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Discount 30%</span>
-                  <span>-{discount.toLocaleString()} ₹</span>
+                  <span>Discount 0%</span>
+                  <span>0 ₹</span>
                 </div>
                 <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
                   <span>Total Price</span>
-                  <span>{total.toLocaleString()}</span>
+                  <span>{cartTotalPrice()}</span>
                 </div>
               </div>
               <button className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700">

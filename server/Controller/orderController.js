@@ -80,7 +80,7 @@ exports.addOrder = async (req, res) => {
 exports.getOrder = async (req, res) => {
     try {
         const { id } = req.query;
-        const orderData = await Orders.findOne({ user: id }).populate({
+        const orderData = await Orders.find({ user: id }).populate({
             path:
                 "orderItems.product",
             populate: {
@@ -88,6 +88,7 @@ exports.getOrder = async (req, res) => {
                 model: "category"
             }
         });
+        
         if (!orderData)
             console.log("No order were founded in this user id");
         return res.status(200).json({ message: "Orders fetched successfully", orderData });

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const orderComplete = () => {
   return (
@@ -7,9 +8,13 @@ const orderComplete = () => {
         <span className="text-xl font-bold">Order Completed</span>
         <span className="block text-green-500">Arriving By Wed, Apr 2024</span>
       </div>
-      <button className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8">
-        View order
-      </button>
+      <Link
+        to="user/profile/myOrders"
+        className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8"
+        onClick={alert("clicked")}
+      >
+        View order 
+      </Link>
       <div className="text-6xl text-green-500 mb-4">
         <i className="fas fa-check-circle"></i>
       </div>
@@ -18,9 +23,12 @@ const orderComplete = () => {
         Thank You for your order, Sit tight we are processing your order we will
         update you with your order in email
       </p>
-      <button className="bg-red-600 text-white rounded-full px-6 py-2">
+      <Link
+        to={"/user/shop"}
+        className="bg-red-600 text-white rounded-full px-6 py-2"
+      >
         Continue Shopping
-      </button>
+      </Link>
     </main>
   );
 };

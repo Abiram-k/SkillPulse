@@ -14,10 +14,11 @@ const Checkout = () => {
   const [checkoutComplete, setCheckoutComplete] = useState(false);
 
   const checkoutItems = useSelector((state) => state.users.checkoutItems);
+  console.log(checkoutItems, "Check OUt Items");
   const dispatch = useDispatch();
   const user = useSelector((state) => state.users.user);
   const [addresses, setAddresses] = useState([]);
-
+  const [summary, setSummary] = useState({});
   const orderSummary = {
     items: 2,
     subtotal: 22998,
@@ -26,6 +27,71 @@ const Checkout = () => {
     discount: 7208,
     total: 16819.6,
   };
+
+  const totalPrice = () => {
+    return checkoutItems[0]?.products.reduce(
+      (acc, item) => acc + item.product.salesPrice * item.quantity,
+      0
+    );
+  };
+  const calculateDeliveryCharge = () => {
+    if (totalPrice() < 1000) return Math.round((2 / 100) * totalPrice());
+  };
+
+  const calculateGST = (gstRate) => {
+    return Math.round(
+      (gstRate / 100) *
+        checkoutItems[0]?.products.reduce(
+          (acc, item) => acc + item.product.salesPrice * item.quantity,
+          0
+        )
+    );
+  };
+  const cartTotalPrice = () => {
+    const gstRate = 18;
+    const total =
+      totalPrice() + calculateGST(gstRate) + calculateDeliveryCharge();
+    return total;
+  };
+
+  const calculations = () => {
+    const calcs = {};
+    calcs.totalItems = checkoutItems.reduce(
+      (acc, item) => acc + item.quantity,
+      0
+    );
+
+    calcs.totalPrice = checkoutItems.reduce(
+      (acc, item) => acc + item.quantity * item.product.salesPrice,
+      0
+    );
+
+    if (calcs?.totalPrice < 1000)
+      calcs.deliveryCharge = Math.round((2 / 100) * calcs.totalPrice);
+    else calcs.deliveryCharge = 0;
+
+    calcs.GST = Math.round(
+      (18 / 100) *
+        checkoutItems.reduce(
+          (acc, item) => acc + item.product.salesPrice * item.quantity,
+          0
+        )
+    );
+
+    calcs.checkoutTotal =
+      (calcs.totalPrice || 0) + (calcs.deliveryCharge || 0) + (calcs.GST || 0);
+
+    return calcs;
+  };
+
+  useEffect(() => {
+    const calcs = calculations();
+
+    if (Object.keys(calcs).length > 0) {
+      setSummary(calculations());
+      return;
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -47,7 +113,6 @@ const Checkout = () => {
     setSelectedAddressId(selectedAddress);
   };
 
-  //logic for place order and req to store order in order collection
   const handlePlaceOrder = async () => {
     try {
       const response = await axios.post(
@@ -73,12 +138,17 @@ const Checkout = () => {
   return !checkoutComplete ? (
     <div className="min-h-screen bg-black text-white mt-5 font-mono">
       <div className="max-w-7xl mx-auto p-6">
-        <div className="flex justify-between">
-          <div className="w-2/3">
-            <div className="flex justify-between">
-              <h1 className="text-3xl font-bold text-red-600 mb-8">CHECKOUT</h1>
-              <p className="text-green-500 mt-4">Arrives By Wed, Apr 2024</p>
+        <div className="flex flex-col md:flex-row justify-between">
+          <div className="w-full md:w-2/3">
+            <div className="flex flex-col md:flex-row justify-between">
+              <h1 className="text-3xl font-bold text-red-600 mb-4 md:mb-0">
+                CHECKOUT
+              </h1>
+              <p className="text-green-500 mt-2 md:mt-0">
+                Arrives By Wed, Apr 2024
+              </p>
             </div>
+
             {checkoutItems.length > 0 ? (
               checkoutItems.map((item) => (
                 <div
@@ -190,84 +260,64 @@ const Checkout = () => {
               <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
               <div className="space-y-3">
                 <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="card"
-                    // checked={paymentMethod === "card"}
-                    // onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
+                  <input type="radio" name="payment" value="card" />
                   <span>Debit Card / Credit card</span>
                 </label>
                 <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="upi"
-                    // checked={paymentMethod === "upi"}
-                    // onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
+                  <input type="radio" name="payment" value="upi" />
                   <span>UPI Method</span>
                 </label>
                 <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cod"
-                    checked
-                    // ={paymentMethod === "cod"}
-                    // onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
+                  <input type="radio" name="payment" value="cod" checked />
                   <span>Cash on Delivery</span>
                 </label>
                 <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="wallet"
-                    // checked={paymentMethod === "wallet"}
-                    // onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
+                  <input type="radio" name="payment" value="wallet" />
                   <span>Wallet</span>
                 </label>
               </div>
             </div>
 
-            <div className="flex space-x-4">
-              <button
-                className="bg-red-600 text-white px-8 py-3 rounded-md w-full"
-                onClick={handlePlaceOrder}
-              >
+            <div className="flex flex-col md:flex-row space-x-0 md:space-x-4">
+              <button className="bg-red-600 text-white px-8 py-3 rounded-md w-full mb-4 md:mb-0">
                 Place order
               </button>
-              <button className="bg-red-600 text-white px-8 py-3 rounded-md">
+              <button className="bg-red-600 text-white px-8 py-3 rounded-md w-full">
                 APPLY Coupon
               </button>
             </div>
           </div>
-          <div className="w-1/3 pl-8">
-            <div className="bg-pink-50 p-6 rounded-lg text-black">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-              <div className="space-y-2">
+
+          <div className="w-full md:w-80 mt-6 md:mt-0">
+            <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
+              Checkout Details
+            </div>
+            <div className="bg-pink-50 text-black p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+              <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span>{orderSummary.items} Items</span>
-                  <span>{orderSummary.subtotal} ₹</span>
+                  <span>{summary.totalItems} Items</span>
+                  <span>{summary.totalPrice} ₹</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
-                  <span>{orderSummary.deliveryCharges}</span>
+                  <span className="text-green-600">
+                    {summary.totalPrice > 1000
+                      ? "Free"
+                      : summary.deliveryCharge}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>GST Amount</span>
-                  <span>{orderSummary.gstAmount} ₹</span>
+                  <span>GST Amount (18%)</span>
+                  <span>{summary.GST} ₹</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Discount 30%</span>
-                  <span>-{orderSummary.discount} ₹</span>
+                  <span>Discount 0%</span>
+                  <span>0 ₹</span>
                 </div>
-                <div className="flex justify-between font-bold pt-2 border-t border-gray-300">
-                  <span>Total</span>
-                  <span>{orderSummary.total} ₹</span>
+                <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+                  <span>Total Price</span>
+                  <span>{summary.checkoutTotal}</span>
                 </div>
               </div>
             </div>
@@ -283,11 +333,14 @@ const Checkout = () => {
     <main className="flex-grow flex flex-col items-center  text-center p-4 h-screen space-y-3.5 lg:mt-28">
       <div className="bg-gray-800 rounded-full px-6 py-2 mb-4">
         <span className="text-xl font-bold">Order Completed</span>
-        <span className="block text-green-500">Arriving By Wed, Apr 2024</span>
+        <span className="block text-green-500 ">Arriving By Wed, Apr 2024</span>
       </div>
-      <button className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8">
+      <Link
+        to="/user/profile/myOrders"
+        className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8"
+      >
         View order
-      </button>
+      </Link>
       <div className="text-6xl text-green-500 mb-4">
         <i className="fas fa-check-circle"></i>
       </div>
@@ -296,9 +349,12 @@ const Checkout = () => {
         Thank You for your order, Sit tight we are processing your order we will
         update you with your order in email
       </p>
-      <button className="bg-red-600 text-white rounded-full px-6 py-2">
+      <Link
+        to={"/user/profile/shop"}
+        className="bg-red-600 text-white rounded-full px-6 py-2"
+      >
         Continue Shopping
-      </button>
+      </Link>
     </main>
   );
 };

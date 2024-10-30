@@ -35,6 +35,7 @@ import Wishlist from "./Pages/User/wishlist/Wishlist";
 import ShoppingCartPage from "./Pages/User/cart/ShoppingCartPage";
 import Checkout from "./Pages/User/checkout/CheckOut";
 import ManageOrders from "./Pages/User/manageOrders/manageOrders";
+import OrderManagement from "./Pages/Admin/orderManagement/OrderManagement";
 function App() {
   return (
     <>
@@ -221,6 +222,14 @@ function App() {
               element={
                 <ProtectedDashboardAdmin>
                   <Dashboard />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
+              path="orders"
+              element={
+                <ProtectedDashboardAdmin>
+                  <OrderManagement />
                 </ProtectedDashboardAdmin>
               }
             />

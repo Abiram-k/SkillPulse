@@ -14,6 +14,7 @@ import {
   CreditCard,
   ShoppingBag,
   Percent,
+  Bandage,
 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -66,7 +67,7 @@ export default function Dashboard() {
       >
         <div className="p-4 bg-slate-300">
           <button className="text-2xl font-bold mb-8">SkillPulse</button>
-          <nav className="lg:space-y-24 flex flex-col ">
+          <nav className="lg:space-y-12 flex flex-col ">
             <div className="flex flex-col lg:space-y-3">
               <NavItem icon={Menu} text="Dashboard" redirect="dashboard" />
               <NavItem
@@ -81,9 +82,9 @@ export default function Dashboard() {
               <NavItem icon={Tag} text="Coupon" redirect="coupons" />
               <NavItem icon={CreditCard} text="Payments" redirect="payments" />
               <NavItem icon={ShoppingBag} text="Category" redirect="category" />
+              <NavItem icon={Bandage} text="Brand" redirect="brands" />
               <NavItem icon={Percent} text="Offers" redirect="offers" />
             </div>
-            {/* <div className="absolute bottom-0 w-full p-4 space-y-2 bg-slate-200"> */}
             <div>
               <NavItem icon={Settings} text="Settings" redirect="settings" />
               <NavItem icon={LogOut} text="Logout" redirect="/admin/login" />
