@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setProductDetails } from "../../../redux/userSlice";
+import { logoutUser, setProductDetails } from "../../../redux/userSlice";
 import { Heart } from "lucide-react";
 
 const HomePage = () => {
@@ -29,16 +29,10 @@ const HomePage = () => {
         setProducts(response.data.products);
         setCategory(response.data.category);
 
-        if (response.data.isBlocked) {
-          setIsBlocked(true);
-          navigate("/login");
-        }
       } catch (error) {
         if (error?.response.data.isBlocked) {
-          setIsBlocked(true);
-          navigate("/login");
+          dispatch(logoutUser());
         }
-
         Toast.fire({
           icon: "error",
           title: `${error?.response?.data.message}`,
@@ -71,6 +65,9 @@ const HomePage = () => {
       });
     } catch (error) {
       console.log(error);
+      if (error?.response.data.isBlocked) {
+        dispatch(logoutUser());
+      }
       Toast.fire({
         icon: "error",
         title: `${error?.response?.data.message}`,

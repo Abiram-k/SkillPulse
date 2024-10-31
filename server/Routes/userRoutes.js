@@ -32,25 +32,25 @@ router.get('/auth/google/callback',
 router.get("/products", verifyUser, isBlocked, userController.getProducts);
 router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
 
-router.post("/user", uploadImage.single("file"), userController.updateUser);
-router.get("/user/:id", userController.getUser);
-router.post("/address", uploadImage.none(), userController.addAddress);//none to handle form data ,with no files
-router.get("/address", userController.getAddress);
-router.delete("/address", userController.deleteAddress);
-router.get("/editAddress", userController.getEditAddress);
-router.put("/editAddress", uploadImage.none(), userController.editAddress);
+router.post("/user", verifyUser, isBlocked, uploadImage.single("file"), userController.updateUser);
+router.get("/user/:id", verifyUser, isBlocked, userController.getUser);
+router.post("/address", verifyUser, isBlocked, uploadImage.none(), userController.addAddress);//none to handle form data ,with no files
+router.get("/address", verifyUser, isBlocked, userController.getAddress);
+router.delete("/address", verifyUser, isBlocked, userController.deleteAddress);
+router.get("/editAddress", verifyUser, isBlocked, userController.getEditAddress);
+router.put("/editAddress", verifyUser, isBlocked, uploadImage.none(), userController.editAddress);
 
-router.post("/addToCart/:id", userController.addToCart);
-router.get("/cart/:id", cartController.getCart);
-router.post("/updateQuantity/:productId", cartController.updateQuantity);
-router.delete("/cartItem/:productId", cartController.removeCartItem);
+router.post("/addToCart/:id", verifyUser, isBlocked, userController.addToCart);
+router.get("/cart/:id", verifyUser, isBlocked, cartController.getCart);
+router.post("/updateQuantity/:productId", verifyUser, isBlocked, cartController.updateQuantity);
+router.delete("/cartItem/:productId", verifyUser, isBlocked, cartController.removeCartItem);
 
 // router.delete("/cartItem/:productId", wishlistController.removewishlistItme);
-router.get("/wishlist", wishlistController.getwishlist);
-router.post("/wishlist", wishlistController.addTowishlist);
+router.get("/wishlist", verifyUser, isBlocked, wishlistController.getwishlist);
+router.post("/wishlist", verifyUser, isBlocked, wishlistController.addTowishlist);
 
-router.post("/order/:id", orderController.addOrder);
-router.get("/order", orderController.getOrder);
-router.post("/cancelOrder", orderController.cancelOrder);
+router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
+router.get("/order", verifyUser, isBlocked, orderController.getOrder);
+router.post("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder);
 
 module.exports = router;

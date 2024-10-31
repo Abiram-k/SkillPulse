@@ -10,10 +10,11 @@ const AddProduct = () => {
   const [spinner, setSpinner] = useState(false);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
+  const [brand, setBrand] = useState("");
   const [description, setDescription] = useState("");
   const [regularPrice, setRegularPrice] = useState("");
   const [salesPrice, setSalesPrice] = useState("");
-  const [brand, setBrand] = useState("");
+  const [brands, setBrands] = useState([]);
   const [units, setUnits] = useState("");
   const [categories, setCategories] = useState([]);
 
@@ -39,7 +40,6 @@ const AddProduct = () => {
     if (category.trim() === "") error.category = "Category is required *";
     if (description.trim() === "")
       error.description = "description is required *";
-    if (category.trim() === "") error.category = "Category is required *";
     if (regularPrice.trim() === "")
       error.regularPrice = "regularPrice is required *";
     else if (isNaN(regularPriceInt))
@@ -73,11 +73,21 @@ const AddProduct = () => {
       }
     })();
   }, []);
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/admin/brand");
+        setBrands(response?.data?.brands);
+      } catch (err) {
+        alert(err?.response?.data?.message);
+      }
+    })();
+  }, []);
   // Handle image file change and set image for cropping
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const maxSize = 1 * 1024 * 1024;
+    const maxSize = 1 * 1024 * 1024 *1024;
     if (
       imageFile &&
       allowedTypes.includes(imageFile.type) &&
@@ -233,6 +243,31 @@ const AddProduct = () => {
           )}
         </div>
         <div>
+          <label className="flex items-center">
+            Brand:
+            <select
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+            >
+              {brands.length > 0 ? (
+                brands.map((brand) => (<>
+                  <option key={brand._id} value={brand.name}>
+                    {brand.name}
+                  </option>
+                  <option key={brand._id} value={brand.name}>
+                    {brand.name}
+                  </option>
+                </>
+                ))
+              ) : (
+                <option value="">No Brands were added</option>
+              )}
+            </select>
+          </label>
+          {message.brand && <p className="text-red-600">{message.brand}</p>}
+        </div>
+        <div>
           <label className="flex items-center col-span-2">
             Description:
             <input
@@ -260,7 +295,7 @@ const AddProduct = () => {
             <p className="text-red-600">{message.salesPrice}</p>
           )}
         </div>
-        <div>
+        {/* <div>
           <label className="flex items-center">
             Brand:
             <input
@@ -270,8 +305,9 @@ const AddProduct = () => {
               onChange={(e) => setBrand(e.target.value)}
             />
           </label>
-          {message.brand && <p className="text-red-600">{message.brand}</p>}
+          {message.brand && <p className="text-red-600">{message.brand}</p>} 
         </div>
+          */}
         <div>
           <label className="flex items-center">
             Regular Price :
@@ -308,7 +344,7 @@ const AddProduct = () => {
               className="border rounded-lg p-4 flex flex-col items-center"
             >
               <label htmlFor={`fileInput${index}`}>
-                <img 
+                <img
                   src={images[field] || "https://placehold.co/100x100"}
                   alt="product"
                   className="mb-2"

@@ -1,7 +1,7 @@
 const Wishlist = require("../models/wishlistModel");
 
 
-exports.getwishlist = async (req, res) => {
+exports.getwishlist = async (req, res) => { 
     try {
         const wishlist = await Wishlist.find();
         console.log(wishlist);
@@ -15,7 +15,7 @@ exports.getwishlist = async (req, res) => {
 exports.addTowishlist = async (req, res) => {
     try {
         console.log("hey")
-    } catch (error) {
+    } catch (error) { 
 
     }
 }

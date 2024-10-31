@@ -12,7 +12,7 @@ exports.isBlocked = async (req, res, next) => {
 
         if (authUser.isBlocked) {
             req.body.isBlocked = true;
-            return res.status(404).json({ message: `No access ,${authUser.firstName} were blocked by admin` });
+            return res.status(404).json({ message: `No access ,${authUser.firstName} were blocked by admin`, isBlocked: req.body.isBlocked });
         }
         else {
             res.status(200)

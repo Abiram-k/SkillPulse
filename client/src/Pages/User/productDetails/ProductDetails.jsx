@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Star, Heart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { setProductDetails } from "../../../redux/userSlice";
+import { logoutUser, setProductDetails } from "../../../redux/userSlice";
 import { Toast } from "@/Components/Toast";
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 
 const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -12,12 +12,22 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const [magnifierVisible, setMagnifierVisible] = useState(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
-  const [limitAddToCart, setLimitAddToCart] = useState(0);
   const dispatch = useDispatch();
   const product = useSelector((state) => state.users.details); // this is an array object,so first element is the product object
   const user = useSelector((state) => state.users.user);
   console.log(product, "From product details page");
-  const { setCartCount } = useOutletContext();
+
+  const [cartProduct, setCartProduct] = useState(
+    JSON.parse(localStorage.getItem("added")) || []
+  );
+  const [goToCart, setGoToCart] = useState(false);
+
+  useEffect(() => {
+    const isProductInCart = cartProduct.includes(product[0]._id);
+    // alert(isProductInCart);
+    setGoToCart(isProductInCart);
+  }, [cartProduct, product]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -81,11 +91,7 @@ const ProductDetails = () => {
   const gotoDetails = (product) => dispatch(setProductDetails(product));
 
   const handleAddToCart = async () => {
-
-    setLimitAddToCart((prevCount) => prevCount + 1);
-    setCartCount((prevCount) => prevCount + 1); //outlet provider
- 
-
+    // if (!cartProduct.find((product) => product === product[0]._id)) {
     try {
       const response = await axios.post(
         `http://localhost:3000/addToCart/${product[0]._id}`,
@@ -97,21 +103,36 @@ const ProductDetails = () => {
           },
         }
       );
-      console.log(response.data);
+      setCartProduct((prev) => {
+        if (!prev.includes(product[0]._id)) {
+          const updatedCart = [...prev, product[0]._id];
+          localStorage.setItem("added", JSON.stringify(updatedCart));
+          return updatedCart;
+        }
+        return prev;
+      });
+
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
       });
     } catch (error) {
-      console.log(error?.response?.data?.massage);
+      if (error?.response.data.isBlocked) {
+        dispatch(logoutUser());
+      }
       Toast.fire({
         icon: "error",
         title: `${error?.response?.data?.message}`,
       });
       console.log(error);
     }
+    // } else {
+    // }
   };
 
+  useEffect(() => {
+    localStorage.setItem("added", JSON.stringify(cartProduct));
+  }, [cartProduct]);
   return (
     <div className="min-h-screen bg-black text-white">
       <main className="container mx-auto px-4 py-8">
@@ -213,15 +234,21 @@ const ProductDetails = () => {
                   ))}
                 </div>
                 <div className="flex space-x-4">
-                  <button
-                    className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
-                    onClick={handleAddToCart}
-                    disabled={limitAddToCart == product.units}
-                  >
-                    {limitAddToCart === product.units
-                      ? `${product.units} added / 0 left`
-                      : "Add To Cart"}
-                  </button>
+                  {!goToCart ? (
+                    <button
+                      className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
+                      onClick={handleAddToCart}
+                    >
+                      Add To Cart
+                    </button>
+                  ) : (
+                    <Link
+                      to={"/user/cart"}
+                      className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
+                    >
+                      Go to cart
+                    </Link>
+                  )}
                   <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
                     Buy Now
                   </button>
@@ -298,5 +325,3 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
-
-// export default ProductDetails;

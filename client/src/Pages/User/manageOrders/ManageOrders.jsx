@@ -34,9 +34,9 @@ const ManageOrders = () => {
   console.log("From fronend", orders);
 
   const getStatusColor = (status) => {
-    if (status === "processing") return "text-yellow-500";
+    if (status == "processing") return "text-yellow-500";
     if (status === "shipped") return "text-blue-500";
-    if (status === "delivered") return "text-green-500";
+    if (status == "delivered") return "text-green-500";
     if (status === "pending") return "text-orange-500";
     if (status === "canceled") return "text-red-500";
     return "text-gray-500";
@@ -123,7 +123,7 @@ const ManageOrders = () => {
                   <div className="flex justify-between mt-2">
                     <div>
                       Status:{" "}
-                      <span className={`text-yellow-500 ${getStatusColor(item.productStatus)}`}>
+                      <span className={` ${getStatusColor(item.productStatus)}`}>
                         {item.productStatus}
                       </span>
                     </div>

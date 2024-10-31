@@ -5,6 +5,7 @@ import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Toast } from "@/Components/Toast";
+import { logoutUser } from "@/redux/userSlice";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
@@ -12,7 +13,6 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedAddress, setSelectedAddress] = useState({});
   const [checkoutComplete, setCheckoutComplete] = useState(false);
-
   const checkoutItems = useSelector((state) => state.users.checkoutItems);
   console.log(checkoutItems, "Check OUt Items");
   const dispatch = useDispatch();
@@ -99,11 +99,19 @@ const Checkout = () => {
         const response = await axios.get(
           `http://localhost:3000/address?id=${user?._id}${
             selectedAddressId ? `&addrId=${selectedAddressId}` : ""
-          }`
+          }`,
+          { withCredentials: true }
         );
         setAddresses(response.data.addresses);
         setSelectedAddress(response.data.selectedAddress);
       } catch (error) {
+        if (error?.response.data.isBlocked) {
+          dispatch(logoutUser());
+          Toast.fire({
+            icon: "error",
+            title: `${error?.response.data.message}`,
+          });
+        }
         console.log(error);
       }
     })();

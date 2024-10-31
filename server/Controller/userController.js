@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { error } = require('console');
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
+const Brand = require('../models/brandModel');
 const { isBlocked } = require('../Middleware/isBlockedUser');
 const { listCategory } = require('./adminController');
 const Cart = require('../models/cartModel');
@@ -215,7 +216,12 @@ exports.getProducts = async (req, res) => {
         let isBlocked = req.body.isBlocked || false;
         const isListedCategory = Category.find({ isListed: true }).select("_id");
         const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
-        const products = await Product.find({ category: { $in: isListedCategoryIds } }).populate("category");
+
+        const isListedBrand = Brand.find({ isListed: true }).select("_id");
+        const isListedBrandIds = (await isListedBrand).map((brand) => brand._id);
+
+        const products = await Product.find({ category: { $in: isListedCategoryIds } }, { brand: { $in: isListedBrand } }).populate([{ path: "category" }, { path: "brand" }]);
+
         console.log(products)
         const category = await Category.find()
         return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
@@ -349,7 +355,6 @@ exports.getEditAddress = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ message: "Failed to fetch details,You can enter details" })
     }
-
 }
 
 exports.editAddress = async (req, res) => {

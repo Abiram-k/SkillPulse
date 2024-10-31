@@ -40,6 +40,7 @@ const Shop = () => {
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
   const currentProduct = products.slice(firstPostIndex, lastPostIndex);
+  
   return (
     <div>
       <div

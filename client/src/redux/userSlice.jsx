@@ -6,8 +6,8 @@ const initialState = {
   checkoutItems: JSON.parse(localStorage.getItem("checkoutItems")) || null,
   signUpSuccess: localStorage.getItem("signUpSuccess") || null,
   // selectedAddress also need to remove from localstorage
+  cartProductsQty: JSON.parse(localStorage.getItem("cartProductsQty")) || [],
 };
-
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -27,6 +27,10 @@ const userSlice = createSlice({
     setProductDetails: (state, action) => {
       state.details = [action.payload];
       localStorage.setItem("productDetails", JSON.stringify(state.details));
+    },
+    setCartProductQty: (state, action) => {
+      state.cartProductsQty = action.payload;
+      localStorage.setItem("cartProductsQty", JSON.stringify(action.payload));
     },
     checkoutItems: (state, action) => {
       state.checkoutItems = action.payload;
@@ -52,5 +56,6 @@ export const {
   signUpSuccess,
   otpSuccess,
   checkoutItems,
-  ordered
+  ordered,
+  setCartProductQty
 } = userSlice.actions;

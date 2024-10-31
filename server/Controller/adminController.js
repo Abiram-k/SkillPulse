@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require("../models/userModel");
 const Admin = require("../models/adminModel");
 const Category = require("../models/categoryModel");
+const Brand = require("../models/brandModel");
 const Product = require("../models/productModel");
 const Orders = require("../models/orderModel");
 const mongoose = require("mongoose")
@@ -97,6 +98,37 @@ exports.addCategory = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+exports.addBrand = async (req, res) => {
+    try {
+        let { name, description } = req.body;
+        console.log(req.file)
+        const image = req.file?.path;
+        console.log(name, description);
+        if (!description) {
+            description = undefined;
+        }
+        const existBrand = await Brand.findOne({
+            name: {
+                $regex: `^${name}$`,
+                $options: ""
+            }
+        })
+        if (existBrand)
+            return res.status(400).json({ message: "Brand already exists" });
+        else {
+            const brand = await Brand.create({
+                name, description, image
+            })
+            return res.status(200).json({
+                message: "Brand added succesfully",
+                brand
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 
 exports.getCategory = async (req, res) => {
     try {
@@ -109,6 +141,89 @@ exports.getCategory = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch categories" });
     }
 }
+exports.getBrand = async (req, res) => {
+    try {
+        const brands = await Brand.find({});
+        if (brands) {
+            return res.json({ message: "succesully fetched all brands", brands });
+        }
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ message: "Failed to fetch brands" });
+    }
+}
+
+exports.deleteBrand = async (req, res) => {
+    try {
+        console.log(await Brand.find());
+        let { id } = req.params;
+        console.log("brand id is:", id);
+        const deletedBrand = await Brand.
+            findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
+        console.log(deletedBrand)
+        if (deletedBrand)
+            return res.status(200).json({ message: "Brand successfully deleted" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "failed to delete Brand" });
+    }
+}
+
+exports.brandRestore = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("brand id is:", id);
+        const RestoredBrand = await Brand.
+            findByIdAndUpdate({ _id: id }, { isDeleted: false, deletedAt: null });
+
+        if (RestoredBrand)
+            return res.status(200).json({ message: "Brand successfully Restore" });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "failed to Restore Brand" });
+    }
+}
+
+exports.editBrand = async (req, res) => {
+    try {
+        let { id, name, description } = req.body;
+        if (!description) {
+            description = undefined;
+        }
+        const isExistbrand = await Brand.findOne({ name, _id: { $ne: id } });
+        if (isExistbrand) {
+            return res.status(400).json({ message: "Brand already exists" });
+        }
+        const updateData = { name };
+        if (description) updateData.description = description;
+        if (req.file?.path) updateData.image = req.file.path;
+
+        const updatedBrand = await Brand.findByIdAndUpdate(id, updateData, { new: true });
+
+        return res.status(200).json({
+            message: "Successfully edited the brand",
+            updatedBrand,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message || "Brand not edited" });
+    }
+};
+
+exports.listBrand = async (req, res) => {
+    try {
+
+        const { id } = req.params;
+        const brand = await Brand.findById(id);
+        console.log(brand);
+        brand.isListed = !brand?.isListed
+        brand.save();
+        return res.status(200).json({ message: "success", brand })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: error.message || "Failed to list/unlist Brand" })
+    }
+}
+
 
 exports.deleteCategory = async (req, res) => {
     try {
@@ -126,6 +241,8 @@ exports.deleteCategory = async (req, res) => {
         return res.status(500).json({ message: "failed to delete category" });
     }
 }
+
+
 exports.categoryRestore = async (req, res) => {
     try {
         const { id } = req.params;
@@ -182,6 +299,7 @@ exports.listCategory = async (req, res) => {
     }
 }
 
+
 exports.getProduct = async (req, res) => {
     try {
         const products = await Product.find().populate("category")
@@ -204,15 +322,7 @@ exports.addProduct = async (req, res) => {
             category,
             brand
         } = req.body;
-        // console.log(
-        //     productName,
-        //     productDescription,
-        //     salesPrice,
-        //     regularPrice,
-        //     units,
-        //     category,
-        //     brand
-        // )
+      
         const productImage = req.files.map((file) => file.path)
         const existProduct = await Product.findOne({ productName });
 

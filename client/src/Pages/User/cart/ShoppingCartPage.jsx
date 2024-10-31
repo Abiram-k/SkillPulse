@@ -4,7 +4,7 @@ import axios from "axios";
 import { Toast } from "@/Components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { checkoutItems } from "@/redux/userSlice";
+import { setCartProductQty, checkoutItems } from "@/redux/userSlice";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 
 const ShoppingCartPage = () => {
@@ -17,11 +17,13 @@ const ShoppingCartPage = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/cart/${user._id}`
+          `http://localhost:3000/cart/${user._id}`,{withCredentials:true}
         );
         setCartItems(response.data.cartItems);
+
         console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
+        console.log(error);
         Toast.fire({
           icon: "error",
           title: `${error?.response?.data.message}`,
@@ -31,23 +33,26 @@ const ShoppingCartPage = () => {
   }, [trigger]);
 
   useEffect(() => {
-    console.log("Updated cart items:", cartItems);
-  }, []);
+    const productsInfo = [];
 
-  const updateQuantityOld = (id, change) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
-  };
+    if (cartItems.length > 0 && cartItems[0]?.products) {
+      cartItems[0]?.products.forEach((product) => {
+        const quantity = product.quantity || 0;
+        productsInfo.push({
+          product: product.product._id,
+          quantity,
+        });
+      });
+    }
+
+    if (productsInfo.length > 0) {
+      dispatch(setCartProductQty(productsInfo));
+    } else {
+      console.warn("No valid products found in cartItems.");
+    }
+  }, [cartItems, dispatch]);
 
   const removeItem = async (id) => {
-    alert(id);
-    alert(user._id);
-    setTrigger((t) => t + 1);
     try {
       const response = await axios.delete(
         `http://localhost:3000/cartItem/${id}`,
@@ -58,6 +63,7 @@ const ShoppingCartPage = () => {
           },
         }
       );
+      setTrigger((t) => t + 1);
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
@@ -71,24 +77,48 @@ const ShoppingCartPage = () => {
     }
   };
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const discount = subtotal * 0.3;
-  const gst = subtotal * 0.05;
-  const total = subtotal - discount + gst;
+  // const subtotal = cartItems.reduce(
+  //   (sum, item) => sum + item.price * item.quantity,
+  //   0
+  // );
+  // const discount = subtotal * 0.3;
+  // const gst = subtotal * 0.05;
+  // const total = subtotal - discount + gst;
 
   const updateQuantity = async (productId, value) => {
-    setTrigger((t) => t + 1);
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/updateQuantity/${productId}`,
-        {},
-        { withCredentials: true, params: { userId: user._id, value } }
-      );
-    } catch (error) {
-      console.log(error);
+    const item = cartItems[0]?.products.find(
+      (item) => item.product._id === productId
+    );
+    if (item) {
+      const newQuantity = item.quantity + value;
+      const availableQuantity = item.product.units;
+
+      if (newQuantity >= 1) {
+        if (newQuantity <= availableQuantity) {
+          try {
+            const response = await axios.post(
+              `http://localhost:3000/updateQuantity/${productId}`,
+              {},
+              { withCredentials: true, params: { userId: user._id, value } }
+            );
+            setTrigger((t) => t + 1);
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: `Already added all available (${item.product.units}) stocks`,
+          });
+        }
+      } else {
+        const userConfirmed = confirm("Product will remove from your cart");
+        let id = productId;
+        if (userConfirmed) await removeItem(id);
+        else return;
+      }
+    } else {
+      alert("No Cart Item Were Founded");
     }
   };
 
@@ -99,8 +129,6 @@ const ShoppingCartPage = () => {
         title: `Add some items and checkout`,
       });
     } else {
-      // alert("check for data ,sended to checkout");
-      // console.log("Data to Checkout", cartItems[0].products);
       dispatch(checkoutItems(cartItems[0]?.products));
       navigate("checkout");
     }
@@ -124,7 +152,7 @@ const ShoppingCartPage = () => {
           (acc, item) => acc + item.product.salesPrice * item.quantity,
           0
         )
-    );
+    )||0;
   };
   const cartTotalPrice = () => {
     const gstRate = 18;
@@ -157,6 +185,9 @@ const ShoppingCartPage = () => {
                     <h3 className="text-lg">{item?.product.productName}</h3>
                     <p className="text-md mt-2">
                       {item?.product.productDescription}
+                    </p>
+                    <p className="text-md mt-2">
+                      available stock : {item?.product.units}
                     </p>
                     <div className="flex gap-2">
                       <p className="text-xl mt-2">
@@ -204,7 +235,7 @@ const ShoppingCartPage = () => {
             </button>
           </div>
 
-          <div className="w-full md:w-80 my-auto">
+          <div className="w-full md:w-80 ">
             <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
               Checkout Details
             </div>

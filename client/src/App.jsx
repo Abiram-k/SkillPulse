@@ -36,6 +36,8 @@ import ShoppingCartPage from "./Pages/User/cart/ShoppingCartPage";
 import Checkout from "./Pages/User/checkout/CheckOut";
 import ManageOrders from "./Pages/User/manageOrders/manageOrders";
 import OrderManagement from "./Pages/Admin/orderManagement/OrderManagement";
+import Brand from "./Pages/Admin/brandManagement/Brand";
+import EditBrand from "./Pages/Admin/brandManagement/EditBrand";
 function App() {
   return (
     <>
@@ -280,11 +282,31 @@ function App() {
               }
             />
             <Route
+              path="brand"
+              element={
+                <ProtectedDashboardAdmin>
+                  <Provider>
+                    <Brand />
+                  </Provider>
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
               path="category/edit"
               element={
                 <ProtectedDashboardAdmin>
                   <Provider>
                     <EditCategory />
+                  </Provider>
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
+              path="brand/edit"
+              element={
+                <ProtectedDashboardAdmin>
+                  <Provider>
+                    <EditBrand />
                   </Provider>
                 </ProtectedDashboardAdmin>
               }
