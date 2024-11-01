@@ -89,8 +89,6 @@ function App() {
               </ProtectUserHome>
             }
           >
-            <Route path="search" element={<SearchProducts />} />
-
             <Route
               path="home"
               element={
@@ -120,6 +118,15 @@ function App() {
               }
             />
             <Route
+              path="search"
+              element={
+                <ProtectUserHome>
+                  <SearchProducts />
+                </ProtectUserHome>
+              }
+            />
+
+            <Route
               path="shop"
               element={
                 <ProtectUserHome>
@@ -127,6 +134,7 @@ function App() {
                 </ProtectUserHome>
               }
             />
+
             <Route
               path="checkout"
               element={

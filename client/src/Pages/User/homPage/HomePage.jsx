@@ -12,6 +12,7 @@ const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [addedToWishlist, setAddedToWishlist] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   console.log(
@@ -27,10 +28,12 @@ const HomePage = () => {
         });
         console.log("product from homepage:", products);
         setProducts(response.data.products);
-        setCategory(response.data.category);
-
+        setCategory(response.data.categoryDoc);
       } catch (error) {
-        if (error?.response.data.isBlocked) {
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
           dispatch(logoutUser());
         }
         Toast.fire({
@@ -59,6 +62,7 @@ const HomePage = () => {
         {},
         { withCredentials: true }
       );
+      setAddedToWishlist(true);
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
@@ -75,6 +79,10 @@ const HomePage = () => {
     }
   };
 
+  const handleRemoveFromWishlist = async (req, res) => {
+    try {
+    } catch (error) {}
+  };
   return (
     <div>
       <section className="relative overflow-hidden h-80 lg:h-auto">
@@ -189,12 +197,17 @@ const HomePage = () => {
                     className="w-full h-32 object-cover rounded cursor-pointer"
                     onClick={() => goToDetails(product)}
                   />
-                  <Heart
-                    className="absolute top-2 right-3 w-6 h-6 
-                     text-red-600 fill-red-600
-                     "
-                    onClick={handleAddToWishList}
-                  />
+                  {addedToWishlist ? (
+                    <Heart
+                      className="absolute top-2 right-3 w-6 h-6  fill-red-600 text-red-600" 
+                      onClick={handleRemoveFromWishlist}
+                    />
+                  ) : (
+                    <Heart
+                      className="absolute top-2 right-3 w-6 h-6" 
+                      onClick={handleAddToWishList}
+                    />
+                  )}
 
                   <div className="mt-2 text-center">
                     {/* <h3 className="text-sm font-semibold text-white">

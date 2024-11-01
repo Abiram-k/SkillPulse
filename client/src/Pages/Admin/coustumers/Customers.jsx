@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Pagination from "../../../Components/Pagination";
 import { User } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { logoutAdmin } from "@/redux/adminSlice";
 
 const Customers = () => {
   const [users, setUsers] = useState([]);
@@ -10,16 +12,20 @@ const Customers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(5);
   const [slno, setSlNo] = useState(0);
+  const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/admin/customers"
+          "http://localhost:3000/admin/customers",{withCredentials:true}
         );
         console.log(response.data.users);
         setUsers(response.data.users);
         // console.log(users);
       } catch (error) {
+        if (error?.response.data.message == "Token not found") {
+          dispatch(logoutAdmin());
+        }
         console.log(error);
         alert(error.message);
       }

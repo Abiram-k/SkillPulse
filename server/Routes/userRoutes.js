@@ -9,13 +9,19 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const { verifyUser } = require("../Middleware/userAuth");
 const { isBlocked } = require("../Middleware/isBlockedUser");
-const { uploadImage } = require("../Middleware/multer")
+const { uploadImage } = require("../Middleware/multer");
+const dotenv = require("dotenv");
+const path = require("node:path")
+
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 router.get('/', userController.baseRoute);
 router.post('/signUp', userController.signUp);
 router.post('/login', userController.login);
 router.post('/otp', userController.otp);
-router.post('/resendOtp', userController.resendOtp)
+router.post('/resendOtp', userController.resendOtp);
+
 router.get('/auth/google',
     passport.authenticate('google', {
         scope:
@@ -26,11 +32,32 @@ router.get('/auth/google/callback',
     passport.authenticate('google',
         { failureRedirect: 'http://localhost:5173/login' }),
     (req, res) => {
+        const token = jwt.sign({
+            id: req.user._id,
+            email: req.user.email
+        },
+            process.env.JWT_SECRETE,
+            { expiresIn: '1h' })
+
+        res.cookie('userToken', token, {
+            httpOnly: true,
+            secure: false,    
+            sameSite: 'Lax',
+            maxAge: 3600000    
+        });
+
         res.redirect('http://localhost:5173/googleRedirect')
     });
 
+
+
+
+
+
 router.get("/products", verifyUser, isBlocked, userController.getProducts);
 router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
+router.get("/brand-category-info/:id", userController.getBrandCategoryInfo);
+
 
 router.post("/user", verifyUser, isBlocked, uploadImage.single("file"), userController.updateUser);
 router.get("/user/:id", verifyUser, isBlocked, userController.getUser);

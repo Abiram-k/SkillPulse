@@ -18,6 +18,6 @@ exports.verifyAdmin = async (req, res, next) => {
         }
     } else {
         console.log("Token not founded");
-        res.status(404).json({ message: "Token not found, authrization failed" })
+        res.status(404).json({ message: "Token not found" })
     }
 }

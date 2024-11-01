@@ -6,7 +6,8 @@ const { verifyAdmin } = require("../Middleware/adminAuth");
 
 
 router.post("/adminLogin", adminController.login);
-router.get("/customers", adminController.customers);
+router.get("/customers",verifyAdmin, adminController.customers);
+
 router.get("/block/:id", verifyAdmin, adminController.blockUser);
 router.put("/productDelete/:id", verifyAdmin, adminController.deleteProduct);
 router.put("/productRestore/:id", verifyAdmin, adminController.restoreProduct);

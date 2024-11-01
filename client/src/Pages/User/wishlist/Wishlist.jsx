@@ -10,7 +10,9 @@ const Wishlist = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/wishlist`);
+        const response = await axios.get(`http://localhost:3000/wishlist`, {
+          withCredentials: true,
+        });
         setwishlist(response.data.wishlist);
         console.log("Wishlist Items : ", response.data.wishlist);
       } catch (error) {
@@ -56,7 +58,9 @@ const Wishlist = () => {
         <div className="w-full max-w-3xl space-y-6 ">
           <div className="wishlist p-6 bg-gray-800 rounded-lg flex items-center space-x-4 justify-center text-xl font-semibold">
             <i className="fas fa-heart text-red-600"></i>
-            <span>My Wishlist <span className="font-mono">(0)</span></span>
+            <span>
+              My Wishlist <span className="font-mono">(0)</span>
+            </span>
           </div>
           <div className="w-full flex justify-center align-middle">
             <h3 className="font-semibold"> No Items were added yet</h3>

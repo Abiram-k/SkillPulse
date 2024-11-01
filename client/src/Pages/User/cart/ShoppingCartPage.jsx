@@ -13,11 +13,13 @@ const ShoppingCartPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
+
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/cart/${user._id}`,{withCredentials:true}
+          `http://localhost:3000/cart/${user._id}`,
+          { withCredentials: true }
         );
         setCartItems(response.data.cartItems);
 
@@ -64,6 +66,13 @@ const ShoppingCartPage = () => {
         }
       );
       setTrigger((t) => t + 1);
+      const alreadyHaveProducts =
+        JSON.parse(localStorage.getItem("added")) || [];
+      const updatedProducts = alreadyHaveProducts.filter(
+        (product) => product != id
+      );
+      localStorage.setItem("added", JSON.stringify(updatedProducts));
+
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
@@ -76,14 +85,6 @@ const ShoppingCartPage = () => {
       });
     }
   };
-
-  // const subtotal = cartItems.reduce(
-  //   (sum, item) => sum + item.price * item.quantity,
-  //   0
-  // );
-  // const discount = subtotal * 0.3;
-  // const gst = subtotal * 0.05;
-  // const total = subtotal - discount + gst;
 
   const updateQuantity = async (productId, value) => {
     const item = cartItems[0]?.products.find(
@@ -146,13 +147,15 @@ const ShoppingCartPage = () => {
   };
 
   const calculateGST = (gstRate) => {
-    return Math.round(
-      (gstRate / 100) *
-        cartItems[0]?.products.reduce(
-          (acc, item) => acc + item.product.salesPrice * item.quantity,
-          0
-        )
-    )||0;
+    return (
+      Math.round(
+        (gstRate / 100) *
+          cartItems[0]?.products.reduce(
+            (acc, item) => acc + item.product.salesPrice * item.quantity,
+            0
+          )
+      ) || 0
+    );
   };
   const cartTotalPrice = () => {
     const gstRate = 18;

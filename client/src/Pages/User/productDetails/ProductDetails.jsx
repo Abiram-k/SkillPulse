@@ -12,6 +12,7 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const [magnifierVisible, setMagnifierVisible] = useState(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+  const [isAvailable, setIsAvailable] = useState(false);
   const dispatch = useDispatch();
   const product = useSelector((state) => state.users.details); // this is an array object,so first element is the product object
   const user = useSelector((state) => state.users.user);
@@ -24,7 +25,6 @@ const ProductDetails = () => {
 
   useEffect(() => {
     const isProductInCart = cartProduct.includes(product[0]._id);
-    // alert(isProductInCart);
     setGoToCart(isProductInCart);
   }, [cartProduct, product]);
 
@@ -32,7 +32,21 @@ const ProductDetails = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/getSimilarProduct/${product[0]._id}`
+          `http://localhost:3000/brand-category-info/${product[0]._id}`,
+          { withCredentials: true }
+        );
+        if (response.data.isAvailable)
+          setIsAvailable(response.data.isAvailable);
+      } catch (error) {
+        console.log(error.message);
+      }
+    })();
+
+    (async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/getSimilarProduct/${product[0]._id}`,
+          { withCredentials: true }
         );
         setSimilarProducts(response.data.similarProducts);
       } catch (error) {
@@ -42,7 +56,7 @@ const ProductDetails = () => {
         console.error(error);
       }
     })();
-  }, [product]);
+  }, [product,isAvailable]);
 
   const reviews = [
     {
@@ -200,9 +214,9 @@ const ProductDetails = () => {
               </div>
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-sm text-gray-400">
+                  {/* <h2 className="text-sm text-gray-400">
                     {"Brand not added" || product.brand}
-                  </h2>
+                  </h2> */}
                   <h1 className="text-xl font-bold">{product.productName}</h1>
                   <p className="text-l font-semi-bold">
                     {product.productDescription}
@@ -234,24 +248,37 @@ const ProductDetails = () => {
                   ))}
                 </div>
                 <div className="flex space-x-4">
-                  {!goToCart ? (
+                  {isAvailable ? (
+                    !goToCart ? (
+                      <button
+                        className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
+                        onClick={handleAddToCart}
+                      >
+                        Add To Cart
+                      </button>
+                    ) : (
+                      <Link
+                        to={"/user/cart"}
+                        className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
+                      >
+                        Go to cart
+                      </Link>
+                    )
+                  ) : (
                     <button
                       className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
-                      onClick={handleAddToCart}
+                      disabled
                     >
-                      Add To Cart
+                      Product is Unavailable
                     </button>
-                  ) : (
-                    <Link
-                      to={"/user/cart"}
-                      className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto font-mono"
-                    >
-                      Go to cart
-                    </Link>
                   )}
-                  <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
+                  {isAvailable && 
+                  <button
+                  className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto"
+                  >
                     Buy Now
                   </button>
+                  }
                 </div>
               </div>
             </div>

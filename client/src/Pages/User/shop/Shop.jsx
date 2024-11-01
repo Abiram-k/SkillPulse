@@ -10,37 +10,55 @@ import { Heart } from "lucide-react";
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
+  const [brand, setBrand] = useState([]);
+  const [filter, setFilter] = useState({
+    category: "",
+    brand: "",
+    price: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(5);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   useEffect(() => {
-    (async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/products", {
-          withCredentials: true,
-        });
-        console.log("product from homepage:", response.data.products);
-        setProducts(response.data.products);
-        setCategory(response.data.category);
-      } catch (error) {
-        Toast.fire({
-          icon: "error",
-          title: `${error?.response?.data.message}`,
-        });
-        console.log(error.message);
-      }
-    })();
-  }, []);
+    fetchProducts();
+  }, [filter]);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/products", {
+        params: filter,
+        withCredentials: true,
+      });
+      setProducts(response.data.products);
+      setCategory(response.data.categoryDoc);
+      setBrand(response.data.brandDoc);
+    } catch (error) {
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
+  };
+
   const goToDetails = (product) => {
     dispatch(setProductDetails(product));
     navigate("/user/productDetails");
   };
 
+  const handleFilter = (e) => {
+    const { name, value } = e.target;
+    setFilter((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
   const currentProduct = products.slice(firstPostIndex, lastPostIndex);
-  
+
   return (
     <div>
       <div
@@ -66,192 +84,91 @@ const Shop = () => {
       <div className="filters grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gray-950 rounded-lg shadow-lg border-b-2 border-t-2 border-gray-800 mb-10">
         <div>
           <p className="font-bold text-2xl mb-4">Category</p>
-          <div className="space-y-3">
-            <div>
-              <input
-                type="checkbox"
-                id="gaming-consoles"
-                className="filter-checkbox mr-2"
-              />
-              <label
-                htmlFor="gaming-consoles"
-                className="hover:text-orange-500"
-              >
-                Gaming Consoles
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="gaming-peripherals"
-                className="filter-checkbox mr-2"
-              />
-              <label
-                htmlFor="gaming-peripherals"
-                className="hover:text-orange-500"
-              >
-                Gaming Peripherals
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="graphics-cards"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="graphics-cards" className="hover:text-orange-500">
-                Graphics Cards
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="gaming-accessories"
-                className="filter-checkbox mr-2"
-              />
-              <label
-                htmlFor="gaming-accessories"
-                className="hover:text-orange-500"
-              >
-                Gaming Accessories
-              </label>
-            </div>
-          </div>
+
+          <select
+            className="w-full p-2 bg-gray-800 text-white rounded font-mono"
+            defaultValue=""
+            name="category"
+            value={filter.category || ""}
+            onChange={handleFilter}
+          >
+            <option value="" disabled>
+              Select a Category
+            </option>
+            <option value="">All Categories</option>
+            {category.map((item) => (
+              <option value={item.name} key={item._id} onClick={handleFilter}>
+                {item.name}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Discount Offers Filter */}
         <div>
           <p className="font-bold text-2xl mb-4">Discount Offers</p>
-          <div className="space-y-3">
-            <div>
-              <input
-                type="checkbox"
-                id="discount-10-20"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="discount-10-20" className="hover:text-orange-500">
-                10% - 20%
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="discount-20-30"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="discount-20-30" className="hover:text-orange-500">
-                20% - 30%
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="discount-upto-50"
-                className="filter-checkbox mr-2"
-              />
-              <label
-                htmlFor="discount-upto-50"
-                className="hover:text-orange-500"
-              >
-                Upto 50%
-              </label>
-            </div>
-          </div>
+          <select
+            className="w-full p-2 bg-gray-800 text-white rounded font-mono"
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Select Discount Offer
+            </option>
+            <option value="10-20">10% - 20%</option>
+            <option value="20-30">20% - 30%</option>
+            <option value="upto-50">Up to 50%</option>
+          </select>
         </div>
 
+        {/* Price Filter */}
         <div>
           <p className="font-bold text-2xl mb-4">Price Filter</p>
-          <div className="space-y-3">
-            <div>
-              <input
-                type="checkbox"
-                id="below-5000"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="below-5000" className="hover:text-orange-500">
-                Below 5000₹
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="5000-10000"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="5000-10000" className="hover:text-orange-500">
-                5000₹ - 10,000₹
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="10000-50000"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="10000-50000" className="hover:text-orange-500">
-                10,000₹ - 50,000₹
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="above-50000"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="above-50000" className="hover:text-orange-500">
-                Above 50,000₹
-              </label>
-            </div>
-          </div>
+          <select
+            className="w-full p-2 bg-gray-800 text-white rounded font-mono"
+            defaultValue=""
+            value={filter.price || ""}
+            onChange={handleFilter}
+            name="price"
+          >
+            <option value="" disabled>
+              Select Price Range
+            </option>
+            <option value="" >
+              All products
+            </option>
+
+            <option value="Low-High">Low-High</option>
+            <option value="High-Low">High-Low</option>
+            <option value="below-5000">Below 5000₹</option>
+            <option value="5000-10000">5000₹ - 10,000₹</option>
+            <option value="10000-50000">10,000₹ - 50,000₹</option>
+            <option value="above-50000">Above 50,000₹</option>
+          </select>
         </div>
 
         <div>
           <p className="font-bold text-2xl mb-4">Brand</p>
-          <div className="space-y-3">
-            <div>
-              <input
-                type="checkbox"
-                id="brand-boat"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="brand-boat" className="hover:text-orange-500">
-                Boat
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="brand-sony"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="brand-sony" className="hover:text-orange-500">
-                Sony
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="brand-jbl"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="brand-jbl" className="hover:text-orange-500">
-                Jbl
-              </label>
-            </div>
-            <div>
-              <input
-                type="checkbox"
-                id="brand-bose"
-                className="filter-checkbox mr-2"
-              />
-              <label htmlFor="brand-bose" className="hover:text-orange-500">
-                Bose
-              </label>
-            </div>
-          </div>
+          <select
+            className="w-full p-2 bg-gray-800 text-white rounded font-mono"
+            defaultValue=""
+            name="brand"
+            value={filter.brand || ""}
+            onChange={handleFilter}
+          >
+            <option value="" disabled>
+              Select a Brand
+            </option>
+            <option value="">All Brands</option>
+            {brand.map((item) => (
+              <option value={item.name} key={item._id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+      <div className="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-mono">
         {currentProduct.length > 0 ? (
           currentProduct.map((product, index) =>
             product.isListed && !product.isDeleted ? (
@@ -291,50 +208,20 @@ const Shop = () => {
             ) : (
               <div
                 key={""}
-                className="product-card p-4 rounded-lg shadow-lg relative"
+                className="product-card p-4 rounded-lg shadow-lg relative w-screen"
               >
-                <i className="fas fa-heart absolute top-2 right-2 text-gray-400"></i>
-                <img
-                  src="https://placehold.co/200x200"
-                  alt="Product Image"
-                  className="w-full h-40 object-cover mb-4"
-                />
-                <Heart className="absolute top-2 right-3 w-6 h-6" />
-
-                <div className="text-lg font-bold">Product Name</div>
-                <div className="text-sm text-gray-400">Product Description</div>
-                <div className="text-xl font-bold mt-2">
-                  ₹11,295
-                  <span className="line-through text-gray-400">
-                    ₹13,999
-                  </span>{" "}
-                  20% off
-                </div>
-                <div className="text-sm text-gray-400">Free Delivery</div>
+                <p className="text-center font-bold">
+                  NO Product Were Founded{" "}
+                </p>
               </div>
             )
           )
         ) : (
           <div
             key={""}
-            className="product-card p-4 rounded-lg shadow-lg relative"
+            className="product-card p-4 rounded-lg shadow-lg relative w-screen"
           >
-            <i className="fas fa-heart absolute top-2 right-2 text-gray-400"></i>
-            <img
-              src="https://placehold.co/200x200"
-              alt="Product Image"
-              className="w-full h-40 object-cover mb-4"
-            />
-            <Heart className="absolute top-2 right-3 w-6 h-6" />
-
-            <div className="text-lg font-bold">Product Name</div>
-            <div className="text-sm text-gray-400">Product Description</div>
-            <div className="text-xl font-bold mt-2">
-              ₹11,295
-              <span className="line-through text-gray-400">₹13,999</span> 20%
-              off
-            </div>
-            <div className="text-sm text-gray-400">Free Delivery</div>
+            <p className="text-center font-bold">NO Product Were Founded </p>
           </div>
         )}
       </div>

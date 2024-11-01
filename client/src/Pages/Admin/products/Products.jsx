@@ -46,7 +46,9 @@ function Products() {
   const handleListing = async (id) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/admin/handleProductListing/${id}`
+        `http://localhost:3000/admin/handleProductListing/${id}`,
+        {},
+        { withCredentials: true }
       );
       console.log(response.data);
       if (response.data.product.isListed) {

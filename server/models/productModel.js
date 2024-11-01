@@ -58,10 +58,10 @@ const productSchema = new mongoose.Schema({
   },
   brand: {
     type: mongoose.Schema.Types.ObjectId ,
-    ref: 'Brand',
+    ref: 'brand',
     // required: true,
-    // type: String,
-    // default: "Brand not added"
+    type: String,
+    default: "Brand not added"
   }
 }, {
   timestamps: true

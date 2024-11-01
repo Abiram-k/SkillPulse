@@ -19,7 +19,7 @@ exports.verifyUser = async (req, res, next) => {
             console.log("User not authorized, token failed");
         }
     } else {
-        res.status(401);
+        res.status(401).json({ message: "token not found" });
         console.log("Token not founded");
     }
 }

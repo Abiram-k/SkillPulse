@@ -9,7 +9,7 @@ const brandSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        default: "Not Added",
+        default: "Nil",
         required: false
     },
     image: {
@@ -30,5 +30,5 @@ const brandSchema = new mongoose.Schema({
         default: null
     }
 })
-const Brand = mongoose.model("Brand", brandSchema);
+const Brand = mongoose.model("brand", brandSchema);
 module.exports = Brand;

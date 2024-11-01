@@ -213,18 +213,59 @@ exports.login = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
     try {
+        const { brand, category, price } = req.query;
+        // console.log("hello")
+        const query = {};
+        if (category) {
+            const categoryDoc = await Category.findOne({ name: category })
+            console.log(categoryDoc, "Selected Category")
+            if (categoryDoc) query.category = categoryDoc._id.toString()
+            console.log(categoryDoc._id.toString())
+        }
+        if (brand) {
+            const brandDoc = await Brand.findOne({ name: brand })
+            console.log(brandDoc, "Selected Brand")
+            if (brandDoc) query.brand = brandDoc._id.toString()
+            console.log(brandDoc._id.toString())
+        }
+        if (price) {
+            if (price === 'below-5000') {
+                query.salesPrice = { $lt: 5000 };
+            } else if (price === '5000-10000') {
+                query.salesPrice = { $gte: 5000, $lte: 10000 };
+            } else if (price === '10000-50000') {
+                query.salesPrice = { $gte: 10000, $lte: 50000 };
+            } else if (price === 'above-50000') {
+                query.salesPrice = { $gt: 50000 };
+
+            }
+        }
+
+        let sortOrder = {};
+
+        if (price === 'High-Low') {
+            sortOrder = { salesPrice: -1 };
+        } else if (price === 'Low-High') {
+            sortOrder = { salesPrice: 1 };
+        }
+
+        // const isListedCategory = Category.find({ isListed: true }).select("_id");
+
+        // const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
+
+        // const isListedBrand = await Brand.find({ isListed: true }).select("_id");
+        // console.log(isListedBrand)
+
+        // const isListedBrandIds = isListedBrand.map((brand) => brand._id);
+
         let isBlocked = req.body.isBlocked || false;
-        const isListedCategory = Category.find({ isListed: true }).select("_id");
-        const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
-
-        const isListedBrand = Brand.find({ isListed: true }).select("_id");
-        const isListedBrandIds = (await isListedBrand).map((brand) => brand._id);
-
-        const products = await Product.find({ category: { $in: isListedCategoryIds } }, { brand: { $in: isListedBrand } }).populate([{ path: "category" }, { path: "brand" }]);
-
+        const products = await Product.find(query).sort(sortOrder)
+        .populate('category').populate('brand');
+        // console.log("<<<<<<<<<<<>>>>>>>>>>>>")
         console.log(products)
-        const category = await Category.find()
-        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, category, isBlocked })
+        const categoryDoc = await Category.find()
+        const brandDoc = await Brand.find()
+        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, categoryDoc, brandDoc, isBlocked })
     } catch (error) {
         return res.status(500).json({ message: "Failed To Fetch Product Data" })
     }
@@ -241,6 +282,30 @@ exports.getSimilarProduct = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: error.message || "Server error" });
+    }
+}
+
+exports.getBrandCategoryInfo = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const productData = await Product.findById(id).populate('category brand');
+        if (!productData) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        const { category, brand } = productData;
+
+        console.log(category, brand)
+        const isCategoryAvailable = category && category.isListed && !category.isDeleted;
+        const isBrandAvailable = brand && brand.isListed && !brand.isDeleted;
+
+        const isAvailable = isCategoryAvailable && isBrandAvailable;
+
+        return res.status(200).json({ message: "success", isAvailable });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occurred fetching product/brand details" });
     }
 }
 
