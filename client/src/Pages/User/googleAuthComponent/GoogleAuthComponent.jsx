@@ -2,13 +2,33 @@ import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addUser } from "../../../redux/userSlice";
+import axios from "axios";
 function GoogleAuthComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(addUser({ isLoggedIn: true }));
-    navigate("/user/home");
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/googleUser", {
+          withCredentials: true,
+        });
+        console.log("user data in google login", response.data);
+        dispatch(
+          addUser({
+            isLoggedIn: true,
+            ...response.data,
+          })
+        );
+
+        navigate("/user/home");
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        navigate("/login");
+      }
+    };
+
+    fetchUserData();
   }, [navigate]);
 }
 

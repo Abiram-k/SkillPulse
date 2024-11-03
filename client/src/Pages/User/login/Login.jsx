@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import loginImage from "../../../assets/login-image.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -27,7 +27,9 @@ function Login() {
     }
     return error;
   };
-
+  useEffect(() => {
+    localStorage.removeItem("otpTimer");
+  }, []);
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage({});

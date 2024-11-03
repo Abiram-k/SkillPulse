@@ -11,7 +11,6 @@ const orderComplete = () => {
       <Link
         to="user/profile/myOrders"
         className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8"
-        onClick={alert("clicked")}
       >
         View order 
       </Link>

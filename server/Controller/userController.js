@@ -9,7 +9,7 @@ const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const Brand = require('../models/brandModel');
 const { isBlocked } = require('../Middleware/isBlockedUser');
-const { listCategory } = require('./adminController');
+const { listCategory, blockUser } = require('./adminController');
 const Cart = require('../models/cartModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
@@ -89,17 +89,8 @@ exports.signUp = async (req, res) => {
         }
         req.session.user = req.body;
         req.session.otp = otp;
-
-        //to delte the otp after 30seconds;
-        // setTimeout(() => {
-        //     if (req.session && req.session.otp) {
-        //         delete req.session.otp;
-        //         console.log('OTP expired');
-        //     }
-        // }, otpExpiry * 1000);
-
-        console.log(req.session.otp);
-        console.log(req.session.user);
+        // console.log(req.session.otp);
+        // console.log(req.session.user);
         return res.status(200).json({ message: "Proceeded to Otp verification" })
     }
 }
@@ -206,6 +197,18 @@ exports.login = async (req, res) => {
     }
 }
 
+exports.getUserData = async (req, res) => {
+    try {
+        const token = req.cookies.userToken;
+        if (!token) return res.status(401).send("Unauthorized");
+        const decoded = jwt.verify(token, process.env.JWT_SECRETE);
+        const user = await User.findById(decoded.id).select("-password");
+        res.status(200).json(user);
+
+    } catch (error) {
+        res.status(400).json({ message: "Failed to retrieve user data", error });
+    }
+}
 
 
 
@@ -213,21 +216,19 @@ exports.login = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
     try {
-        const { brand, category, price } = req.query;
-        // console.log("hello")
+        const { brand, category, price, newArrivals } = req.query;
         const query = {};
+
         if (category) {
-            const categoryDoc = await Category.findOne({ name: category })
-            console.log(categoryDoc, "Selected Category")
-            if (categoryDoc) query.category = categoryDoc._id.toString()
-            console.log(categoryDoc._id.toString())
+            const categoryDoc = await Category.findOne({ name: category });
+            if (categoryDoc) query.category = categoryDoc._id.toString();
         }
+
         if (brand) {
-            const brandDoc = await Brand.findOne({ name: brand })
-            console.log(brandDoc, "Selected Brand")
-            if (brandDoc) query.brand = brandDoc._id.toString()
-            console.log(brandDoc._id.toString())
+            const brandDoc = await Brand.findOne({ name: brand });
+            if (brandDoc) query.brand = brandDoc._id.toString();
         }
+
         if (price) {
             if (price === 'below-5000') {
                 query.salesPrice = { $lt: 5000 };
@@ -237,45 +238,52 @@ exports.getProducts = async (req, res) => {
                 query.salesPrice = { $gte: 10000, $lte: 50000 };
             } else if (price === 'above-50000') {
                 query.salesPrice = { $gt: 50000 };
-
             }
         }
 
         let sortOrder = {};
 
-        if (price === 'High-Low') {
-            sortOrder = { salesPrice: -1 };
-        } else if (price === 'Low-High') {
-            sortOrder = { salesPrice: 1 };
+        if (newArrivals) {
+            const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() - 30);
+            query.createdAt = { $gt: currentDate };
+            sortOrder = { createdAt: -1 }; 
         }
 
-        // const isListedCategory = Category.find({ isListed: true }).select("_id");
+        if (price === 'High-Low') {
+            sortOrder = { ...sortOrder, salesPrice: -1 };
+        } else if (price === 'Low-High') {
+            sortOrder = { ...sortOrder, salesPrice: 1 };
+        }
 
-        // const isListedCategoryIds = (await isListedCategory).map((category) => category._id)
+        const products = await Product.find(query)
+            .sort(sortOrder)
+            .populate('category')
+            .populate('brand');
 
-        // const isListedBrand = await Brand.find({ isListed: true }).select("_id");
-        // console.log(isListedBrand)
+        const categoryDoc = await Category.find();
+        const brandDoc = await Brand.find();
 
-        // const isListedBrandIds = isListedBrand.map((brand) => brand._id);
-
-        let isBlocked = req.body.isBlocked || false;
-        const products = await Product.find(query).sort(sortOrder)
-        .populate('category').populate('brand');
-        // console.log("<<<<<<<<<<<>>>>>>>>>>>>")
-        console.log(products)
-        const categoryDoc = await Category.find()
-        const brandDoc = await Brand.find()
-        return res.status(200).json({ message: "Sucessfully Fetched All Products", products, categoryDoc, brandDoc, isBlocked })
+        return res.status(200).json({
+            message: "Successfully Fetched All Products",
+            products,
+            categoryDoc,
+            brandDoc,
+            isBlocked: req.body.isBlocked || false
+        });
     } catch (error) {
-        return res.status(500).json({ message: "Failed To Fetch Product Data" })
+        console.error("Error fetching products:", error);
+        return res.status(500).json({ message: "Failed To Fetch Product Data" });
     }
-}
+};
+
 
 exports.getSimilarProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const productData = await Product.findById(id);
         const similarProducts = await Product.find({ category: productData?.category })
+        .populate("brand")
         if (similarProducts.length === 0)
             return res.status(404).json({ message: "No Similar products were founded !" })
         return res.status(200).json({ message: "Product fetched successfully", similarProducts });
@@ -293,7 +301,6 @@ exports.getBrandCategoryInfo = async (req, res) => {
         if (!productData) {
             return res.status(404).json({ message: "Product not found" });
         }
-
         const { category, brand } = productData;
 
         console.log(category, brand)
@@ -487,7 +494,7 @@ exports.editAddress = async (req, res) => {
 exports.deleteAddress = async (req, res) => {
     try {
         const { id } = req.query;
-        console.log(id);
+        // console.log(id);
 
         const user = await User.findOne({ "address._id": id });
         const addressIndex = user.address.findIndex((addr, index) => addr._id.toString() == id);
@@ -502,6 +509,49 @@ exports.deleteAddress = async (req, res) => {
         return res.status(500).json({ message: "Error occured while deleting address" })
     }
 }
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { currentPassword, newPassword } = req.body;
+
+        console.log("Current Password:", currentPassword);
+        console.log("New Password:", newPassword);
+        console.log("User ID:", id);
+
+        // Find user by ID
+        const user = await User.findById(id);
+        if (!user) {
+            console.log("User not found");
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        console.log("User found, checking current password...");
+
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!isValidPassword) {
+            console.log("Current password is incorrect");
+            return res.status(401).json({ message: "Please enter the correct password" });
+        }
+
+        console.log("Current password is correct, hashing new password...");
+
+        // const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = newPassword;
+
+        console.log("Saving new password...");
+        await user.save();
+
+        console.log("Password changed successfully");
+        return res.status(200).json({ message: "Password changed successfully" });
+
+    } catch (error) {
+        console.error("Error occurred:", error);
+        return res.status(500).json({ message: "An error occurred while changing the password" });
+    }
+};
+
+
 
 exports.addToCart = async (req, res) => {
     try {

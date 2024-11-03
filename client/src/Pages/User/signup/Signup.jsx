@@ -59,7 +59,9 @@ const Signup = () => {
   };
 
   const notification = document.getElementById("errorNotification");
-
+  useEffect(() => {
+    localStorage.removeItem("otpTimer");
+  }, []);
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessage({ serverMessage: "" });

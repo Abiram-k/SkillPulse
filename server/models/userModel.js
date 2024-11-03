@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         require: true,
-        // unique: true
     },
     password: {
         type: String,
@@ -69,7 +68,6 @@ const userSchema = new mongoose.Schema({
         address: {
             type: String,
             required: true,
-            unique: true
         },
         pincode: {
             type: String,
@@ -96,8 +94,8 @@ userSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-});
-userSchema.methods.comparePassword = async (password) => {
+});     
+userSchema.methods.comparePassword = async function(password) {
     return await bcrypt.compare(password, this.password);
 }
 

@@ -84,21 +84,19 @@ const SearchProducts = () => {
                     className="w-full h-32 object-cover mb-2 rounded-md" // Adjust height of the image
                     onClick={() => goToDetails(product)}
                   />
-                  <h2 className="text-sm font-semibold">
-                    {product.category.name}
-                  </h2>{" "}
+                  <h2 className="text-lg font-bold  ">{product.productName}</h2>{" "}
                   {/* Smaller text size */}
-                  <p className="text-gray-200 text-md font-semibold ">
-                    {product.productName}
+                  <p className=" text-sm font-semibold text-gray-200">
+                    {product.category.name}
                   </p>
                   <p className="text-gray-400 text-sm mb-3">
                     {product.productDescription}
                   </p>
-                  <p className="price font-bold text-gray-800 text-sm ">
+                  <p className="price font-bold  text-md ">
                     {" "}
-                    {product.salesPrice}
-                    <span className="old-price line-through text-gray-500 text-sm">
-                      {product.regularPrice}
+                    {product.salesPrice}₹
+                    <span className="lg:ms-3 old-price line-through text-gray-500 text-sm">
+                      {product.regularPrice}₹
                     </span>{" "}
                     <span className="discount text-green-600 text-sm">
                       {index % 2 === 0 ? "20% off" : "75% off"}

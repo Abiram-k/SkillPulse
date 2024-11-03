@@ -13,7 +13,7 @@ import { logoutUser } from "../../../redux/userSlice";
 import axios from "axios";
 import { Toast } from "../../../Components/Toast";
 import { Link } from "react-router-dom";
-import { DialogDemo } from "@/Components/DialogDemo";
+import { ChangePassword } from "@/Components/ChangePassword";
 const AccountOverview = () => {
   const user = useSelector((state) => state.users.user);
   // console.log(user, "from profile page");
@@ -58,7 +58,7 @@ const AccountOverview = () => {
   const handleImageChange = (e) => {
     const imageFile = e.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const maxSize = 1 * 1024 * 1024; // 1MB
+    const maxSize = 1 * 1024 * 1024 * 1024; // 1MB
     if (
       imageFile &&
       allowedTypes.includes(imageFile.type) &&
@@ -104,6 +104,8 @@ const AccountOverview = () => {
 
   const handleProfileChange = async (e) => {
     e.preventDefault();
+    alert(dateOfBirth)
+
     const formError = formValidate();
     if (Object.keys(formError).length > 0) {
       setMessage(formError);
@@ -186,7 +188,11 @@ const AccountOverview = () => {
           <span className="font-semibold">{user.firstName || "Abiram k"}</span>
         </div>
         <div className="flex gap-3">
-          <DialogDemo name="Change Password" className="mt-5" />
+          <ChangePassword
+            name="Change Password"
+            className="mt-5"
+            id={user._id}
+          />
           <button
             className="bg-green-500 rounded p-2 hover:scale-110 transition-all duration-100 flex gap-2 justify-center align-middle"
             onClick={handleEditMode}
@@ -267,7 +273,7 @@ const AccountOverview = () => {
           <input
             type="date"
             className="w-full bg-gray-700 rounded-lg p-2"
-            value={dateOfBirth}
+            value={dateOfBirth?.split("T")[0]}
             onChange={(e) => setDateOfBirth(e.target.value)}
             disabled={!editMode}
           />

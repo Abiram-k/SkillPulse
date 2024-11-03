@@ -24,6 +24,7 @@ const HomePage = () => {
     (async () => {
       try {
         const response = await axios.get("http://localhost:3000/products", {
+          params: { newArrivals: true },
           withCredentials: true,
         });
         console.log("product from homepage:", products);
@@ -107,7 +108,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <h5 className=" text-center mt-5 text-xl">Categories</h5>
+      <h5 className="text-md lg:text-xl  ps-8 font-bold text-center mt-5">Categories</h5>
       <section className="flex flex-wrap justify-around gap-6 py-8 bg-black border-gray-500 border-b">
         {category.length > 0 ? (
           category.slice(0, 4).map(
@@ -178,7 +179,7 @@ const HomePage = () => {
           </ul>
         </div>
       </section>
-
+      <h2 className="text-md lg:text-xl  ps-8 font-bold ">New Arrivals</h2>
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black">
         {products.length > 0 ? (
           products.map(
@@ -199,12 +200,12 @@ const HomePage = () => {
                   />
                   {addedToWishlist ? (
                     <Heart
-                      className="absolute top-2 right-3 w-6 h-6  fill-red-600 text-red-600" 
+                      className="absolute top-2 right-3 w-6 h-6  fill-red-600 text-red-600"
                       onClick={handleRemoveFromWishlist}
                     />
                   ) : (
                     <Heart
-                      className="absolute top-2 right-3 w-6 h-6" 
+                      className="absolute top-2 right-3 w-6 h-6"
                       onClick={handleAddToWishList}
                     />
                   )}
@@ -233,62 +234,9 @@ const HomePage = () => {
               )
           )
         ) : (
-          <>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="PC Case"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <Heart className="absolute top-2 right-3 w-6 h-6" />
-
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT</h3>
-                <p>Soundcore by Ankerlife</p>
-                <p className="text-lg font-bold">
-                  ₹3,199 <span className="line-through">₹4,999</span> 90% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="Vortex Controller"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <Heart className="absolute top-2 right-3 w-6 h-6" />
-
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT </h3>
-                <p>Soundcore by Ankers</p>
-                <p className="text-lg font-bold">
-                  ₹11,295 <span className="line-through">₹13,999</span> 20% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded">
-              <img
-                src="https://placehold.co/300x200"
-                alt="Keyboard"
-                className="w-full h-auto"
-                onClick={() => goToDetails()}
-              />
-              <Heart className="absolute top-2 right-3 w-6 h-6" />
-
-              <div className="mt-4">
-                <h3 className="text-xl font-bold">BOAT</h3>
-                <p>BOAT Newly Launched</p>
-                <p className="text-lg font-bold">
-                  ₹3999 <span className="line-through">₹8999</span> 75% off
-                </p>
-                <p>Free Delivery</p>
-              </div>
-            </div>
-          </>
+          <div className=" rounded w-screen text-center">
+            <h2 className="text-center">No Products were added yet</h2>
+          </div>
         )}
       </section>
     </div>

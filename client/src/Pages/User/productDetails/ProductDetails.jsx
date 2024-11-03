@@ -14,14 +14,18 @@ const ProductDetails = () => {
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [isAvailable, setIsAvailable] = useState(false);
   const dispatch = useDispatch();
-  const product = useSelector((state) => state.users.details); // this is an array object,so first element is the product object
+  const product = useSelector((state) => state.users.details);
   const user = useSelector((state) => state.users.user);
   console.log(product, "From product details page");
 
-  const [cartProduct, setCartProduct] = useState(
-    JSON.parse(localStorage.getItem("added")) || []
-  );
   const [goToCart, setGoToCart] = useState(false);
+  const [cartProduct, setCartProduct] = useState([]);
+
+  useEffect(() => {
+    const savedCart =
+      JSON.parse(localStorage.getItem(`cart_${user?._id}`)) || [];
+    setCartProduct(savedCart);
+  }, [user?._id]);
 
   useEffect(() => {
     const isProductInCart = cartProduct.includes(product[0]._id);
@@ -36,7 +40,11 @@ const ProductDetails = () => {
           { withCredentials: true }
         );
         if (response.data.isAvailable)
-          setIsAvailable(response.data.isAvailable);
+          if (product[0].units === 0) {
+            setIsAvailable(false);
+          } else {
+            setIsAvailable(response.data.isAvailable);
+          }
       } catch (error) {
         console.log(error.message);
       }
@@ -56,7 +64,7 @@ const ProductDetails = () => {
         console.error(error);
       }
     })();
-  }, [product,isAvailable]);
+  }, [product, isAvailable]);
 
   const reviews = [
     {
@@ -105,7 +113,6 @@ const ProductDetails = () => {
   const gotoDetails = (product) => dispatch(setProductDetails(product));
 
   const handleAddToCart = async () => {
-    // if (!cartProduct.find((product) => product === product[0]._id)) {
     try {
       const response = await axios.post(
         `http://localhost:3000/addToCart/${product[0]._id}`,
@@ -120,7 +127,7 @@ const ProductDetails = () => {
       setCartProduct((prev) => {
         if (!prev.includes(product[0]._id)) {
           const updatedCart = [...prev, product[0]._id];
-          localStorage.setItem("added", JSON.stringify(updatedCart));
+          localStorage.setItem(`cart_${user._id}`, JSON.stringify(updatedCart));
           return updatedCart;
         }
         return prev;
@@ -145,8 +152,11 @@ const ProductDetails = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem("added", JSON.stringify(cartProduct));
-  }, [cartProduct]);
+    if (user?._id) {
+      localStorage.setItem(`cart_${user._id}`, JSON.stringify(cartProduct));
+    }
+  }, [cartProduct, user?._id]);
+
   return (
     <div className="min-h-screen bg-black text-white">
       <main className="container mx-auto px-4 py-8">
@@ -214,14 +224,14 @@ const ProductDetails = () => {
               </div>
               <div className="space-y-6">
                 <div>
-                  {/* <h2 className="text-sm text-gray-400">
-                    {"Brand not added" || product.brand}
-                  </h2> */}
                   <h1 className="text-xl font-bold">{product.productName}</h1>
                   <p className="text-l font-semi-bold">
                     {product.productDescription}
                   </p>
                 </div>
+                <h2 className="text-sm text-gray-300 font-semibold">
+                  Brand : {product.brand?.name || "Brand not added"}
+                </h2>
                 <div className="flex items-baseline space-x-4">
                   <span className="text-2xl font-bold text-green-500">
                     ₹{product.salesPrice}
@@ -272,13 +282,11 @@ const ProductDetails = () => {
                       Product is Unavailable
                     </button>
                   )}
-                  {isAvailable && 
-                  <button
-                  className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto"
-                  >
-                    Buy Now
-                  </button>
-                  }
+                  {isAvailable && (
+                    <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
+                      Buy Now
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -302,7 +310,9 @@ const ProductDetails = () => {
                     onClick={() => gotoDetails(product)}
                   />
                   <div className="space-y-2">
-                    <h3 className="text-sm text-gray-400">{product.brand}</h3>
+                    <h3 className="text-sm text-gray-400">
+                      {product.brand?.name}
+                    </h3>
                     <p className="font-semibold">{product.productName}</p>
                     <div className="flex items-baseline space-x-2">
                       <span className="font-bold">{product.salesPrice}</span>

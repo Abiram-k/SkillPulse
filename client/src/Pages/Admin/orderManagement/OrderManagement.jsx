@@ -14,14 +14,16 @@ import {
   LogOut,
   Edit,
 } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { ChangeStatus } from "@/Components/ChangeStatus";
+import { logoutAdmin } from "@/redux/adminSlice";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [updatedStatus, setUpdatedStatus] = useState("");
+  const dispatch = useDispatch();
 
   const user = useSelector((state) => state.users.user);
 
@@ -30,17 +32,20 @@ const OrderManagement = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/order?id=${user._id}`
-        );
+        const response = await axios.get(`http://localhost:3000/admin/order`, {
+          withCredentials: true,
+        });
         console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
       } catch (error) {
+        if (error?.response.data.message == "Token not found") {
+          dispatch(logoutAdmin());
+        }
         console.log(error.message);
         alert(error?.response.data.message);
       }
     })();
-  }, []);
+  }, [orders]);
 
   const handleUpdatedStatus = (status) => {
     if (status) setUpdatedStatus(status);
@@ -102,29 +107,41 @@ const OrderManagement = () => {
               <div className="flex items-center space-x-2">
                 <span className="text-white">Sort</span>
                 <select className="bg-transparent border border-gray-700 rounded px-2 py-1 text-white">
-                  <option>Name</option>
+                  <option disabled>Select One</option>
+                  <option className="text-black">A - Z</option>
+                  <option className="text-black">Z - A</option>
+                  <option className="text-black">Recent</option>
+                  <option className="text-black">Oldest</option>
                 </select>
                 <span className="text-white">By</span>
                 <select className="bg-transparent border border-gray-700 rounded px-2 py-1 text-white">
-                  <option>Ascending</option>
+                  <option disabled>Select One</option>
+                  <option className="text-black">Price-Ascending</option>
+                  <option className="text-black">Price-Descending</option>
                 </select>
               </div>
               <select className="bg-transparent border border-gray-700 rounded px-2 py-1 text-white">
-                <option>Filter</option>
+                <option disabled>Filter</option>
+                <option className="text-black">Canceled</option>
+                <option className="text-black">shipped</option>
+                <option className="text-black">processing</option>
+                <option className="text-black">delivered</option>
+                <option className="text-black">cancelled</option>
+
               </select>
-              <button className="bg-gray-100 text- px-4 py-2 rounded">
+              {/* <button className="bg-gray-100 text- px-4 py-2 rounded">
                 MORE DETAILS
-              </button>
+              </button> */}
             </div>
           </div>
 
           <div className="bg-black rounded-lg overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="bg-black text-white">
+                <tr className="bg-black text-white text-lg">
                   <th className="px-6 py-3 text-left">ORDER ID</th>
-                  <th className="px-6 py-3 text-left">CATEGORY</th>
-                  <th className="px-6 py-3 text-left">NAME</th>
+                  <th className="px-6 py-3 text-left">PRODUCT</th>
+                  <th className="px-4 py-3 text-left">ORDER DATE</th>
                   <th className="px-6 py-3 text-left">PRICE</th>
                   <th className="px-6 py-3 text-left">ADDRESS</th>
                   <th className="px-6 py-3 text-left">STATUS</th>
@@ -133,17 +150,16 @@ const OrderManagement = () => {
               </thead>
               <tbody>
                 {orders.map((order) =>
-                  order.orderItems.map((item) => (
-                    <tr
-                      key={order.orderId}
-                      className="border-t border-gray-800"
-                    >
-                      <td className="px-6 py-4 text-white">{order.orderId}</td>
-                      <td className="px-6 py-4 text-white">
-                        {item.product.category.name}
+                  order.orderItems.map((item, index) => (
+                    <tr key={index} className="border-t border-gray-800">
+                      <td className="px-6 py-4 text-gray-200">
+                        {order.orderId}
                       </td>
                       <td className="px-6 py-4 text-white">
-                        {item.product.productName} x ({item.quantity})
+                        {item.product?.productName} x ({item.quantity})
+                      </td>
+                      <td className="px-6 py-4 text-white">
+                        {order.orderDate}
                       </td>
                       <td className="px-6 py-4 text-white">
                         {item.product.salesPrice * item.quantity}

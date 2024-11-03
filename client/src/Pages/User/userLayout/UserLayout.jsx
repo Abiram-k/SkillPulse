@@ -52,20 +52,20 @@ function UserLayout() {
           >
             SHOP
           </Link>
-          <a
-            href="#"
+          <Link
+            to="shop"
             className="text-white no-underline hover:bg-slate-600 rounded p-1 transition duration-200"
           >
             CATEGORY
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="contact"
             className="text-white no-underline hover:bg-slate-600 rounded p-1"
           >
             CONTACT
-          </a>
+          </Link>
           <a
-            href="#"
+            href="about"
             className="text-white no-underline hover:bg-slate-600 rounded p-1"
           >
             ABOUT US

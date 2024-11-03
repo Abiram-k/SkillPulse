@@ -6,6 +6,8 @@ import { context } from "../../../Components/Provider";
 import { useContext, useRef } from "react";
 import Pagination from "../../../Components/Pagination";
 import { Toast } from "../../../Components/Toast";
+import { logoutAdmin } from "@/redux/adminSlice";
+import { useDispatch } from "react-redux";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -14,6 +16,7 @@ function Products() {
   const [postPerPage, setPostPerPage] = useState(5);
   const searchFocus = useRef(null);
   const { setData } = useContext(context);
+  const dispatch = useDispatch();
 
   //to refresh the page
   const handleRefresh = () => {
@@ -29,11 +32,15 @@ function Products() {
     (async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/admin/getProduct"
+          "http://localhost:3000/admin/getProduct",
+          { withCredentials: true }
         );
         console.log(response.data.products);
         setProducts(response.data.products);
       } catch (error) {
+        if (error?.response.data.message == "Token not found") {
+          dispatch(logoutAdmin());
+        }
         console.log(error?.response?.data?.message);
       }
     })();

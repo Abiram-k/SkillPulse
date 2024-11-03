@@ -14,7 +14,8 @@ const ManageAddress = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/address?id=${user?._id}`
+          `http://localhost:3000/address?id=${user?._id}`,
+          { withCredentials: true }
         );
         console.log(response.data);
         setAddresses(response.data.addresses);
@@ -27,7 +28,8 @@ const ManageAddress = () => {
   const handleDeleteAddress = async (id) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/address?id=${id}`
+        `http://localhost:3000/address?id=${id}`,
+        { withCredentials: true }
       );
       console.log(response.data);
       Toast.fire({

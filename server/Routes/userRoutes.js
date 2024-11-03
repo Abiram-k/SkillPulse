@@ -28,6 +28,7 @@ router.get('/auth/google',
             ['email', 'profile']
     }
     ));
+router.get('/googleUser', userController.getUserData);
 router.get('/auth/google/callback',
     passport.authenticate('google',
         { failureRedirect: 'http://localhost:5173/login' }),
@@ -41,9 +42,9 @@ router.get('/auth/google/callback',
 
         res.cookie('userToken', token, {
             httpOnly: true,
-            secure: false,    
+            secure: false,
             sameSite: 'Lax',
-            maxAge: 3600000    
+            maxAge: 3600000
         });
 
         res.redirect('http://localhost:5173/googleRedirect')
@@ -58,10 +59,11 @@ router.get("/products", verifyUser, isBlocked, userController.getProducts);
 router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
 router.get("/brand-category-info/:id", userController.getBrandCategoryInfo);
 
-
 router.post("/user", verifyUser, isBlocked, uploadImage.single("file"), userController.updateUser);
 router.get("/user/:id", verifyUser, isBlocked, userController.getUser);
-router.post("/address", verifyUser, isBlocked, uploadImage.none(), userController.addAddress);//none to handle form data ,with no files
+router.post("/address", verifyUser, isBlocked, uploadImage.none(), userController.addAddress);
+router.patch("/password/:id", verifyUser, isBlocked, userController.changePassword);
+
 router.get("/address", verifyUser, isBlocked, userController.getAddress);
 router.delete("/address", verifyUser, isBlocked, userController.deleteAddress);
 router.get("/editAddress", verifyUser, isBlocked, userController.getEditAddress);
@@ -78,6 +80,7 @@ router.post("/wishlist", verifyUser, isBlocked, wishlistController.addTowishlist
 
 router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
 router.get("/order", verifyUser, isBlocked, orderController.getOrder);
-router.post("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder);
+router.patch("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder);
+router.patch("/returnOrder", verifyUser, isBlocked, orderController.returnOrder);
 
 module.exports = router;

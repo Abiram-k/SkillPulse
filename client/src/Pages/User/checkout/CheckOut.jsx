@@ -9,7 +9,6 @@ import { logoutUser } from "@/redux/userSlice";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedAddress, setSelectedAddress] = useState({});
   const [checkoutComplete, setCheckoutComplete] = useState(false);
@@ -19,14 +18,6 @@ const Checkout = () => {
   const user = useSelector((state) => state.users.user);
   const [addresses, setAddresses] = useState([]);
   const [summary, setSummary] = useState({});
-  const orderSummary = {
-    items: 2,
-    subtotal: 22998,
-    deliveryCharges: "Free",
-    gstAmount: 1030,
-    discount: 7208,
-    total: 16819.6,
-  };
 
   const totalPrice = () => {
     return checkoutItems[0]?.products.reduce(
@@ -231,10 +222,12 @@ const Checkout = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Delivery Address</h2>
-                <ChangeAddress
-                  addresses={addresses}
-                  onSelectedAddress={handleSelectedAddress}
-                />
+                {addresses.length > 0 && (
+                  <ChangeAddress
+                    addresses={addresses}
+                    onSelectedAddress={handleSelectedAddress}
+                  />
+                )}
               </div>
               {Object.keys(selectedAddress).length === 0 ? (
                 <div className="bg-gray-900 p-4 rounded">
@@ -287,7 +280,10 @@ const Checkout = () => {
             </div>
 
             <div className="flex flex-col md:flex-row space-x-0 md:space-x-4">
-              <button className="bg-red-600 text-white px-8 py-3 rounded-md w-full mb-4 md:mb-0">
+              <button
+                className="bg-red-600 text-white px-8 py-3 rounded-md w-full mb-4 md:mb-0"
+                onClick={handlePlaceOrder}
+              >
                 Place order
               </button>
               <button className="bg-red-600 text-white px-8 py-3 rounded-md w-full">

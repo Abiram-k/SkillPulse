@@ -322,7 +322,7 @@ exports.addProduct = async (req, res) => {
             category,
             brand
         } = req.body;
-      
+
         const productImage = req.files.map((file) => file.path)
         const existProduct = await Product.findOne({ productName });
 
@@ -477,7 +477,6 @@ exports.editStatus = async (req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-
         if (!updatedStatus) {
             console.log("No status were founded");
         } else {
@@ -498,5 +497,26 @@ exports.editStatus = async (req, res) => {
         console.log(error.message);
 
         return res.status(500).json({ message: "Error occured while updating status" });
+    }
+}
+
+exports.getOrder = async (req, res) => {
+    try {
+        const orderData = await Orders.find()
+    .populate({
+        path: "orderItems.product", 
+        populate: {
+            path: "category", 
+            model: "category" 
+        }
+    })
+    // .populate("user");
+
+        if (!orderData)
+            console.log("No order were founded in this user id");
+        return res.status(200).json({ message: "Orders fetched successfully", orderData });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: "Failed to fetch orders" });
     }
 }

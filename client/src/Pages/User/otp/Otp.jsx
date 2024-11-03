@@ -8,49 +8,33 @@ import { otpSuccess } from "../../../redux/userSlice";
 
 function Otp() {
   const [timer, setTimer] = useState(
-    // localStorage.getItem("otpTimer")
-      // ? Number(localStorage.getItem("otpTimer"))
-      // :
-       60
+    localStorage.getItem("otpTimer")
+      ? Number(localStorage.getItem("otpTimer"))
+      : 60
   );
-  const [otp, setOtp] = useState(60);
+  const [otp, setOtp] = useState("");
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
-  const [spinner, setSpinner] = useState(false);
-  const [input, setInput] = useState(false);
-  const [resetKey, setResetKey] = useState(0); // Key to reset useEffect
+  const [spinner, setSpinner] = useState(false);// Initially enabled
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Timer countdown with reset capability
-  useEffect(
-    () => {
+  useEffect(() => {
+    if (timer > 0) {
       const interval = setInterval(() => {
-        setTimer((t) => {
-          if (t > 0) {
-            const updatedTime = t - 1;
-            localStorage.setItem("otpTimer", updatedTime);
-            return updatedTime;
-          } else {
-            setResendOtp(true); // Allow resend OTP when time is up
-            return 0;
-          }
+        setTimer((prevTimer) => {
+          const updatedTime = prevTimer - 1;
+          localStorage.setItem("otpTimer", updatedTime);
+          return updatedTime;
         });
       }, 1000);
 
-      const timeout = setTimeout(() => {
-        clearInterval(interval);
-      }, 30 * 1000); // End after 30 seconds
-
-      return () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
-      };
-    },
-    [
-      // resetKey
-    ]
-  ); // Reset timer when resetKey changes
+      return () => clearInterval(interval);
+    } else {
+      setResendOtp(true);
+      setInput(false); 
+    }
+  }, [timer]);
 
   const handleOtpChange = (value) => {
     setOtp(value);
@@ -66,9 +50,10 @@ function Otp() {
       if (response.status === 200) {
         dispatch(otpSuccess());
         navigate("/login");
+        localStorage.removeItem("otpTimer");
       }
     } catch (error) {
-      if (error.response.status === 400) {
+      if (error.response?.status === 400) {
         setMessage({ serverError: error.response.data.message });
       }
     }
@@ -77,7 +62,7 @@ function Otp() {
   const handleResendOtp = async () => {
     setInput(true);
     setSpinner(true);
-    setTimer(60);
+    setTimer(60); 
     setResendOtp(false);
 
     try {
@@ -90,26 +75,25 @@ function Otp() {
       setMessage({ success: response.data.message });
     } catch (error) {
       setSpinner(false);
-      if (error.response.status === 400) {
+      if (error.response?.status === 400) {
         setMessage({ serverError: error.response.data.message });
       }
     }
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMessage({ serverMessage: "" });
+    const messageTimer = setTimeout(() => {
+      setMessage({});
     }, 2000);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(messageTimer);
   }, [message]);
 
   return (
     <div className="text-center flex items-center flex-col justify-center h-screen px-4 transition-transform duration-300">
-      {/* popup notification */}
       {message.serverError && (
         <div
           id="notification"
-          className=" error notification"
+          className="error notification"
           itemID="errorNotification"
         >
           {message.serverError}
@@ -119,7 +103,7 @@ function Otp() {
         <div
           id="notification"
           className="notification"
-          itemID="errorNotification"
+          itemID="successNotification"
         >
           {message.success}
         </div>
@@ -144,38 +128,30 @@ function Otp() {
         <h2 className="text-2xl font-bold mb-2">OTP Verification</h2>
         <p className="mb-6">Enter the OTP to confirm</p>
 
-        {input || timer ? (
-          <div className="flex items-center justify-end space-x-3 mb-4 text-white">
-            <OtpInput
-              length={6}
-              handleOtpChange={handleOtpChange}
-              disable={false}
-            />
-            <div className=" p-2 rounded-full w-14 h-11">
-              <span className="">{timer}</span>
-            </div>
+        <div className="flex items-center justify-end space-x-3 mb-4 text-white">
+          <OtpInput
+            length={6}
+            handleOtpChange={handleOtpChange}
+            disable={!input}
+          />
+          <div className="p-2 rounded-full w-14 h-11">
+            <span>{timer}</span>
           </div>
-        ) : (
-          <div className="flex items-center justify-end space-x-3 mb-4 text-black">
-            <OtpInput length={6} handleOtpChange={handleOtpChange} disable />
-            <div className=" p-2 rounded-full w-14 h-11">
-              <i class="fa-solid fa-clock-rotate-left text-red-600 text-lg"></i>
-            </div>
-          </div>
-        )}
+        </div>
 
         {resendOtp && (
           <p
             className="mb-6 rounded text-gray-400 hover:scale-125 cursor-pointer transform transition-transform duration-300"
             onClick={handleResendOtp}
           >
-            Resend OTP ?
+            Resend OTP?
           </p>
         )}
 
         <button
           className="bg-red-600 text-white py-2 px-6 mt-2 rounded-full hover:bg-red-700"
           onClick={handleClick}
+          disabled={!input}
         >
           CONFIRM
         </button>

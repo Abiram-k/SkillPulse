@@ -21,13 +21,11 @@ const Customers = () => {
         );
         console.log(response.data.users);
         setUsers(response.data.users);
-        // console.log(users);
       } catch (error) {
         if (error?.response.data.message == "Token not found") {
           dispatch(logoutAdmin());
         }
         console.log(error);
-        alert(error.message);
       }
     })();
     searchFocus.current.focus();

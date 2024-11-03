@@ -13,7 +13,7 @@ const ShoppingCartPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
-
+console.log(user)
   useEffect(() => {
     (async () => {
       try {
@@ -228,14 +228,21 @@ const ShoppingCartPage = () => {
                 </div>
               ))}
             </div>
-
-            <button
-              to={"checkout"}
-              className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
-              onClick={handleCheckout}
-            >
-              Checkout
-            </button>
+            <div className="flex lg:gap-3 gap-1">
+              <button
+                to={"checkout"}
+                className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
+                onClick={handleCheckout}
+              >
+                Checkout
+              </button>
+              <Link
+                to={"/user/shop"}
+                className="mt-8 inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
+              >
+                Continue shopping
+              </Link>
+            </div>
           </div>
 
           <div className="w-full md:w-80 ">

@@ -34,4 +34,5 @@ router.get("/getProduct", adminController.getProduct);
 router.post("/handleProductListing/:id", verifyAdmin, adminController.handleProductListing);
 
 router.patch("/status", adminController.editStatus)
+router.get("/order", adminController.getOrder)
 module.exports = router; 

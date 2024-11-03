@@ -3,10 +3,12 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import "./manageOrder.css";
+import { Toast } from "@/Components/Toast";
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
+  const [refresh, setRefresh] = useState(0);
 
   const user = useSelector((state) => state.users.user);
 
@@ -16,7 +18,8 @@ const ManageOrders = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/order?id=${user._id}`
+          `http://localhost:3000/order?id=${user._id}`,
+          { withCredentials: true }
         );
         console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
@@ -24,13 +27,47 @@ const ManageOrders = () => {
         console.log(error.message);
       }
     })();
-  }, []);
+  }, [refresh]);
 
-  const handleCancelOrder = async () => {
-    const response = axios.post(
-      `http://localhost:3000/cancelOrder?id=${user._id}`
-    );
+  const handleCancelOrder = async (item) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/cancelOrder?id=${user._id}&itemId=${item._id}`,
+        {},
+        { withCredentials: true }
+      );
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+      setRefresh((prev) => prev + 1);
+    } catch (error) {
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
   };
+  const handleReturnOrder = async (item) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/ReturnOrder?id=${user._id}&itemId=${item._id}`,
+        {},
+        { withCredentials: true }
+      );
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+      setRefresh((prev) => prev + 1);
+    } catch (error) {
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
+  };
+
   console.log("From fronend", orders);
 
   const getStatusColor = (status) => {
@@ -38,7 +75,8 @@ const ManageOrders = () => {
     if (status === "shipped") return "text-blue-500";
     if (status == "delivered") return "text-green-500";
     if (status === "pending") return "text-orange-500";
-    if (status === "canceled") return "text-red-500";
+    if (status === "cancelled") return "text-red-500";
+    if (status === "returned") return "text-red-500";
     return "text-gray-500";
   };
 
@@ -123,17 +161,33 @@ const ManageOrders = () => {
                   <div className="flex justify-between mt-2">
                     <div>
                       Status:{" "}
-                      <span className={` ${getStatusColor(item.productStatus)}`}>
+                      <span
+                        className={` ${getStatusColor(item.productStatus)}`}
+                      >
                         {item.productStatus}
                       </span>
                     </div>
                     <div>Date: {orders.orderDate}</div>
-                    <button
-                      className="bg-red-500 p-2 rounded"
-                      onClick={handleCancelOrder}
-                    >
-                      Cancel
-                    </button>
+                    {item.productStatus != "shipped" &&
+                      item.productStatus != "delivered" &&
+                      item.productStatus != "cancelled" &&
+                      item.productStatus != "returned" && (
+                        <button
+                          className="bg-red-500 p-2 rounded"
+                          onClick={() => handleCancelOrder(item)}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    {item.productStatus == "delivered" && (
+                      <button
+                        className="bg-red-500 p-2 rounded"
+                        onClick={() => handleReturnOrder(item)}
+                      >
+                        Return
+                      </button>
+                    )}
+
                     <button className="bg-gray-700 p-2 rounded">Invoice</button>
                   </div>
                 </div>

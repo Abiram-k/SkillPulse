@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { context } from "../../../Components/Provider";
 import { useContext } from "react";
 import { Toast } from "../../../Components/Toast";
+import { logoutAdmin } from "@/redux/adminSlice";
+import { useDispatch } from "react-redux";
 
 const Brand = () => {
   const [name, setName] = useState("");
@@ -16,8 +18,10 @@ const Brand = () => {
   const [spinner, setSpinner] = useState(false);
   const { setData } = useContext(context);
   const navigate = useNavigate();
-  const error = {};
+  const dispatch = useDispatch();
   
+  const error = {};
+
   const validateForm = () => {
     if (name.trim() === "") error.name = "Brand name is required *";
     const firstLetter = name[0];
@@ -56,6 +60,9 @@ const Brand = () => {
           setBrands(response.data.brands);
         })
         .catch((error) => {
+          if (error?.response.data.message == "Token not found") {
+            dispatch(logoutAdmin());
+          }
           console.log(error);
           alert(error?.response.data.message);
         });
@@ -203,19 +210,13 @@ const Brand = () => {
             {brands?.length > 0 ? (
               brands.map((brand, index) => (
                 <tr className="border-t" key={brand._id}>
-                  <td
-                    className={brand.isDeleted ? "line-through p-2" : "p-2"}
-                  >
+                  <td className={brand.isDeleted ? "line-through p-2" : "p-2"}>
                     {index + 1}
                   </td>
-                  <td
-                    className={brand.isDeleted ? "line-through p-2" : "p-2"}
-                  >
+                  <td className={brand.isDeleted ? "line-through p-2" : "p-2"}>
                     {brand.name}
                   </td>
-                  <td
-                    className={brand.isDeleted ? "line-through p-2" : "p-2"}
-                  >
+                  <td className={brand.isDeleted ? "line-through p-2" : "p-2"}>
                     {brand.description}
                   </td>
                   <td className="p-2">

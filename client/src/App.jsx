@@ -38,6 +38,8 @@ import ManageOrders from "./Pages/User/manageOrders/manageOrders";
 import OrderManagement from "./Pages/Admin/orderManagement/OrderManagement";
 import Brand from "./Pages/Admin/brandManagement/Brand";
 import EditBrand from "./Pages/Admin/brandManagement/EditBrand";
+import Contact from "./Pages/User/contact/Contact";
+import About from "./Pages/User/about/About";
 function App() {
   return (
     <>
@@ -131,6 +133,22 @@ function App() {
               element={
                 <ProtectUserHome>
                   <Shop />
+                </ProtectUserHome>
+              }
+            />
+            <Route
+              path="contact"
+              element={
+                <ProtectUserHome>
+                  <Contact />
+                </ProtectUserHome>
+              }
+            />
+            <Route
+              path="about"
+              element={
+                <ProtectUserHome>
+                  <About />
                 </ProtectUserHome>
               }
             />
