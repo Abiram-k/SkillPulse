@@ -1,3 +1,4 @@
+import { Password } from "@mui/icons-material";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -7,7 +8,10 @@ const initialState = {
   signUpSuccess: localStorage.getItem("signUpSuccess") || null,
   // selectedAddress also need to remove from localstorage
   cartProductsQty: JSON.parse(localStorage.getItem("cartProductsQty")) || [],
+  forgotEmailVerified:
+    JSON.parse(localStorage.getItem("verifiedForgotEmail")) || "",
 };
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -23,6 +27,17 @@ const userSlice = createSlice({
     otpSuccess: (state, action) => {
       state.signUpSuccess = null;
       localStorage.removeItem("signUpSuccess");
+    },
+    forgotEmailVerified: (state, action) => {
+      state.verifiedForgotEmail = action.payload;
+      localStorage.setItem(
+        "verifiedForgotEmail",
+        JSON.stringify(action.payload)
+      );
+    },
+    passwordReseted: (state, action) => {
+      state.verifiedForgotEmail = "";
+      localStorage.removeItem("verifiedForgotEmail");
     },
     setProductDetails: (state, action) => {
       state.details = [action.payload];
@@ -57,5 +72,7 @@ export const {
   otpSuccess,
   checkoutItems,
   ordered,
-  setCartProductQty
+  setCartProductQty,
+  forgotEmailVerified,
+  passwordReseted
 } = userSlice.actions;

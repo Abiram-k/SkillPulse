@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { context } from "../../../Components/Provider";
 import { useContext } from "react";
 import { Toast } from "../../../Components/Toast";
+import { logoutAdmin } from "@/redux/adminSlice";
+import { useDispatch } from "react-redux";
 const Category = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -15,6 +17,7 @@ const Category = () => {
   const [spinner, setSpinner] = useState(false);
   const { setData } = useContext(context);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const error = {};
   const validateForm = () => {
     if (name.trim() == "") error.name = "Category name is required *";
@@ -54,6 +57,12 @@ const Category = () => {
           setCategories(response.data.categories);
         })
         .catch((error) => {
+          if (
+            error?.response.data.message == "Token not found" ||
+            error?.response.data.message == "Failed to authenticate Admin"
+          ) {
+            dispatch(logoutAdmin());
+          }
           console.log(error);
           alert(error?.response.data.message);
         });

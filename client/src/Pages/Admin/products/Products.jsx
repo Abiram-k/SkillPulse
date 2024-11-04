@@ -38,7 +38,10 @@ function Products() {
         console.log(response.data.products);
         setProducts(response.data.products);
       } catch (error) {
-        if (error?.response.data.message == "Token not found") {
+        if (
+          error?.response.data.message == "Token not found" ||
+          error?.response.data.message == "Failed to authenticate Admin"
+        ) {
           dispatch(logoutAdmin());
         }
         console.log(error?.response?.data?.message);

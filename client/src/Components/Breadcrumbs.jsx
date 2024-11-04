@@ -13,6 +13,8 @@ const Breadcrumbs = () => {
     pathname.includes("admin") ||
     pathname.includes("login") ||
     pathname.includes("signup") ||
+    pathname.includes("forgotPassword") ||
+    pathname.includes("verifyEmail") ||
     pathname.includes("otp")
   ) {
     return null;

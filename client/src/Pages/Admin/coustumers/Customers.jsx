@@ -17,12 +17,16 @@ const Customers = () => {
     (async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/admin/customers",{withCredentials:true}
+          "http://localhost:3000/admin/customers",
+          { withCredentials: true }
         );
         console.log(response.data.users);
         setUsers(response.data.users);
       } catch (error) {
-        if (error?.response.data.message == "Token not found") {
+        if (
+          error?.response.data.message == "Token not found" ||
+          error?.response.data.message == "Failed to authenticate Admin"
+        ) {
           dispatch(logoutAdmin());
         }
         console.log(error);

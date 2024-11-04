@@ -1,12 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const MongoStore = require('connect-mongo');
 const dotenv = require("dotenv");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const path = require("node:path");
 const cors = require("cors");
-const userRouter = require('./Routes/userRoutes')
-const adminRouter = require('./Routes/adminRoutes')
+const userRouter = require('./routes/userRoutes')
+const adminRouter = require('./routes/adminRoutes')
 const nodeMailer = require("nodemailer");
 const passport = require("passport");
 require('./config/passport');
@@ -29,6 +30,8 @@ app.use(session({
     secret: SESSION_SECRETE,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
+
     cookie: { secure: false, maxAge: 60000 * 24 }
 }));
 app.use(passport.initialize());

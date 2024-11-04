@@ -40,6 +40,8 @@ import Brand from "./Pages/Admin/brandManagement/Brand";
 import EditBrand from "./Pages/Admin/brandManagement/EditBrand";
 import Contact from "./Pages/User/contact/Contact";
 import About from "./Pages/User/about/About";
+import ForgotPassword from "./Pages/User/forgotPassword/ForgotPassword";
+import EmailVerification from "./Pages/User/forgotPassword/EmailVerification";
 function App() {
   return (
     <>
@@ -61,6 +63,22 @@ function App() {
             element={
               <ProtectAuthUser>
                 <Signup />
+              </ProtectAuthUser>
+            }
+          />
+          <Route
+            path="/forgotPassword"
+            element={
+              <ProtectAuthUser>
+                <ForgotPassword />
+              </ProtectAuthUser>
+            }
+          />
+          <Route
+            path="/verifyEmail"
+            element={
+              <ProtectAuthUser>
+                <EmailVerification />
               </ProtectAuthUser>
             }
           />

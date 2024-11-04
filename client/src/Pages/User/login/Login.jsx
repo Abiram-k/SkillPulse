@@ -2,10 +2,11 @@ import React, { useEffect } from "react";
 import loginImage from "../../../assets/login-image.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { addUser } from "../../../redux/userSlice";
+import { addUser, passwordReseted } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
 import axios from "axios";
+import { Toast } from "@/Components/Toast";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +30,7 @@ function Login() {
   };
   useEffect(() => {
     localStorage.removeItem("otpTimer");
+    dispatch(passwordReseted());
   }, []);
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -59,8 +61,27 @@ function Login() {
     }
   };
   const handleGoogleAuth = () => {
-    window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = `http://localhost:3000/auth/google?method=login`;
   };
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get("error");
+
+    if (error === "user_exists") {
+      Toast.fire({
+        icon: "error",
+        title: `User already exists. Please log in instead.`,
+      });
+      urlParams.delete("error");
+      window.history.replaceState(null, "", window.location.pathname);
+    } else if (error === "server_error") {
+      urlParams.delete("error");
+      window.history.replaceState(null, "", window.location.pathname);
+      alert("An internal server error occurred. Please try again.");
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen ps-10 sm:ps-0  ms-80 sm:ms-auto">
       <h1 className="text-white sm:text-6xl sm:mb-10 mb-5 text-[24px]">
@@ -112,9 +133,12 @@ function Login() {
             </div>
           </form>
           <div className="text-center mt-4">
-            <a href="#" className="text-gray-400 text-sm hover:underline">
+            <Link
+              to="/verifyEmail"
+              className="text-gray-400 text-sm hover:underline"
+            >
               Forgot Password?
-            </a>
+            </Link>
           </div>
           <div className="text-center mt-2">
             <Link

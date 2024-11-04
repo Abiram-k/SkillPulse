@@ -10,7 +10,7 @@ const generateOrderId = () => {
     orderCounter += 1;
     const timestamp = Date.now();
     return `SKPUL-FT-${timestamp}-${orderCounter}`;
-};
+}; 
 
 const generateOrderDate = () => {
     const date = new Date();

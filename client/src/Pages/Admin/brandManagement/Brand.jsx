@@ -19,7 +19,7 @@ const Brand = () => {
   const { setData } = useContext(context);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const error = {};
 
   const validateForm = () => {
@@ -60,7 +60,10 @@ const Brand = () => {
           setBrands(response.data.brands);
         })
         .catch((error) => {
-          if (error?.response.data.message == "Token not found") {
+          if (
+            error?.response.data.message == "Token not found" ||
+            error?.response.data.message == "Failed to authenticate Admin"
+          ) {
             dispatch(logoutAdmin());
           }
           console.log(error);

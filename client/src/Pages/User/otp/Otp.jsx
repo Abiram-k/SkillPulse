@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { otpSuccess } from "../../../redux/userSlice";
 
 function Otp() {
+  const [input, setInput] = useState(true);
   const [timer, setTimer] = useState(
     localStorage.getItem("otpTimer")
       ? Number(localStorage.getItem("otpTimer"))
@@ -15,7 +16,7 @@ function Otp() {
   const [otp, setOtp] = useState("");
   const [resendOtp, setResendOtp] = useState(false);
   const [message, setMessage] = useState({});
-  const [spinner, setSpinner] = useState(false);// Initially enabled
+  const [spinner, setSpinner] = useState(false); // Initially enabled
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -32,7 +33,7 @@ function Otp() {
       return () => clearInterval(interval);
     } else {
       setResendOtp(true);
-      setInput(false); 
+      setInput(false);
     }
   }, [timer]);
 
@@ -62,7 +63,7 @@ function Otp() {
   const handleResendOtp = async () => {
     setInput(true);
     setSpinner(true);
-    setTimer(60); 
+    setTimer(60);
     setResendOtp(false);
 
     try {

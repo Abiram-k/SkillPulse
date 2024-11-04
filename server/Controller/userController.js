@@ -42,18 +42,13 @@ const sendOTPEmail = async (email, otp, name) => {
             subject: 'SKILL PULSE ,Your OTP for Signup ',
             text: `Dear ${name},
 
-            Thank you for signing up! 
+            Thank you for signing up! Your One-Time Password (OTP) for completing your signup process is:One-Time-Password is: ${otp}
+            Please enter this OTP on the signup page to verify your account. This OTP is valid for a limited time only, so please use it promptly.
+            If you did not initiate this request, please ignore this email. Your account security is important to us.
 
-Your One-Time Password (OTP) for completing your signup process is:
+            Best regards,  
+            The [SkillPulse] Team`,
 
-One-Time-Password is: ${otp}
-
-Please enter this OTP on the signup page to verify your account. This OTP is valid for a limited time only, so please use it promptly.
-
-If you did not initiate this request, please ignore this email. Your account security is important to us.
-
-Best regards,  
-The [SkillPulse] Team`,
         };
         await transporter.sendMail(mailCredentials);
         console.log('OTP sent successfully');
@@ -153,8 +148,86 @@ exports.resendOtp = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+const passResetEmail = async (email, otp, name) => {
+    console.log("OTP IS:", otp);
+    console.log("EMAIL:", email);
+    try {
+        const mailCredentials = {
 
+            from: "abiramk0107@gmail.com",
+            to: email,
+            subject: 'Skill Pulse - OTP for Password Reset',
+            text: `Dear ${name},
 
+             Thank you for reaching out to reset your password. Your One-Time Password (OTP) for completing the password reset process is: ${otp}
+
+             Please enter this OTP on the password reset page to proceed with resetting your account password. Note that this OTP is valid only for a limited time, so please use it as soon as possible.
+             If you did not initiate this request, please ignore this email. Your account security is our priority.
+
+             Best regards,  
+             The Skill Pulse Team`
+        };
+
+        await transporter.sendMail(mailCredentials);
+        console.log('OTP sent successfully');
+        return true;
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        return false;
+    }
+}
+
+exports.verifyEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        // console.log(user)
+        if (!user)
+            return res.status(401).json({ message: "Email id not found" })
+        const otp = generateOTP()
+        req.session.resetPassOtp = otp;
+        console.log(req.session)
+
+        const otpSuccess = await passResetEmail(email, otp, user.firstName)
+        if (!otpSuccess)
+            console.log("Otp verification Failed")
+        return res.status(200).json({ message: "OTP sent successfully" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while verifying email" })
+    }
+}
+exports.verifyResetOtp = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        console.log(otp, "from fronted")
+        const validOtp = req.session.resetPassOtp;
+        console.log(validOtp, "from session fronted");
+        if (otp && otp != validOtp)
+            return res.status(400).json({ message: "Otp is incorrect" });
+        else
+            return res.status(200).json({ message: "Verification completed" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while verifying otp" })
+    }
+}
+exports.forgotPassword = async (req, res) => {
+    try {
+        console.log("hey");
+        const { email, newPassword } = req.body;
+        const user = await User.findOne({ email });
+        if (!user)
+            return res.status(404).json({ message: "User not found" })
+        user.password = newPassword;
+        await user.save();
+        return res.status(200).json({ message: "Password Reseted" })
+    } catch (error) {
+
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while resetting password" })
+    }
+}
 
 exports.login = async (req, res) => {
     try {
@@ -247,7 +320,7 @@ exports.getProducts = async (req, res) => {
             const currentDate = new Date();
             currentDate.setDate(currentDate.getDate() - 30);
             query.createdAt = { $gt: currentDate };
-            sortOrder = { createdAt: -1 }; 
+            sortOrder = { createdAt: -1 };
         }
 
         if (price === 'High-Low') {
@@ -283,7 +356,7 @@ exports.getSimilarProduct = async (req, res) => {
         const { id } = req.params;
         const productData = await Product.findById(id);
         const similarProducts = await Product.find({ category: productData?.category })
-        .populate("brand")
+            .populate("brand")
         if (similarProducts.length === 0)
             return res.status(404).json({ message: "No Similar products were founded !" })
         return res.status(200).json({ message: "Product fetched successfully", similarProducts });

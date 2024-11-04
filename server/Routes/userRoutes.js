@@ -11,7 +11,8 @@ const { verifyUser } = require("../Middleware/userAuth");
 const { isBlocked } = require("../Middleware/isBlockedUser");
 const { uploadImage } = require("../Middleware/multer");
 const dotenv = require("dotenv");
-const path = require("node:path")
+const path = require("node:path");
+const User = require("../models/userModel");
 
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
@@ -22,37 +23,65 @@ router.post('/login', userController.login);
 router.post('/otp', userController.otp);
 router.post('/resendOtp', userController.resendOtp);
 
-router.get('/auth/google',
+router.post('/verifyEmail', userController.verifyEmail);
+router.post('/verifyResetOtp', userController.verifyResetOtp);
+router.patch('/forgotPassword', userController.forgotPassword);
+
+// router.get('/auth/google',
+// //      (req, res, next) => {
+// //     console.log("Full URL:", req.originalUrl); // This should include ?method=login
+// //     console.log("<<<<Method>>>>", req.query.method);
+// //     req.session.method = req.query.method;           
+// //     next();
+// // },
+
+//  passport.authenticate('google', { scope: ['email', 'profile'] ,   state: state }));
+
+router.get('/auth/google', (req, res, next) => {
+    const state = JSON.stringify({ method: req.query.method });
     passport.authenticate('google', {
-        scope:
-            ['email', 'profile']
-    }
-    ));
+        scope: ['email', 'profile'],
+        state: state
+    })(req, res, next);
+});
+
 router.get('/googleUser', userController.getUserData);
 router.get('/auth/google/callback',
     passport.authenticate('google',
         { failureRedirect: 'http://localhost:5173/login' }),
-    (req, res) => {
-        const token = jwt.sign({
-            id: req.user._id,
-            email: req.user.email
-        },
-            process.env.JWT_SECRETE,
-            { expiresIn: '1h' })
+    async (req, res) => {
+        try {
+            const state = JSON.parse(req.query.state || '{}');
+            const method = state.method;
+            const email = req.user?.emails?.[0]?.value;
 
-        res.cookie('userToken', token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'Lax',
-            maxAge: 3600000
-        });
+            if (method == 'signup') {
+                const existingUser = User.findOne(email);
+                if (existingUser) {
+                    return res.redirect('http://localhost:5173/login?error=user_exists');
+                }
+            }
+          
+            const token = jwt.sign({
+                id: req.user._id,
+                email: req.user.email
+            },
+                process.env.JWT_SECRETE,
+                { expiresIn: '1h' })
 
-        res.redirect('http://localhost:5173/googleRedirect')
+            res.cookie('userToken', token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'Lax',
+                maxAge: 3600000
+            });
+
+            res.redirect('http://localhost:5173/googleRedirect')
+        } catch (error) {
+            console.error("Authentication error:", error);
+            res.redirect('http://localhost:5173/signup?error=server_error');
+        }
     });
-
-
-
-
 
 
 router.get("/products", verifyUser, isBlocked, userController.getProducts);
