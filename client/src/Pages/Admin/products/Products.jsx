@@ -14,6 +14,7 @@ function Products() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(5);
+  const [filterProduct, setFilterProduct] = useState("All");
   const searchFocus = useRef(null);
   const { setData } = useContext(context);
   const dispatch = useDispatch();
@@ -32,7 +33,7 @@ function Products() {
     (async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/admin/getProduct",
+          `http://localhost:3000/admin/getProduct?filter=${filterProduct}`,
           { withCredentials: true }
         );
         console.log(response.data.products);
@@ -48,7 +49,7 @@ function Products() {
       }
     })();
     searchFocus.current.focus();
-  }, [products]);
+  }, [dispatch, filterProduct]);
 
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
@@ -66,7 +67,7 @@ function Products() {
           title: "Unlisted",
           text: `${response.data.product.productName}
             Listed successfully`,
-          icon: "sucess",
+          icon: "success",
           confirmButtonText: "Done",
         });
       } else {
@@ -147,7 +148,7 @@ function Products() {
         <i className="fas fa-plus mr-2"></i> Add Product
       </Link>
 
-      <main className="flex-1 p-6 bg-white text-black">
+      <main className="flex-1 p-6 bg-white text-black font-mono">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 space-y-4 lg:space-y-0">
           <button
             className="flex items-center text-gray-600 mb-4 lg:mb-0"
@@ -165,22 +166,18 @@ function Products() {
               onChange={(e) => setSearch(e.target.value)}
             />
             <div className="flex items-center space-x-4">
-              <span className="font-semibold">Sort</span>
-              <select className="border rounded px-2 py-1">
-                <option>Product Name</option>
-              </select>
-              <span className="font-semibold">By</span>
-              <select className="border rounded px-2 py-1">
-                <option>Ascending</option>
-                <option>Descending</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
               <span className="font-semibold">Filter</span>
-              <select className="border rounded px-2 py-1">
-                <option>Price</option>
-                <option>Category</option>
-                <option>Brand</option>
+              <select
+                className="border rounded px-2 py-1 font-mono"
+                value={filterProduct}
+                onChange={(e) => setFilterProduct(e.target.value)}
+              >
+                <option value="">Select Option</option>
+                <option value="Recently Added">Recently Added</option>
+                <option value="High-Low">High-Low</option>
+                <option value="Low-High">Low-High</option>
+                <option value="A-Z">A-Z</option>
+                <option value="Z-A">Z-A</option>
               </select>
             </div>
           </div>
@@ -237,7 +234,13 @@ function Products() {
                           <td className="p-2 ">
                             {product.category?.name || "not Fetched"}
                           </td>
-                          <td className="p-2 ">{product.productDescription}</td>
+                          <td className="p-2 whitespace-normal">
+                            {product.productDescription
+                              .split(" ")
+                              .slice(0, 2)
+                              .join(" ")}
+                            ...
+                          </td>
                           <td className="p-2 ">{product.salesPrice}</td>
                           <td className="p-2 ">{product.units}</td>
                         </>

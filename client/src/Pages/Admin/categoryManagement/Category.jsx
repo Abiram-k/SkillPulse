@@ -193,7 +193,7 @@ const Category = () => {
   };
 
   return (
-    <main className="w-4/5 p-8">
+    <main className="w-4/5 p-8 font-mono">
       {spinner && (
         <div className="spinner-overlay">
           <div className="spinner"></div>

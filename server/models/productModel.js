@@ -52,16 +52,14 @@ const productSchema = new mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    type: String,
+    // type: String,
     ref: 'category',
     required: true
   },
   brand: {
     type: mongoose.Schema.Types.ObjectId ,
+    // type: String,
     ref: 'brand',
-    // required: true,
-    type: String,
-    default: "Brand not added"
   }
 }, {
   timestamps: true

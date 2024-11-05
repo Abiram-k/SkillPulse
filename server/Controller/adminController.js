@@ -44,8 +44,19 @@ exports.login = async (req, res) => {
 
 exports.customers = async (req, res) => {
     try {
+        const { filter } = req.query;
+        // console.log("<<<<<<<<<<<<", filter, "<<<<<<<<<<<<")
+
         const users = await User.find();
-        console.log(users);
+
+        if (filter == "A-Z")
+            users.sort((a, b) => a.firstName.localeCompare(b.firstName));
+        else if (filter == "Z-A")
+            users.sort((a, b) => b.firstName.localeCompare(a.firstName));
+        else if (filter === "Recently added") {
+            users = users.sort((a, b) => b.createdAt - a.createdAt);
+        }
+        // console.log(users);
 
         return res.status(200).json({ message: "success", users });
     } catch (error) {
@@ -302,11 +313,26 @@ exports.listCategory = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     try {
-        const products = await Product.find().populate("category")
-        // const categories = await Category.findById(products.category)
+        const { filter } = req.query;
+        console.log(filter)
+        const products = await Product.find().populate([
+            { path: "category" },
+            { path: "brand" }
+        ]);
+        if (filter == "Recently Added")
+            products.sort((a, b) => b.createdAt - a.createdAt);
+        else if (filter == "High-Low")
+            products.sort((a, b) => b.salesPrice - a.salesPrice);
+        else if (filter == "Low-High")
+            products.sort((a, b) => a.salesPrice - b.salesPrice);
+        if (filter === "A-Z") {
+            products.sort((a, b) => a.productName.localeCompare(b.productName));
+        } else if (filter === "Z-A") {
+            products.sort((a, b) => b.productName.localeCompare(a.productName));
+        }
         return res.status(200).json({ message: "successfully fetched all products", products });
     } catch (error) {
-        console.log(error.message)
+        console.log(error)
         return res.status(500).json({ message: error.message || "Failed to fetch data" })
     }
 }
@@ -326,9 +352,12 @@ exports.addProduct = async (req, res) => {
         const productImage = req.files.map((file) => file.path)
         const existProduct = await Product.findOne({ productName });
 
-        const categoryDoc = await Category.findOne({ name: category })
+        const categoryDoc = await Category.findOne({ name: category });
+        const brandDoc = await Brand.findOne({ name: brand })
         if (!categoryDoc)
             return res.status(400).json({ message: "Category not existing" });
+        if (!brandDoc)
+            return res.status(400).json({ message: "Brand not existing" });
         if (existProduct) {
             console.log("product exists");
             return res.status(400).json({ message: "product already exists" });
@@ -341,7 +370,7 @@ exports.addProduct = async (req, res) => {
                 regularPrice,
                 units,
                 category: categoryDoc,
-                brand,
+                brand: brandDoc,
                 productImage
             });
             console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -391,6 +420,9 @@ exports.editProduct = async (req, res) => {
             _id: { $ne: id }
         });
         const categoryDoc = await Category.findOne({ name: { $regex: new RegExp(`^${category}$`, 'i') } })
+        const brandDoc = await Brand.findOne({ name: { $regex: new RegExp(`^${brand}$`, 'i') } })
+        if (!brandDoc)
+            return res.status(400).json({ message: "Brand not existing" });
         if (!categoryDoc)
             return res.status(400).json({ message: "Category not existing" });
         if (existProduct) {
@@ -405,7 +437,7 @@ exports.editProduct = async (req, res) => {
                 regularPrice,
                 units,
                 category: categoryDoc._id,
-                brand,
+                brand: brandDoc._id,
                 productImage
             });
             // console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -464,12 +496,13 @@ exports.handleProductListing = async (req, res) => {
 }
 exports.editStatus = async (req, res) => {
     try {
+        console.log("hey")
         const { id } = req.query;
         const { orderId, productId, updatedStatus } = req.body;
 
-        console.log("product Id: ", productId)
+        console.log("product Id: ", productId);
         console.log("order Id: ", orderId)
-        const updatingOrder = await Orders.findOne({ user: id, orderId })
+        const updatingOrder = await Orders.findOne({ orderId })
         console.log(updatingOrder);
 
         if (!updatingOrder) {
@@ -480,7 +513,7 @@ exports.editStatus = async (req, res) => {
         if (!updatedStatus) {
             console.log("No status were founded");
         } else {
-            const productIndex = updatingOrder.orderItems.findIndex((product) => product.product.toString() == productId);
+            const productIndex = updatingOrder.orderItems.findIndex((product) => product._id.toString() == productId);
 
             if (productIndex === -1) {
                 console.log("Product not found in order items");
@@ -502,21 +535,53 @@ exports.editStatus = async (req, res) => {
 
 exports.getOrder = async (req, res) => {
     try {
-        const orderData = await Orders.find()
-    .populate({
-        path: "orderItems.product", 
-        populate: {
-            path: "category", 
-            model: "category" 
-        }
-    })
-    // .populate("user");
+        const { filter } = req.query;
+        const query = {};
 
-        if (!orderData)
-            console.log("No order were founded in this user id");
+        // Filtering by `productStatus` inside `orderItems`
+        if (["cancelled", "shipped", "processing", "delivered", "returned"].includes(filter)) {
+            query.orderItems = { $elemMatch: { productStatus: filter } };
+        }
+
+        // Fetch orders with filtered `productStatus`, populating `orderItems.product.category`
+        const orderData = await Orders.find(query)
+            .populate({
+                path: "orderItems.product",
+                populate: {
+                    path: "category",
+                    model: "category"
+                }
+            });
+
+        // Sort the results based on the `filter` value
+        if (filter === "Recent") {
+            orderData.sort((a, b) => b.orderDate - a.orderDate);
+        } else if (filter === "Oldest") {
+            orderData.sort((a, b) => a.orderDate - b.orderDate);
+        } else if (filter === "A-Z") {
+            orderData.sort((a, b) => {
+                if (a.orderItems.length > 0 && b.orderItems.length > 0) {
+                    return a.orderItems[0].product.productName.localeCompare(b.orderItems[0].product.productName);
+                }
+                return 0;
+            });
+        } else if (filter === "Z-A") {
+            orderData.sort((a, b) => {
+                if (a.orderItems.length > 0 && b.orderItems.length > 0) {
+                    return b.orderItems[0].product.productName.localeCompare(a.orderItems[0].product.productName);
+                }
+                return 0;
+            });
+        }
+
+        if (!orderData.length) {
+            console.log("No orders were found with the given filter.");
+            return res.status(404).json({ message: "No orders found." });
+        }
+
         return res.status(200).json({ message: "Orders fetched successfully", orderData });
     } catch (error) {
-        console.log(error.message);
+        console.error("Error fetching orders:", error.message);
         return res.status(500).json({ message: "Failed to fetch orders" });
     }
-}
+};

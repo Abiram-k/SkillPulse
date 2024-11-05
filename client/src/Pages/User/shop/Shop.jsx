@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import productBanner from "../../../assets/homeProductBanner.webp";
 import axios from "axios";
 import { Toast } from "../../../Components/Toast";
-import { setProductDetails } from "../../../redux/userSlice";
+import { logoutUser, setProductDetails } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../Components/Pagination";
@@ -35,6 +35,9 @@ const Shop = () => {
       setCategory(response.data.categoryDoc);
       setBrand(response.data.brandDoc);
     } catch (error) {
+      if (error?.response.data.isBlocked) {
+        dispatch(logoutUser());
+      }
       Toast.fire({
         icon: "error",
         title: `${error?.response?.data.message}`,
@@ -173,38 +176,38 @@ const Shop = () => {
           currentProduct.map((product, index) =>
             product.isListed && !product.isDeleted ? (
               <div
-                className="bg-gray-800 p-3 rounded shadow-lg transform hover:scale-105 transition-transform duration-300"
-                key={product._id}
-              >
-                <img
-                  src={
-                    product.productImage[0] || "https://placehold.co/300x200"
-                  }
-                  alt={product.productDescription}
-                  className="w-full h-32 object-cover rounded cursor-pointer"
-                  onClick={() => goToDetails(product)}
-                />
-                <Heart className="absolute top-2 right-3 w-6 h-6" />
-
-                <div className="mt-2 text-center">
-                  {/* <h3 className="text-sm font-semibold text-white">
-                    {product.brand}
-                  </h3> */}
-                  <p className="text-xs text-gray-300">{product.productName}</p>
-                  <p className="text-sm font-bold text-green-500">
-                    ₹{product.salesPrice}
-                    <span className="line-through text-gray-400 ml-1">
-                      ₹{product.regularPrice}
-                    </span>
-                    <span className="text-red-500 ml-1">20% off</span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {product.salesPrice > 1000
-                      ? "Free Delivery"
-                      : "Delivery Charges Apply"}
-                  </p>
-                </div>
+              className="relative bg-gray-800 p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
+              key={product._id}
+            >
+              <img
+                src={product.productImage[0] || "https://placehold.co/300x200"}
+                alt={product.productDescription}
+                className="w-full h-40 object-cover rounded-t-lg cursor-pointer transition-opacity hover:opacity-90"
+                onClick={() => goToDetails(product)}
+              />
+              
+              <Heart
+                className="absolute top-3 right-3 w-7 h-7 text-gray-300 hover:text-red-500 transition-colors cursor-pointer"
+                onClick={() => (addedToWishlist ? handleRemoveFromWishlist() : handleAddToWishlist())}
+              />
+            
+              <div className="p-3 text-center">
+                
+                <p className="text-sm font-medium text-gray-300 truncate">
+                  {product.productName}
+                </p>
+             
+                <p className="text-lg font-bold text-green-400 mt-1">
+                  ₹{product.salesPrice}
+                  <span className="line-through text-gray-500 ml-2">₹{product.regularPrice}</span>
+                  <span className="text-red-500 ml-2 text-xs">20% off</span>
+                </p>
+            
+                <p className="text-xs text-gray-400 mt-1">
+                  {product.salesPrice > 1000 ? "Free Delivery" : "Delivery Charges Apply"}
+                </p>
               </div>
+            </div>            
             ) : (
               <div
                 key={""}

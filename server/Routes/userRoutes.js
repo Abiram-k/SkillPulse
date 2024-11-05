@@ -105,7 +105,8 @@ router.delete("/cartItem/:productId", verifyUser, isBlocked, cartController.remo
 
 // router.delete("/cartItem/:productId", wishlistController.removewishlistItme);
 router.get("/wishlist", verifyUser, isBlocked, wishlistController.getwishlist);
-router.post("/wishlist", verifyUser, isBlocked, wishlistController.addTowishlist);
+router.post("/wishlist", verifyUser, isBlocked, wishlistController.addToWishlist);
+router.delete("/wishlist", verifyUser, isBlocked, wishlistController.deleteWishlistItem);
 
 router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
 router.get("/order", verifyUser, isBlocked, orderController.getOrder);

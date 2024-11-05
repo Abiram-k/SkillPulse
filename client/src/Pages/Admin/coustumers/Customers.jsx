@@ -12,12 +12,13 @@ const Customers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(5);
   const [slno, setSlNo] = useState(0);
+  const [filterUser, setFilterUser] = useState("All");
   const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/admin/customers",
+          `http://localhost:3000/admin/customers?filter=${filterUser}`,
           { withCredentials: true }
         );
         console.log(response.data.users);
@@ -33,7 +34,7 @@ const Customers = () => {
       }
     })();
     searchFocus.current.focus();
-  }, []);
+  }, [filterUser]);
 
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
@@ -49,8 +50,8 @@ const Customers = () => {
         Swal.fire({
           title: "Blocked",
           text: `${response.data.name}
-            "Blocked successfully`,
-          icon: "sucess",
+          "Blocked successfully`,
+          icon: "success",
           confirmButtonText: "Done",
         });
       } else {
@@ -80,13 +81,7 @@ const Customers = () => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <label htmlFor="sort" className="mr-2">
-                Sort
-              </label>
-
-              <select id="sort" className="border rounded p-1">
-                <option>Name</option>
-              </select>
+              <h1 className="px-4 font-semi-bold lg:text-lg">Coustomers</h1>
             </div>
             <input
               type="text"
@@ -96,29 +91,31 @@ const Customers = () => {
               ref={searchFocus}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <div>
+            <div className="font-mono">
               <label htmlFor="order" className="mr-2">
-                By
+                Sort By
               </label>
 
               <select
                 id="order"
                 className="border rounded p-1"
-                // value={filterUser}
-                // onChange={(e) => setFilterUser(e.target.value)}
+                value={filterUser}
+                onChange={(e) => setFilterUser(e.target.value)}
               >
-                <option>Recently added</option>
-                <option>name</option>
+                <option  value="">All Costumers</option>
+                <option value="Recently added">Recently added</option>
+                <option value="A-Z">A-Z</option>
+                <option value="Z-A">Z-A</option>
               </select>
             </div>
-            <div>
+            {/* <div>
               <label htmlFor="filter" className="mr-2">
                 Filter
               </label>
               <select id="filter" className="border rounded p-1">
                 <option></option>
               </select>
-            </div>
+            </div> */}
           </div>
           <div className="table-container  p-5 rounded ">
             <table className="w-full table-auto ">

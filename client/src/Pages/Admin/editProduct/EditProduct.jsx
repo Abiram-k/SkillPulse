@@ -23,6 +23,7 @@ const EditProduct = () => {
 
   const navigate = useNavigate();
   const { data } = useContext(context);
+  console.log("Edit Product Data",data)
 
   useEffect(() => {
     setId(data?._id || "");
@@ -31,9 +32,10 @@ const EditProduct = () => {
     setDescription(data?.productDescription || "");
     setRegularPrice(data?.regularPrice || "");
     setSalesPrice(data?.salesPrice || "");
-    setBrand(data?.brand || "");
+    setBrand(data?.brand?.name || "not fetched");
     setUnits(data?.units || "");
     setProductImage(data?.productImage || []);
+    // console.log("BRANDD DATAA ", data?.brand)
   }, [data]);
 
   const error = {};
@@ -347,4 +349,4 @@ const EditProduct = () => {
   );
 };
 
-export default EditProduct
+export default EditProduct;

@@ -71,8 +71,9 @@ const AddProduct = () => {
       } catch (err) {
         alert(err?.response?.data?.message);
       }
-    })();
+    })()
   }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -158,6 +159,8 @@ const AddProduct = () => {
 
   // Handle adding the product with images
   const handleAddProduct = async (e) => {
+    console.log("BRAASDGJASJEFGJG",brand)
+    console.log("cartergsdgdgf",category)
     e.preventDefault();
     const formErrors = validateForm();
     setMessage(formErrors);
@@ -252,9 +255,6 @@ const AddProduct = () => {
             >
               {brands.length > 0 ? (
                 brands.map((brand) => (<>
-                  <option key={brand._id} value={brand.name}>
-                    {brand.name}
-                  </option>
                   <option key={brand._id} value={brand.name}>
                     {brand.name}
                   </option>

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Toast } from "../../../Components/Toast";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setProductDetails } from "@/redux/userSlice";
+import { logoutUser, setProductDetails } from "@/redux/userSlice";
 
 const SearchProducts = () => {
   const [products, setProducts] = useState([]);
@@ -21,6 +21,9 @@ const SearchProducts = () => {
         setProducts(response.data.products);
         setCategory(response.data.category);
       } catch (error) {
+        if (error?.response.data.isBlocked) {
+          dispatch(logoutUser());
+        }
         Toast.fire({
           icon: "error",
           title: `${error?.response?.data.message}`,

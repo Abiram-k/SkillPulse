@@ -4,7 +4,7 @@ import axios from "axios";
 import { Toast } from "@/Components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { setCartProductQty, checkoutItems } from "@/redux/userSlice";
+import { setCartProductQty, checkoutItems, logoutUser } from "@/redux/userSlice";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 
 const ShoppingCartPage = () => {
@@ -25,6 +25,9 @@ console.log(user)
 
         console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
+        if (error?.response.data.isBlocked) {
+          dispatch(logoutUser());
+        }
         console.log(error);
         Toast.fire({
           icon: "error",

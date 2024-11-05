@@ -100,7 +100,8 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             <Bell className="h-6 w-6  text-yellow-700" />
             <div className="flex items-center gap-2 ">
-              <div className="w-8 h-8 bg-gray-300 text-black rounded-full" />
+              {/* <div className="w-8 h-8 bg-gray-300 text-black rounded-full" /> */}
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntF7sVICaZX72XQZ9FTjq_uRbZlN8t9uqwA&s" alt="admin logo"n className="w-8 h-8 bg-gray-500 text-black rounded-full " />
               <span className="text-black">Abiram</span>
             </div>
           </div>

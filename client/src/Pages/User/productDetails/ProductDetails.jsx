@@ -158,7 +158,7 @@ const ProductDetails = () => {
   }, [cartProduct, user?._id]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white font-mono">
       <main className="container mx-auto px-4 py-8">
         {product.length === 0 ? (
           <div>Loading...</div>
@@ -225,12 +225,15 @@ const ProductDetails = () => {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-xl font-bold">{product.productName}</h1>
-                  <p className="text-l font-semi-bold">
+                  <p className="text-l font-semi-bold text-gray-300">
                     {product.productDescription}
                   </p>
                 </div>
                 <h2 className="text-sm text-gray-300 font-semibold">
                   Brand : {product.brand?.name || "Brand not added"}
+                </h2>
+                <h2 className="text-sm text-gray-300 font-semibold">
+                  category : {product.category?.name || "Brand not added"}
                 </h2>
                 <div className="flex items-baseline space-x-4">
                   <span className="text-2xl font-bold text-green-500">
@@ -283,7 +286,7 @@ const ProductDetails = () => {
                     </button>
                   )}
                   {isAvailable && (
-                    <button className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
+                    <button className="bg-red-900 text-white line-through px-6 py-2 rounded-full hover:bg-red-700 text-sm w-full md:w-auto">
                       Buy Now
                     </button>
                   )}

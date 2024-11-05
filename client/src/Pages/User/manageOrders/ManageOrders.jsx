@@ -1,14 +1,16 @@
 import { responsive } from "@cloudinary/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./manageOrder.css";
 import { Toast } from "@/Components/Toast";
+import { logoutUser } from "@/redux/userSlice";
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [refresh, setRefresh] = useState(0);
+  const dispatch = useDispatch();
 
   const user = useSelector((state) => state.users.user);
 
@@ -24,6 +26,9 @@ const ManageOrders = () => {
         console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
       } catch (error) {
+        if (error?.response.data.isBlocked) {
+          dispatch(logoutUser());
+        }
         console.log(error.message);
       }
     })();

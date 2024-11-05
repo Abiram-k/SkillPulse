@@ -28,8 +28,9 @@ export const ChangeStatus = ({
     updatedState(updatedStatus);
     try {
       const response = await axios.patch(
-        `http://localhost:3000/admin/status?id=${user._id}`,
-        { orderId, productId, updatedStatus }
+        `http://localhost:3000/admin/status?id=${user?._id}`,
+        { orderId, productId, updatedStatus },
+        { withCredentials: true }
       );
       console.log(response.data.message);
       Toast.fire({

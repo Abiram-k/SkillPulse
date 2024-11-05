@@ -6,7 +6,7 @@ const { verifyAdmin } = require("../Middleware/adminAuth");
 
 
 router.post("/adminLogin", adminController.login);
-router.get("/customers",verifyAdmin, adminController.customers);
+router.get("/customers", verifyAdmin, adminController.customers);
 
 router.get("/block/:id", verifyAdmin, adminController.blockUser);
 router.put("/productDelete/:id", verifyAdmin, adminController.deleteProduct);
@@ -26,7 +26,7 @@ router.put("/brandRestore/:id", verifyAdmin, adminController.brandRestore);
 router.post("/handleBrandListing/:id", verifyAdmin, adminController.listBrand)
 router.post("/addBrand", uploadImage.single("file"), verifyAdmin, adminController.addBrand);
 router.put("/editBrand", uploadImage.single("file"), verifyAdmin, adminController.editBrand);
-
+ 
 
 router.put("/editProduct/:id", uploadImage.array("file"), verifyAdmin, adminController.editProduct);
 router.post("/addProduct", uploadImage.array("file"), verifyAdmin, adminController.addProduct);

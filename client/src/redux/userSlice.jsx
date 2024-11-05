@@ -1,3 +1,4 @@
+import Wishlist from "@/Pages/User/wishlist/Wishlist";
 import { Password } from "@mui/icons-material";
 import { createSlice } from "@reduxjs/toolkit";
 
@@ -10,6 +11,7 @@ const initialState = {
   cartProductsQty: JSON.parse(localStorage.getItem("cartProductsQty")) || [],
   forgotEmailVerified:
     JSON.parse(localStorage.getItem("verifiedForgotEmail")) || "",
+  wishlistItems: [],
 };
 
 const userSlice = createSlice({
@@ -55,6 +57,14 @@ const userSlice = createSlice({
       state.checkoutItems = null;
       localStorage.removeItem("checkoutItems");
     },
+    wishlistItems: (state, action) => {
+      const exisit = state.wishlistItems.find((item) => item == action.payload);
+      if (!exisit) state.wishlistItems.push(action.payload);
+    },
+    removefromWishlist: (state, action) => {
+      if (!action.payload) state.wishlistItems = [];
+      else state.wishlistItems.filter((item) => item !== action.payload);
+    },
     logoutUser: (state) => {
       state.user = null;
       localStorage.removeItem("userData");
@@ -74,5 +84,7 @@ export const {
   ordered,
   setCartProductQty,
   forgotEmailVerified,
-  passwordReseted
+  passwordReseted,
+  wishlistItems,
+  removefromWishlist,
 } = userSlice.actions;

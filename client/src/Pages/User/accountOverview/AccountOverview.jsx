@@ -28,6 +28,7 @@ const AccountOverview = () => {
   const [spinner, setSpinner] = useState(false);
   const [message, setMessage] = useState({});
   const [editMode, setEditMode] = useState(false);
+  const dispatch = useDispatch();
 
   const formValidate = () => {
     let error = {};
@@ -97,6 +98,9 @@ const AccountOverview = () => {
         setUserProfile(response.data.userData);
         setProfileImage(response.data.userData.profileImage);
       } catch (error) {
+        if (error?.response.data.isBlocked) {
+          dispatch(logoutUser());
+        }
         console.log(error?.response?.data?.message);
       }
     })();
@@ -104,7 +108,7 @@ const AccountOverview = () => {
 
   const handleProfileChange = async (e) => {
     e.preventDefault();
-    alert(dateOfBirth)
+    alert(dateOfBirth);
 
     const formError = formValidate();
     if (Object.keys(formError).length > 0) {
