@@ -52,7 +52,7 @@ const OrderManagement = () => {
         alert(error?.response.data.message);
       }
     })();
-  }, [filterOrders, dispatch,orders]);
+  }, [filterOrders, dispatch]);
 
   const handleUpdatedStatus = (status) => {
     if (status) setUpdatedStatus(status);

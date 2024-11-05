@@ -4,7 +4,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   user: JSON.parse(localStorage.getItem("userData")) || null,
-  details: JSON.parse(localStorage.getItem("productDetails")) || [],
+  details: 
+  JSON.parse(localStorage.getItem("productDetails")) ||
+   [],
   checkoutItems: JSON.parse(localStorage.getItem("checkoutItems")) || null,
   signUpSuccess: localStorage.getItem("signUpSuccess") || null,
   // selectedAddress also need to remove from localstorage

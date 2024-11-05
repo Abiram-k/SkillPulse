@@ -22,8 +22,10 @@ const ProductDetails = () => {
   const [cartProduct, setCartProduct] = useState([]);
 
   useEffect(() => {
+
     const savedCart =
-      JSON.parse(localStorage.getItem(`cart_${user?._id}`)) || [];
+      JSON.parse(localStorage.getItem(`cart_${user._id}`))
+       || [];
     setCartProduct(savedCart);
   }, [user?._id]);
 
@@ -152,10 +154,10 @@ const ProductDetails = () => {
   };
 
   useEffect(() => {
-    if (user?._id) {
+    if (user?._id && cartProduct.length > 0) {
       localStorage.setItem(`cart_${user._id}`, JSON.stringify(cartProduct));
     }
-  }, [cartProduct, user?._id]);
+  }, [cartProduct, user?._id]); 
 
   return (
     <div className="min-h-screen bg-black text-white font-mono">

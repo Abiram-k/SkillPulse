@@ -42,9 +42,9 @@ console.log(user)
 
     if (cartItems.length > 0 && cartItems[0]?.products) {
       cartItems[0]?.products.forEach((product) => {
-        const quantity = product.quantity || 0;
+        const quantity = product?.quantity || 0;
         productsInfo.push({
-          product: product.product._id,
+          product: product.product?._id,
           quantity,
         });
       });
@@ -69,13 +69,9 @@ console.log(user)
         }
       );
       setTrigger((t) => t + 1);
-      const alreadyHaveProducts =
-        JSON.parse(localStorage.getItem("added")) || [];
-      const updatedProducts = alreadyHaveProducts.filter(
-        (product) => product != id
-      );
-      localStorage.setItem("added", JSON.stringify(updatedProducts));
-
+        const alreadyHaveProducts = JSON.parse(localStorage.getItem(`cart_${user._id}`)) || [];
+        const updatedProducts = alreadyHaveProducts.filter((product) => product !== id);
+        localStorage.setItem(`cart_${user._id}`, JSON.stringify(updatedProducts));
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
@@ -140,7 +136,7 @@ console.log(user)
 
   const totalPrice = () => {
     return cartItems[0]?.products.reduce(
-      (acc, item) => acc + item.product.salesPrice * item.quantity,
+      (acc, item) => acc + item.product?.salesPrice * item.quantity,
       0
     );
   };
@@ -154,7 +150,7 @@ console.log(user)
       Math.round(
         (gstRate / 100) *
           cartItems[0]?.products.reduce(
-            (acc, item) => acc + item.product.salesPrice * item.quantity,
+            (acc, item) => acc + item.product?.salesPrice * item.quantity,
             0
           )
       ) || 0
@@ -179,28 +175,28 @@ console.log(user)
             <div className="space-y-6">
               {cartItems[0]?.products.map((item) => (
                 <div
-                  key={item?.product._id}
+                  key={item?.product?._id}
                   className="flex items-center bg-gray-900 rounded-lg p-4 space-x-4"
                 >
                   <img
-                    src={item?.product.productImage[0] || ""}
-                    alt={item?.product.name}
+                    src={item?.product?.productImage[0] || ""}
+                    alt={item?.product?.name}
                     className="w-28 h-28 object-cover rounded"
                   />
                   <div className="flex-grow">
-                    <h3 className="text-lg">{item?.product.productName}</h3>
+                    <h3 className="text-lg">{item?.product?.productName}</h3>
                     <p className="text-md mt-2">
-                      {item?.product.productDescription}
+                      {item?.product?.productDescription}
                     </p>
                     <p className="text-md mt-2">
-                      available stock : {item?.product.units}
+                      available stock : {item?.product?.units}
                     </p>
                     <div className="flex gap-2">
                       <p className="text-xl mt-2">
-                        ₹{item?.product.salesPrice.toLocaleString()}
+                        ₹{item?.product?.salesPrice.toLocaleString()}
                       </p>
                       <p className="text-xl mt-2 line-through text-gray-400">
-                        ₹{item?.product.regularPrice.toLocaleString()}
+                        ₹{item?.product?.regularPrice.toLocaleString()}
                       </p>
                     </div>
                   </div>

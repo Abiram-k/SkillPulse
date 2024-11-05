@@ -125,7 +125,7 @@ const ManageOrders = () => {
         <input
           type="text"
           className="flex-grow p-2 rounded bg-transparent border-4 text-white border-gray-600 focus:outline-none "
-          placeholder="Search your Orders using Order ID "
+          placeholder="Search your Orders using Order ID, product and category "
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

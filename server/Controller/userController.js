@@ -84,19 +84,20 @@ exports.signUp = async (req, res) => {
         }
         req.session.user = req.body;
         req.session.otp = otp;
-        // console.log(req.session.otp);
-        // console.log(req.session.user);
+
+        setTimeout(() => {
+            delete req.session.otp;
+        }, 60000);
+
         return res.status(200).json({ message: "Proceeded to Otp verification" })
     }
 }
 
 exports.otp = async (req, res) => {
-
     const { otp } = req.body;
     console.log(otp, req.session.otp);
     const newUser = req.session.user;
     console.log("new User", newUser);
-
     try {
         if (!req.session.otp) {
             return res.status(400).json({ message: "Otp expired !" })
@@ -216,6 +217,7 @@ exports.forgotPassword = async (req, res) => {
     try {
         console.log("hey");
         const { email, newPassword } = req.body;
+        console.log(email);
         const user = await User.findOne({ email });
         if (!user)
             return res.status(404).json({ message: "User not found" })

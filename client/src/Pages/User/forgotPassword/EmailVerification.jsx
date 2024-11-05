@@ -68,6 +68,7 @@ const EmailVerification = () => {
         },
         { withCredentials: true }
       );
+      alert(email)
       dispatch(forgotEmailVerified(email));
       Toast.fire({
         icon: "success",
