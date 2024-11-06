@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ChangeAddress } from "@/Components/ChangeAddress";
-import axios from "axios";
+import axios from "../../../axiosIntercepters/AxiosInstance";
 import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Toast } from "@/Components/Toast";
@@ -88,10 +88,9 @@ const Checkout = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/address?id=${user?._id}${
+          `/address?id=${user?._id}${
             selectedAddressId ? `&addrId=${selectedAddressId}` : ""
-          }`,
-          { withCredentials: true }
+          }`
         );
         setAddresses(response.data.addresses);
         setSelectedAddress(response.data.selectedAddress);
@@ -114,12 +113,10 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/order/${user._id}`,
-        checkoutItems,
-        { withCredentials: true }
-      );
+      const response = await axios.post(`/order/${user._id}`, checkoutItems);
       setCheckoutComplete((prev) => !prev);
+      localStorage.removeItem(`cart_${user._id}`);
+      localStorage.removeItem("checkoutItems");
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,

@@ -4,7 +4,7 @@ import productBanner from "../../../assets/homeProductBanner.webp";
 import { useDispatch, useSelector } from "react-redux";
 import { setProductDetails } from "../../../redux/userSlice";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../axiosIntercepters/AxiosInstance";
 const LandingPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [products, setProducts] = useState([]);
@@ -20,9 +20,7 @@ const LandingPage = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("http://localhost:3000/products", {
-          withCredentials: true,
-        });
+        const response = await axios.get("/products");
         console.log("fdsfasdfasdf", response.data.products);
         setProducts(response.data.products);
         setCategories(response.data.category);

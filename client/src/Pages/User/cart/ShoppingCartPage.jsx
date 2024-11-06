@@ -4,7 +4,11 @@ import axios from "axios";
 import { Toast } from "@/Components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { setCartProductQty, checkoutItems, logoutUser } from "@/redux/userSlice";
+import {
+  setCartProductQty,
+  checkoutItems,
+  logoutUser,
+} from "@/redux/userSlice";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 
 const ShoppingCartPage = () => {
@@ -13,7 +17,7 @@ const ShoppingCartPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
-console.log(user)
+  console.log(user);
   useEffect(() => {
     (async () => {
       try {
@@ -69,9 +73,12 @@ console.log(user)
         }
       );
       setTrigger((t) => t + 1);
-        const alreadyHaveProducts = JSON.parse(localStorage.getItem(`cart_${user._id}`)) || [];
-        const updatedProducts = alreadyHaveProducts.filter((product) => product !== id);
-        localStorage.setItem(`cart_${user._id}`, JSON.stringify(updatedProducts));
+      const alreadyHaveProducts =
+        JSON.parse(localStorage.getItem(`cart_${user._id}`)) || [];
+      const updatedProducts = alreadyHaveProducts.filter(
+        (product) => product !== id
+      );
+      localStorage.setItem(`cart_${user._id}`, JSON.stringify(updatedProducts));
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
@@ -94,22 +101,24 @@ console.log(user)
       const availableQuantity = item.product.units;
 
       if (newQuantity >= 1) {
-        if (newQuantity <= availableQuantity) {
-          try {
-            const response = await axios.post(
-              `http://localhost:3000/updateQuantity/${productId}`,
-              {},
-              { withCredentials: true, params: { userId: user._id, value } }
-            );
-            setTrigger((t) => t + 1);
-          } catch (error) {
-            console.log(error);
+        if (newQuantity <= 5) {
+          if (newQuantity <= availableQuantity || value == -1) {
+            try {
+              const response = await axios.post(
+                `http://localhost:3000/updateQuantity/${productId}`,
+                {},
+                { withCredentials: true, params: { userId: user._id, value } }
+              );
+              setTrigger((t) => t + 1);
+            } catch (error) {
+              console.log(error);
+            }
+          } else {
+            Toast.fire({
+              icon: "error",
+              title: `Already added all available (${item.product.units}) stocks`,
+            });
           }
-        } else {
-          Toast.fire({
-            icon: "error",
-            title: `Already added all available (${item.product.units}) stocks`,
-          });
         }
       } else {
         const userConfirmed = confirm("Product will remove from your cart");

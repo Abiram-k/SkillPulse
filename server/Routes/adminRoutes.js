@@ -21,7 +21,7 @@ router.get("/category", adminController.getCategory)
 router.post("/category", uploadImage.single("file"), verifyAdmin, adminController.addCategory);
 router.put("/category", uploadImage.single("file"), verifyAdmin, adminController.editCategory);
 router.patch("/categoryRestore/:id", verifyAdmin, adminController.categoryRestore);
-router.patch("/categoryListing/:id", verifyAdmin, adminController.listCategory)
+router.patch("/categoryListing/:id", verifyAdmin, adminController.listCategory);4
 router.delete("/category/:id", verifyAdmin, adminController.deleteCategory);
 
 router.get("/brand", adminController.getBrand)

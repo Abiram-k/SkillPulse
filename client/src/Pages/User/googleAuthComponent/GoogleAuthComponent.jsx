@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addUser } from "../../../redux/userSlice";
-import axios from "axios";
+import axios from "../../../axiosIntercepters/AxiosInstance";
 function GoogleAuthComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -10,9 +10,7 @@ function GoogleAuthComponent() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/googleUser", {
-          withCredentials: true,
-        });
+        const response = await axios.get("/googleUser");
         console.log("user data in google login", response.data);
         dispatch(
           addUser({

@@ -14,7 +14,7 @@ import {
 
 const AlertDialogueButton = ({ name, onClick }) => {
   return (
-    <AlertDialog className="font-mono">
+    <AlertDialog className="font-mono ">
       <AlertDialogTrigger className="btn btn-danger">{name}</AlertDialogTrigger>
       <AlertDialogContent className="bg-black">
         <AlertDialogHeader>

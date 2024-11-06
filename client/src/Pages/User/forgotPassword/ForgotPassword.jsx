@@ -1,6 +1,6 @@
 import { Toast } from "@/Components/Toast";
 import { passwordReseted } from "@/redux/userSlice";
-import axios from "axios";
+import axios from "../../../axiosIntercepters/AxiosInstance";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -34,11 +34,10 @@ const ForgotPassword = () => {
         return;
       }
       if (Object.keys(formError).length == 0) {
-        const response = await axios.patch(
-          `http://localhost:3000/forgotPassword`,
-          { email, newPassword },
-          { withCredentials: true }
-        );
+        const response = await axios.patch(`/forgotPassword`, {
+          email,
+          newPassword,
+        });
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,

@@ -10,10 +10,11 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../redux/userSlice";
-import axios from "axios";
+// import axios from "axios";
 import { Toast } from "../../../Components/Toast";
 import { Link } from "react-router-dom";
 import { ChangePassword } from "@/Components/ChangePassword";
+import axios from "../../../axiosIntercepters/AxiosInstance";
 const AccountOverview = () => {
   const user = useSelector((state) => state.users.user);
   // console.log(user, "from profile page");
@@ -84,12 +85,7 @@ const AccountOverview = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/user/${user._id}`,
-          {
-            withCredentials: true,
-          }
-        );
+        const response = await axios.get(`/user/${user._id}`);
         setFirstName(response.data.userData.firstName);
         setSecondName(response.data.userData.lastName);
         setDateOfBirth(response.data.userData.dateOfBirth);
@@ -108,7 +104,6 @@ const AccountOverview = () => {
 
   const handleProfileChange = async (e) => {
     e.preventDefault();
-    alert(dateOfBirth);
 
     const formError = formValidate();
     if (Object.keys(formError).length > 0) {
@@ -116,7 +111,6 @@ const AccountOverview = () => {
       return;
     }
     console.log(formError);
-    alert(formError);
     try {
       const formData = new FormData();
       formData.append("firstName", firstName);
@@ -126,17 +120,12 @@ const AccountOverview = () => {
       formData.append("mobileNumber", mobileNumber);
       formData.append("dateOfBirth", dateOfBirth);
       setSpinner(true);
-      const response = await axios.post(
-        "http://localhost:3000/user",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-          params: {
-            id: user._id,
-          },
-        }
-      );
+      const response = await axios.post("/user", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        params: {
+          id: user._id,
+        },
+      });
       setSpinner(false);
       console.log(response.data.updatedUser);
       setProfileImage(response.data.updatedUser);

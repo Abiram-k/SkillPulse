@@ -9,7 +9,7 @@ function UserLayout() {
 
   return (
     <>
-      <div className="bg-[#1C1C1C] text-white p-4 flex justify-between items-center sticky top-0 z-50">
+      <div className="bg-[#1C1C1C] text-white p-4 flex justify-between items-center sticky top-0 z-50 ">
         <div className="text-sm w-full lg:w-fit lg:text-2xl font-bold">
           <Link to={"/user/home"}>SKILL PULSE</Link>
         </div>

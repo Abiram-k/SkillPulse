@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Star, Heart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+// import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { logoutUser, setProductDetails } from "../../../redux/userSlice";
 import { Toast } from "@/Components/Toast";
 import { Link, useOutletContext } from "react-router-dom";
@@ -22,10 +23,8 @@ const ProductDetails = () => {
   const [cartProduct, setCartProduct] = useState([]);
 
   useEffect(() => {
-
     const savedCart =
-      JSON.parse(localStorage.getItem(`cart_${user._id}`))
-       || [];
+      JSON.parse(localStorage.getItem(`cart_${user._id}`)) || [];
     setCartProduct(savedCart);
   }, [user?._id]);
 
@@ -38,8 +37,7 @@ const ProductDetails = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/brand-category-info/${product[0]._id}`,
-          { withCredentials: true }
+          `/brand-category-info/${product[0]._id}`
         );
         if (response.data.isAvailable)
           if (product[0].units === 0) {
@@ -55,8 +53,7 @@ const ProductDetails = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/getSimilarProduct/${product[0]._id}`,
-          { withCredentials: true }
+          `/getSimilarProduct/${product[0]._id}`
         );
         setSimilarProducts(response.data.similarProducts);
       } catch (error) {
@@ -117,10 +114,9 @@ const ProductDetails = () => {
   const handleAddToCart = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/addToCart/${product[0]._id}`,
+        `/addToCart/${product[0]._id}`,
         {},
         {
-          withCredentials: true,
           params: {
             userId: user._id,
           },
@@ -157,7 +153,7 @@ const ProductDetails = () => {
     if (user?._id && cartProduct.length > 0) {
       localStorage.setItem(`cart_${user._id}`, JSON.stringify(cartProduct));
     }
-  }, [cartProduct, user?._id]); 
+  }, [cartProduct, user?._id]);
 
   return (
     <div className="min-h-screen bg-black text-white font-mono">

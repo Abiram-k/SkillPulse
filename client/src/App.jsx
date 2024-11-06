@@ -42,6 +42,7 @@ import Contact from "./Pages/User/contact/Contact";
 import About from "./Pages/User/about/About";
 import ForgotPassword from "./Pages/User/forgotPassword/ForgotPassword";
 import EmailVerification from "./Pages/User/forgotPassword/EmailVerification";
+import Wallet from "./Pages/User/wallet/Wallet";
 function App() {
   return (
     <>
@@ -225,6 +226,14 @@ function App() {
                 element={
                   <ProtectUserHome>
                     <ManageAddress />
+                  </ProtectUserHome>
+                }
+              />
+              <Route
+                path="wallet"
+                element={
+                  <ProtectUserHome>
+                    <Wallet />
                   </ProtectUserHome>
                 }
               />

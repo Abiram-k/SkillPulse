@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
 import productBanner from "../../../assets/homeProductBanner.webp";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { Toast } from "../../../Components/Toast";
-import { logoutUser, setProductDetails } from "../../../redux/userSlice";
-import { useDispatch } from "react-redux";
+import {
+  logoutUser,
+  setProductDetails,
+  wishlistItems,
+} from "../../../redux/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../Components/Pagination";
 import { Heart } from "lucide-react";
+import {
+  addToWishList,
+  removeFromWishlist,
+} from "../wishlist/addRemoveWishlit";
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -17,19 +25,21 @@ const Shop = () => {
     price: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [postPerPage, setPostPerPage] = useState(5);
+  const [postPerPage, setPostPerPage] = useState(8);
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const user = useSelector((state) => state.users.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
+    fetchWishlist();
   }, [filter]);
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/products", {
+      const response = await axios.get("/products", {
         params: filter,
-        withCredentials: true,
       });
       setProducts(response.data.products);
       setCategory(response.data.categoryDoc);
@@ -62,6 +72,87 @@ const Shop = () => {
   const firstPostIndex = lastPostIndex - postPerPage;
   const currentProduct = products.slice(firstPostIndex, lastPostIndex);
 
+  const handleAddToWishList = async (product) => {
+    try {
+      await addToWishList(product, user, dispatch);
+      //   const response = await axios.post("/wishList", {
+      //     user: user._id,
+      //     product,
+      //   });
+      setTrigger((prev) => prev + 1);
+      //   Toast.fire({
+      //     icon: "success",
+      //     title: `${response.data.message}`,
+      //   });
+    } catch (error) {
+      //   console.log(error);
+      //   if (error?.response.data.isBlocked) {
+      //     dispatch(logoutUser());
+      //   }
+      //   Toast.fire({
+      //     icon: "error",
+      //     title: `${error?.response?.data.message}`,
+      //   });
+    }
+  };
+
+  const handleRemoveFromWishlist = async (product) => {
+    try {
+      await removeFromWishlist(product, user, dispatch);
+      setTrigger((prev) => prev + 1);
+      // const response = await axios.delete(
+      //   `/wishList?user=${user._id}&product=${product}`
+      // );
+      // if (response.status == 200) {
+      //   Toast.fire({
+      //     icon: "success",
+      //     title: `${response.data.message}`,
+      //   });
+      //   dispatch(removefromWishlist(product));
+      //   setTrigger((prev) => prev + 2);
+      //   window.location.reload();
+      // }
+    } catch (error) {
+      // console.log(error);
+      // if (error?.response.data.isBlocked) {
+      //   dispatch(logoutUser());
+      // }
+      // Toast.fire({
+      //   icon: "error",
+      //   title: `${error?.response?.data.message}`,
+      // });
+    }
+  };
+  const fetchWishlist = async () => {
+    try {
+      const response = await axios.get(`/wishlist?user=${user._id}`);
+      console.log(response.data.wishlist[0]);
+      const uniqueWishlistItems = [
+        ...new Set(
+          response.data.wishlist[0].products.map(
+            (product) => product.product._id
+          )
+        ),
+      ];
+      uniqueWishlistItems.forEach((id) => {
+        setWishlistItems((prev) => [...prev, id]);
+      });
+      // dispatch(removefromWishlist());
+      console.log("Wishlist Items : ", response.data.wishlist);
+    } catch (error) {
+      console.error(
+        "Error fetching wishlist:",
+        error.response || error.message
+      );
+      if (error?.response?.data.isBlocked) {
+        dispatch(logoutUser());
+      }
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
+  };
   return (
     <div>
       <div
@@ -136,9 +227,7 @@ const Shop = () => {
             <option value="" disabled>
               Select Price Range
             </option>
-            <option value="" >
-              All products
-            </option>
+            <option value="">All products</option>
 
             <option value="Low-High">Low-High</option>
             <option value="High-Low">High-Low</option>
@@ -176,38 +265,59 @@ const Shop = () => {
           currentProduct.map((product, index) =>
             product.isListed && !product.isDeleted ? (
               <div
-              className="relative bg-gray-800 p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
-              key={product._id}
-            >
-              <img
-                src={product.productImage[0] || "https://placehold.co/300x200"}
-                alt={product.productDescription}
-                className="w-full h-40 object-cover rounded-t-lg cursor-pointer transition-opacity hover:opacity-90"
-                onClick={() => goToDetails(product)}
-              />
-              
-              <Heart
-                className="absolute top-3 right-3 w-7 h-7 text-gray-300 hover:text-red-500 transition-colors cursor-pointer"
-                onClick={() => (addedToWishlist ? handleRemoveFromWishlist() : handleAddToWishlist())}
-              />
-            
-              <div className="p-3 text-center">
-                
-                <p className="text-sm font-medium text-gray-300 truncate">
-                  {product.productName}
-                </p>
-             
-                <p className="text-lg font-bold text-green-400 mt-1">
-                  ₹{product.salesPrice}
-                  <span className="line-through text-gray-500 ml-2">₹{product.regularPrice}</span>
-                  <span className="text-red-500 ml-2 text-xs">20% off</span>
-                </p>
-            
-                <p className="text-xs text-gray-400 mt-1">
-                  {product.salesPrice > 1000 ? "Free Delivery" : "Delivery Charges Apply"}
-                </p>
+                className="relative bg-gray-800 p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
+                key={product._id}
+              >
+                <img
+                  src={
+                    product.productImage[0] || "https://placehold.co/300x200"
+                  }
+                  alt={product.productDescription}
+                  className="w-full h-40 object-cover rounded-t-lg cursor-pointer transition-opacity hover:opacity-90"
+                  onClick={() => goToDetails(product)}
+                />
+
+                <Heart
+                  className="absolute top-3 right-3 w-7 h-7 text-gray-300 hover:text-red-500 transition-colors cursor-pointer"
+                  onClick={() =>
+                    addedToWishlist
+                      ? handleRemoveFromWishlist()
+                      : handleAddToWishlist()
+                  }
+                />
+
+                <div className="p-3 text-center">
+                  <p className="text-sm font-medium text-gray-300 truncate">
+                    {product.productName}
+                  </p>
+
+                  <p className="text-lg font-bold text-green-400 mt-1">
+                    ₹{product.salesPrice}
+                    <span className="line-through text-gray-500 ml-2">
+                      ₹{product.regularPrice}
+                    </span>
+                    <span className="text-red-500 ml-2 text-xs">20% off</span>
+                  </p>
+
+                  {wishlistItems.includes(product._id) ? (
+                    <Heart
+                      className="absolute top-3 right-3 w-7 h-7 fill-red-600 text-red-600 cursor-pointer"
+                      onClick={() => handleRemoveFromWishlist(product._id)}
+                    />
+                  ) : (
+                    <Heart
+                      className="absolute top-3 right-3 w-7 h-7 text-gray-300 transition-colors cursor-pointer"
+                      onClick={() => handleAddToWishList(product._id)}
+                    />
+                  )}
+
+                  <p className="text-xs text-gray-400 mt-1">
+                    {product.salesPrice > 1000
+                      ? "Free Delivery"
+                      : "Delivery Charges Apply"}
+                  </p>
+                </div>
               </div>
-            </div>            
             ) : (
               <div
                 key={""}

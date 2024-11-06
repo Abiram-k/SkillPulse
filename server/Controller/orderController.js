@@ -3,6 +3,7 @@ const Cart = require('../models/cartModel');
 const Orders = require('../models/orderModel');
 const User = require("../models/userModel");
 const Product = require('../models/productModel');
+const Wallet = require('../models/walletModel');
 
 let orderCounter = 0;
 
@@ -10,7 +11,7 @@ const generateOrderId = () => {
     orderCounter += 1;
     const timestamp = Date.now();
     return `SKPUL-FT-${timestamp}-${orderCounter}`;
-}; 
+};
 
 const generateOrderDate = () => {
     const date = new Date();
@@ -111,12 +112,24 @@ exports.getOrder = async (req, res) => {
 exports.cancelOrder = async (req, res) => {
     try {
         const { id, itemId } = req.query;
-        const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
-
+        const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } }).populate("orderItems.product")
+        if (!order) {
+            console.error("Order not found")
+            return res.status(400).json({ message: "Order not found" })
+        }
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
         order.orderItems[orderIndex].productStatus = "cancelled";
+        const refundPrice = order.orderItems[orderIndex]?.product?.salesPrice * order.orderItems[orderIndex]?.quantity;
         await order.save();
+        const walletData = {
+            amount: refundPrice,
+            description: "Cancellation Refund",
+            transactionId: `REF-${itemId}-${Date.now()}`
+        }
+        const wallet = await Wallet.findOneAndUpdate({ user: id }, { $push: { transaction: walletData }, $inc: { totalAmount: parseFloat(refundPrice) } }, { upsert: true, new: true });
 
+        if (!wallet)
+            return res.status(400).json({ message: "Wallet not found to refund money " });
         return res.status(200).json({ message: "Order Cancelled successfully" })
 
     } catch (error) {

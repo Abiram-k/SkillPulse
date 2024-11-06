@@ -14,7 +14,6 @@ const dotenv = require("dotenv");
 const path = require("node:path");
 const User = require("../models/userModel");
 
-
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 router.get('/', userController.baseRoute);
@@ -26,16 +25,6 @@ router.post('/resendOtp', userController.resendOtp);
 router.post('/verifyEmail', userController.verifyEmail);
 router.post('/verifyResetOtp', userController.verifyResetOtp);
 router.patch('/forgotPassword', userController.forgotPassword);
-
-// router.get('/auth/google',
-// //      (req, res, next) => {
-// //     console.log("Full URL:", req.originalUrl); // This should include ?method=login
-// //     console.log("<<<<Method>>>>", req.query.method);
-// //     req.session.method = req.query.method;           
-// //     next();
-// // },
-
-//  passport.authenticate('google', { scope: ['email', 'profile'] ,   state: state }));
 
 router.get('/auth/google', (req, res, next) => {
     const state = JSON.stringify({ method: req.query.method });
@@ -61,7 +50,6 @@ router.get('/auth/google/callback',
                     return res.redirect('http://localhost:5173/login?error=user_exists');
                 }
             }
-          
             const token = jwt.sign({
                 id: req.user._id,
                 email: req.user.email
@@ -112,5 +100,7 @@ router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
 router.get("/order", verifyUser, isBlocked, orderController.getOrder);
 router.patch("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder);
 router.patch("/returnOrder", verifyUser, isBlocked, orderController.returnOrder);
+
+router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet)
 
 module.exports = router;

@@ -3,7 +3,7 @@ import banner from "../../../assets/homePageBanner.jpg";
 import productBanner from "../../../assets/homeProductBanner.webp";
 import { Link, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
-import axios from "axios";
+import axios from "../../../axiosIntercepters/AxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import {
   logoutUser,
@@ -12,6 +12,8 @@ import {
   wishlistItems,
 } from "../../../redux/userSlice";
 import { Heart } from "lucide-react";
+import { addToWishList } from "../wishlist/addRemoveWishlit";
+import { removeFromWishlist } from "../wishlist/addRemoveWishlit";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -24,8 +26,9 @@ const HomePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
-  const wishlistedItems = useSelector((state) => state.users.wishlistItems);
-  console.log("Whishlist items...", wishlistedItems);
+  // const wishlistedItems = useSelector((state) => state.users.wishlistItems);
+  const [wishlistItems, setWishlistItems] = useState([]);
+  // console.log("Whishlist items...", wishlistedItems);
   console.log(
     "home page user",
     useSelector((state) => state.users.user)
@@ -33,12 +36,8 @@ const HomePage = () => {
 
   const fetchWishlist = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/wishlist?user=${user._id}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get(`/wishlist?user=${user._id}`);
+      // console.log("TESTING RESPONSE>>>",response)
       console.log(response.data.wishlist[0]);
       const uniqueWishlistItems = [
         ...new Set(
@@ -48,11 +47,16 @@ const HomePage = () => {
         ),
       ];
       uniqueWishlistItems.forEach((id) => {
-        dispatch(wishlistItems(id));
+        // dispatch(wishlistItems(id));
+        setWishlistItems((prev) => [...prev, id]);
       });
       // dispatch(removefromWishlist());
       console.log("Wishlist Items : ", response.data.wishlist);
     } catch (error) {
+      console.error(
+        "Error fetching wishlist:",
+        error.response || error.message
+      );
       if (error?.response.data.isBlocked) {
         dispatch(logoutUser());
       }
@@ -62,11 +66,6 @@ const HomePage = () => {
       });
     }
   };
-
-  // useEffect(() => {
-  //   navigate("/login");
-  // }, [isBlocked, dispatch]);
-
   const goToDetails = (product) => {
     dispatch(setProductDetails(product));
     console.log("productDetails :", product);
@@ -75,60 +74,60 @@ const HomePage = () => {
 
   const handleAddToWishList = async (product) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/wishList",
-        { user: user._id, product },
-        { withCredentials: true }
-      );
+      await addToWishList(product, user, dispatch);
+      //   const response = await axios.post("/wishList", {
+      //     user: user._id,
+      //     product,
+      //   });
       setTrigger((prev) => prev + 1);
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      //   Toast.fire({
+      //     icon: "success",
+      //     title: `${response.data.message}`,
+      //   });
     } catch (error) {
-      console.log(error);
-      if (error?.response.data.isBlocked) {
-        dispatch(logoutUser());
-      }
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data.message}`,
-      });
+      //   console.log(error);
+      //   if (error?.response.data.isBlocked) {
+      //     dispatch(logoutUser());
+      //   }
+      //   Toast.fire({
+      //     icon: "error",
+      //     title: `${error?.response?.data.message}`,
+      //   });
     }
   };
 
   const handleRemoveFromWishlist = async (product) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/wishList?user=${user._id}&product=${product}`,
-        { withCredentials: true }
-      );
-      if (response.status == 200) {
-        setTrigger((prev) => prev + 1);
-        fetchWishlist();
-        Toast.fire({
-          icon: "success",
-          title: `${response.data.message}`,
-        });
-        dispatch(removefromWishlist(product));
-      }
+      await removeFromWishlist(product, user, dispatch);
+      setTrigger((prev) => prev + 1);
+      // const response = await axios.delete(
+      //   `/wishList?user=${user._id}&product=${product}`
+      // );
+      // if (response.status == 200) {
+      //   Toast.fire({
+      //     icon: "success",
+      //     title: `${response.data.message}`,
+      //   });
+      //   dispatch(removefromWishlist(product));
+      //   setTrigger((prev) => prev + 2);
+      //   window.location.reload();
+      // }
     } catch (error) {
-      console.log(error);
-      if (error?.response.data.isBlocked) {
-        dispatch(logoutUser());
-      }
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data.message}`,
-      });
+      // console.log(error);
+      // if (error?.response.data.isBlocked) {
+      //   dispatch(logoutUser());
+      // }
+      // Toast.fire({
+      //   icon: "error",
+      //   title: `${error?.response?.data.message}`,
+      // });
     }
   };
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("http://localhost:3000/products", {
+        const response = await axios.get("/products", {
           params: { newArrivals: true, user },
-          withCredentials: true,
         });
         console.log("product from homepage:", products);
         setProducts(response.data.products);
@@ -148,7 +147,7 @@ const HomePage = () => {
       }
     })();
     fetchWishlist();
-  }, [trigger, dispatch, wishlistItems]);
+  }, [trigger]);
   return (
     <div>
       <section className="relative overflow-hidden h-80 lg:h-auto">
@@ -266,14 +265,14 @@ const HomePage = () => {
                     onClick={() => goToDetails(product)}
                   />
 
-                  {wishlistedItems.includes(product._id) ? (
+                  {wishlistItems.includes(product._id) ? (
                     <Heart
                       className="absolute top-3 right-3 w-7 h-7 fill-red-600 text-red-600 cursor-pointer"
                       onClick={() => handleRemoveFromWishlist(product._id)}
                     />
                   ) : (
                     <Heart
-                      className="absolute top-3 right-3 w-7 h-7 text-gray-300  transition-colors cursor-pointer"
+                      className="absolute top-3 right-3 w-7 h-7 text-gray-300 transition-colors cursor-pointer"
                       onClick={() => handleAddToWishList(product._id)}
                     />
                   )}
@@ -311,5 +310,4 @@ const HomePage = () => {
     </div>
   );
 };
-
 export default HomePage;

@@ -117,99 +117,106 @@ const ManageOrders = () => {
 
   return (
     // <div className="flex">
-    <main className="w-3/4 p-4 font-mono h-screen overflow-y-scroll no-scrollbar">
-      <h1 className="text-2xl lg:text-3xl uppercase font-bold mb-4 lg:mb-14 ">
-        Manage your orders
-      </h1>
-      <div className="flex mb-4 lg:mb-10 transition-all duration-75">
-        <input
-          type="text"
-          className="flex-grow p-2 rounded bg-transparent border-4 text-white border-gray-600 focus:outline-none "
-          placeholder="Search your Orders using Order ID, product and category "
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-4">
-        {orders.length > 0 ? (
-          filteredOrders.length > 0 ? (
-            filteredOrders.map((orders) =>
-              orders.orderItems.map((item) => (
-                <div className="bg-gray-800 p-4 rounded">
-                  <div className="flex justify-between mb-2">
-                    <div>Order Date: {orders.orderDate}</div>
-                    <div>Order Number: {orders.orderId}</div>
-                    <div>Ship To: {orders.address.firstName}</div>
-                    <div>Total: ₹ {item.price}</div>
-                  </div>
-                  <div className="flex">
-                    <img
-                      src={
-                        `${item.product.productImage[0]}` ||
-                        "https://placehold.co/100x100"
-                      }
-                      alt="Image of boAt Immortal 131 with Beast Mode"
-                      className="w-24 h-24 mr-4"
-                    />
-                    <div>
-                      <div>Category: {item.product.category.name}</div>
-
-                      <div>
-                        Price: ₹ {item.product.salesPrice}{" "}
-                        <span className="text-xs">inc GST</span>
-                      </div>
-                      <div>Qty: {item.quantity} </div>
-                      <div className="text-xl">{item.product.productName}</div>
+    <main className="w-full lg:w-full p-4 font-mono h-screen overflow-y-scroll no-scrollbar">
+    <h1 className="text-xl lg:text-3xl uppercase font-bold mb-4 lg:mb-14">
+      Manage your orders
+    </h1>
+    <div className="flex flex-col lg:flex-row mb-4 lg:mb-10 transition-all duration-75 gap-2">
+      <input
+        type="text"
+        className="flex-grow p-2 rounded bg-transparent border-2 lg:border-4 text-white border-gray-600 focus:outline-none"
+        placeholder="Search your Orders using Order ID, product and category"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </div>
+  
+    <div className="space-y-4">
+      {orders.length > 0 ? (
+        filteredOrders.length > 0 ? (
+          filteredOrders.map((orders) =>
+            orders.orderItems.map((item) => (
+              <div className="bg-gray-800 p-4 rounded">
+                <div className="flex flex-col lg:flex-row justify-between mb-2 gap-2 text-sm lg:text-base">
+                  <div>Order Date: {orders.orderDate}</div>
+                  <div>Order Number: {orders.orderId}</div>
+                  <div>Ship To: {orders.address.firstName}</div>
+                  <div>Total: ₹ {item.price}</div>
+                </div>
+                <div className="flex flex-col lg:flex-row gap-4">
+                  <img
+                    src={
+                      `${item.product.productImage[0]}` ||
+                      "https://placehold.co/100x100"
+                    }
+                    alt="Product"
+                    className="w-full lg:w-24 lg:h-24 object-cover"
+                  />
+                  <div>
+                    <div className="text-sm lg:text-base">
+                      Category: {item.product.category.name}
                     </div>
-                  </div>
-                  <div className="flex justify-between mt-2">
-                    <div>
-                      Status:{" "}
-                      <span
-                        className={` ${getStatusColor(item.productStatus)}`}
-                      >
-                        {item.productStatus}
-                      </span>
+                    <div className="text-sm lg:text-base">
+                      Price: ₹ {item.product.salesPrice}{" "}
+                      <span className="text-xs">inc GST</span>
                     </div>
-                    <div>Date: {orders.orderDate}</div>
-                    {item.productStatus != "shipped" &&
-                      item.productStatus != "delivered" &&
-                      item.productStatus != "cancelled" &&
-                      item.productStatus != "returned" && (
-                        <button
-                          className="bg-red-500 p-2 rounded"
-                          onClick={() => handleCancelOrder(item)}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    {item.productStatus == "delivered" && (
-                      <button
-                        className="bg-red-500 p-2 rounded"
-                        onClick={() => handleReturnOrder(item)}
-                      >
-                        Return
-                      </button>
-                    )}
-
-                    <button className="bg-gray-700 p-2 rounded">Invoice</button>
+                    <div className="text-sm lg:text-base">
+                      Qty: {item.quantity}
+                    </div>
+                    <div className="text-lg lg:text-xl font-semibold">
+                      {item.product.productName}
+                    </div>
                   </div>
                 </div>
-              ))
-            )
-          ) : (
-            <div className="bg-gray-800 p-4 rounded">
-              <h2>"{search}" Search not founded</h2>
-            </div>
+                <div className="flex flex-col lg:flex-row justify-between mt-2 gap-2">
+                  <div className="text-sm lg:text-base">
+                    Status:{" "}
+                    <span className={`${getStatusColor(item.productStatus)}`}>
+                      {item.productStatus}
+                    </span>
+                  </div>
+                  <div className="text-sm lg:text-base">
+                    Date: {orders.orderDate}
+                  </div>
+                  {item.productStatus !== "shipped" &&
+                    item.productStatus !== "delivered" &&
+                    item.productStatus !== "cancelled" &&
+                    item.productStatus !== "returned" && (
+                      <button
+                        className="bg-red-500 p-2 rounded text-xs lg:text-sm"
+                        onClick={() => handleCancelOrder(item)}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  {item.productStatus === "delivered" && (
+                    <button
+                      className="bg-red-500 p-2 rounded text-xs lg:text-sm"
+                      onClick={() => handleReturnOrder(item)}
+                    >
+                      Return
+                    </button>
+                  )}
+                  <button className="bg-gray-700 p-2 rounded text-xs lg:text-sm">
+                    Invoice
+                  </button>
+                </div>
+              </div>
+            ))
           )
         ) : (
           <div className="bg-gray-800 p-4 rounded">
-            <h2>NO Orders founded</h2>
+            <h2 className="text-sm lg:text-base">"{search}" not found</h2>
           </div>
-        )}
-      </div>
-    </main>
+        )
+      ) : (
+        <div className="bg-gray-800 p-4 rounded">
+          <h2 className="text-sm lg:text-base">No orders found</h2>
+        </div>
+      )}
+    </div>
+  </main>
+  
     // </div>
   );
 };

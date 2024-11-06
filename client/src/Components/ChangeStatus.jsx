@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
@@ -20,10 +21,12 @@ export const ChangeStatus = ({
   updatedState,
   orderId = "",
   productId = "",
+  currentStatus = "",
 }) => {
   const [updatedStatus, setUpdatedStatus] = useState("");
   const [open, setOpen] = useState(false);
   const user = useSelector((state) => state.users.user);
+
   const handleChangeStatus = async () => {
     updatedState(updatedStatus);
     try {
@@ -38,7 +41,7 @@ export const ChangeStatus = ({
         title: `${response.data.message}`,
       });
       setOpen(false);
-    } catch (error) {
+    } catch (error) { 
       console.log(error);
       setOpen(false);
       Toast.fire({
@@ -77,7 +80,9 @@ export const ChangeStatus = ({
               <option value="shipped">shipped</option>
               <option value="delivered">delivered</option>
               <option value="cancelled">cancelled</option>
+              {currentStatus !== "returned" &&
               <option value="returned">returned</option>
+              }
             </select>
           </div>
         </div>

@@ -13,7 +13,6 @@ const initialState = {
   cartProductsQty: JSON.parse(localStorage.getItem("cartProductsQty")) || [],
   forgotEmailVerified:
     JSON.parse(localStorage.getItem("verifiedForgotEmail")) || "",
-  wishlistItems: [],
 };
 
 const userSlice = createSlice({
@@ -58,10 +57,6 @@ const userSlice = createSlice({
     ordered: (state, action) => {
       state.checkoutItems = null;
       localStorage.removeItem("checkoutItems");
-    },
-    wishlistItems: (state, action) => {
-      const exisit = state.wishlistItems.find((item) => item == action.payload);
-      if (!exisit) state.wishlistItems.push(action.payload);
     },
     removefromWishlist: (state, action) => {
       if (!action.payload) state.wishlistItems = [];

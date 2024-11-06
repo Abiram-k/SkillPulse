@@ -34,13 +34,9 @@ const EmailVerification = () => {
 
     setSpinner(true);
     try {
-      const response = await axios.post(
-        "http://localhost:3000/verifyEmail",
-        {
-          email,
-        },
-        { withCredentials: true }
-      );
+      const response = await axios.post("/verifyEmail", {
+        email,
+      });
       setSpinner(false);
       Toast.fire({
         icon: "success",
@@ -60,15 +56,11 @@ const EmailVerification = () => {
 
   const handleVerifyOtp = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/verifyResetOtp",
-        {
-          email,
-          otp,
-        },
-        { withCredentials: true }
-      );
-      alert(email)
+      const response = await axios.post("/verifyResetOtp", {
+        email,
+        otp,
+      });
+      alert(email);
       dispatch(forgotEmailVerified(email));
       Toast.fire({
         icon: "success",

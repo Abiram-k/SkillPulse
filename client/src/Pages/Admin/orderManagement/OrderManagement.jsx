@@ -128,6 +128,7 @@ const OrderManagement = () => {
                             updatedState={handleUpdatedStatus}
                             orderId={order.orderId}
                             productId={item._id}
+                            currentStatus={item.productStatus}
                           />
                         </td>
                       </tr>
