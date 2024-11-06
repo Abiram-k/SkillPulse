@@ -344,12 +344,13 @@ exports.addProduct = async (req, res) => {
             productDescription,
             salesPrice,
             regularPrice,
-            units,
+            units, 
             category,
-            brand
+            brand,
         } = req.body;
 
         const productImage = req.files.map((file) => file.path)
+        console.log(productImage)
         const existProduct = await Product.findOne({ productName });
 
         const categoryDoc = await Category.findOne({ name: category });
@@ -377,7 +378,9 @@ exports.addProduct = async (req, res) => {
             return res.status(200).json({ message: "product added successully" })
         }
     } catch (error) {
+        console.log(error.message);
         return res.status(500).json({ message: error.message || "Error occurred while adding product" })
+      
     }
 }
 
@@ -406,7 +409,7 @@ exports.editProduct = async (req, res) => {
 
         const { id } = req.params;
         let productImage = []
-        productImage = req.files.flatMap((file) => file.path)
+        productImage = req.files?.flatMap((file) => file?.path)
         if (file) {
             if (Array.isArray(file)) {
                 productImage.push(...file);

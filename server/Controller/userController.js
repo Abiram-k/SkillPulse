@@ -85,9 +85,9 @@ exports.signUp = async (req, res) => {
         req.session.user = req.body;
         req.session.otp = otp;
 
-        setTimeout(() => {
-            delete req.session.otp;
-        }, 60000);
+        // setTimeout(() => {
+        //     delete req.session.otp;
+        // }, 60000);
 
         return res.status(200).json({ message: "Proceeded to Otp verification" })
     }

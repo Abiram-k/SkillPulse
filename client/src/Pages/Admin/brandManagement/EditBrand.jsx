@@ -67,7 +67,7 @@ function EditBrand() {
 
     try {
       const response = await axios.put(
-        "http://localhost:3000/admin/editBrand",
+        "http://localhost:3000/admin/brand",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

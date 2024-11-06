@@ -66,7 +66,7 @@ function EditCategory() {
 
     try {
       const response = await axios.put(
-        "http://localhost:3000/admin/editCategory",
+        "http://localhost:3000/admin/category",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

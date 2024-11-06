@@ -22,7 +22,7 @@ const Category = () => {
   const validateForm = () => {
     if (name.trim() == "") error.name = "Category name is required *";
     const firstLetter = name[0];
-    if(!isNaN(name)) error.name = "Category name must statrt with a letter *"
+    if (!isNaN(name)) error.name = "Category name must statrt with a letter *";
     if (!image) error.image = "Upload a image for the category *";
     return error;
   };
@@ -87,7 +87,7 @@ const Category = () => {
         setSpinner(true);
 
         const response = await axios.post(
-          "http://localhost:3000/admin/addCategory",
+          "http://localhost:3000/admin/category",
           formData,
           {
             headers: {
@@ -117,7 +117,7 @@ const Category = () => {
     const result = confirm("Are you sure to restore categorie");
     try {
       if (result) {
-        const response = await axios.put(
+        const response = await axios.patch(
           `http://localhost:3000/admin/categoryRestore/${id}`,
           {},
           { withCredentials: true }
@@ -133,9 +133,8 @@ const Category = () => {
     // alert(result);
     try {
       if (result) {
-        const response = await axios.put(
-          `http://localhost:3000/admin/categoryDelete/${id}`,
-          {},
+        const response = await axios.delete(
+          `http://localhost:3000/admin/category/${id}`,
           { withCredentials: true }
         );
         Toast.fire({
@@ -157,8 +156,8 @@ const Category = () => {
   };
   const handleListing = async (id) => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/admin/handleCategoryListing/${id}`,
+      const response = await axios.patch(
+        `http://localhost:3000/admin/categoryListing/${id}`,
         {},
         { withCredentials: true }
       );

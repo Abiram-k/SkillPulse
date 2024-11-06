@@ -23,7 +23,7 @@ const EditProduct = () => {
 
   const navigate = useNavigate();
   const { data } = useContext(context);
-  console.log("Edit Product Data",data)
+  console.log("Edit Product Data", data);
 
   useEffect(() => {
     setId(data?._id || "");
@@ -119,11 +119,12 @@ const EditProduct = () => {
     Object.values(productImage).forEach((image, index) => {
       if (image) formData.append("file", image);
     });
+
     try {
       if (Object.keys(formErrors).length === 0) {
         setSpinner(true);
         const response = await axios.put(
-          `http://localhost:3000/admin/editProduct/${id}`,
+          `http://localhost:3000/admin/product/${id}`,
           formData,
           {
             headers: {

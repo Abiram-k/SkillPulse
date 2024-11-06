@@ -33,7 +33,7 @@ function Products() {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/admin/getProduct?filter=${filterProduct}`,
+          `http://localhost:3000/admin/product?filter=${filterProduct}`,
           { withCredentials: true }
         );
         console.log(response.data.products);
@@ -56,8 +56,8 @@ function Products() {
   const currentProducts = products.slice(firstPostIndex, lastPostIndex);
   const handleListing = async (id) => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/admin/handleProductListing/${id}`,
+      const response = await axios.patch(
+        `http://localhost:3000/admin/productListing/${id}`,
         {},
         { withCredentials: true }
       );
@@ -95,9 +95,8 @@ function Products() {
     const result = confirm("Are you sure to delete this product");
     try {
       if (result) {
-        const response = await axios.put(
-          `http://localhost:3000/admin/productDelete/${id}`,
-          {},
+        const response = await axios.delete(
+          `http://localhost:3000/admin/product/${id}`,
           { withCredentials: true }
         );
         Toast.fire({
@@ -121,7 +120,7 @@ function Products() {
     const result = confirm("Are you sure to restore categorie");
     try {
       if (result) {
-        const response = await axios.put(
+        const response = await axios.patch(
           `http://localhost:3000/admin/productRestore/${id}`,
           {},
           { withCredentials: true }

@@ -174,8 +174,8 @@ const AddProduct = () => {
     formData.append("brand", brand);
     formData.append("units", units); // Add product details like name, price, etc.
 
-    productImage.forEach((image) => {
-      formData.append("file", image.file); // Append cropped images to formData
+    productImage.forEach((image,index) => {
+      formData.append("file", image?.file); // Append cropped images to formData
     });
 
     try {
@@ -183,7 +183,7 @@ const AddProduct = () => {
         setSpinner(true);
 
         const response = await axios.post(
-          "http://localhost:3000/admin/addProduct",
+          "http://localhost:3000/admin/product",
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },

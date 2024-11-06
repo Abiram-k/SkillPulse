@@ -88,7 +88,7 @@ const Brand = () => {
       if (Object.keys(formError).length === 0) {
         setSpinner(true);
         const response = await axios.post(
-          "http://localhost:3000/admin/addBrand",
+          "http://localhost:3000/admin/brand",
           formData,
           {
             headers: {
@@ -118,7 +118,7 @@ const Brand = () => {
     const result = confirm("Are you sure to restore brand");
     try {
       if (result) {
-        const response = await axios.put(
+        const response = await axios.patch(
           `http://localhost:3000/admin/brandRestore/${id}`,
           {},
           { withCredentials: true }
@@ -134,9 +134,9 @@ const Brand = () => {
     const result = confirm("Are you sure to delete brand");
     try {
       if (result) {
-        const response = await axios.put(
-          `http://localhost:3000/admin/brandDelete/${id}`,
-          {},
+        const response = await axios.delete(
+          `http://localhost:3000/admin/brand/${id}`,
+          // {},
           { withCredentials: true }
         );
         Toast.fire({
@@ -159,8 +159,8 @@ const Brand = () => {
 
   const handleListing = async (id) => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/admin/handleBrandListing/${id}`,
+      const response = await axios.patch(
+        `http://localhost:3000/admin/brandListing/${id}`,
         {},
         { withCredentials: true }
       );
