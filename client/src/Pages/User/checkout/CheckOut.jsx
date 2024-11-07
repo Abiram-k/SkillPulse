@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ChangeAddress } from "@/Components/ChangeAddress";
-import axios from "../../../axiosIntercepters/AxiosInstance";
 import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Toast } from "@/Components/Toast";
 import { logoutUser } from "@/redux/userSlice";
+import axios from "@/axiosIntercepters/AxiosInstance";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
@@ -18,6 +18,8 @@ const Checkout = () => {
   const user = useSelector((state) => state.users.user);
   const [addresses, setAddresses] = useState([]);
   const [summary, setSummary] = useState({});
+  const [paymentMethod, setPaymentMethod] = useState("Razorpay");
+  const [walletData, setWalletData] = useState({});
 
   const totalPrice = () => {
     return checkoutItems[0]?.products.reduce(
@@ -76,6 +78,15 @@ const Checkout = () => {
   };
 
   useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(`/wallet/${user._id}`);
+        setWalletData(response.data.wallet);
+        console.log("Wallet data : ", response.data.wallet);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
     const calcs = calculations();
 
     if (Object.keys(calcs).length > 0) {
@@ -112,8 +123,11 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
+    alert("hello");
     try {
-      const response = await axios.post(`/order/${user._id}`, checkoutItems);
+      const response = await axios.post(`/order/${user._id}`, checkoutItems, {
+        params: { paymentMethod, totalAmount: summary.checkoutTotal },
+      });
       setCheckoutComplete((prev) => !prev);
       localStorage.removeItem(`cart_${user._id}`);
       localStorage.removeItem("checkoutItems");
@@ -131,6 +145,9 @@ const Checkout = () => {
     }
   };
 
+  const handlePaymentMethod = (e) => {
+    setPaymentMethod(e.target.value);
+  };
   return !checkoutComplete ? (
     <div className="min-h-screen bg-black text-white mt-5 font-mono">
       <div className="max-w-7xl mx-auto p-6">
@@ -258,28 +275,78 @@ const Checkout = () => {
               <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
               <div className="space-y-3">
                 <label className="flex items-center space-x-2">
-                  <input type="radio" name="payment" value="card" />
-                  <span>Debit Card / Credit card</span>
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="Razorpay"
+                    checked={paymentMethod == "Razorpay"}
+                    onChange={handlePaymentMethod}
+                  />
+                  <span>Razorpay</span>
                 </label>
+
                 <label className="flex items-center space-x-2">
-                  <input type="radio" name="payment" value="upi" />
-                  <span>UPI Method</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input type="radio" name="payment" value="cod" checked />
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cod"
+                    checked={paymentMethod == "cod"}
+                    onChange={handlePaymentMethod}
+                  />
                   <span>Cash on Delivery</span>
                 </label>
+
                 <label className="flex items-center space-x-2">
-                  <input type="radio" name="payment" value="wallet" />
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="wallet"
+                    checked={paymentMethod == "wallet"}
+                    onChange={handlePaymentMethod}
+                  />
                   <span>Wallet</span>
                 </label>
+                {paymentMethod == "wallet" && (
+                  <div className="flex flex-col gap-2">
+                    <p>
+                      Wallet balance :
+                      <span className="text-green-500">
+                        {" "}
+                        ₹{" "}
+                        {walletData.totalAmount ? walletData.totalAmount : "0"}
+                      </span>
+                    </p>
+                    <p>
+                      Product Amount :
+                      <span
+                        className={`${
+                          walletData.totalAmount < summary.checkoutTotal
+                            ? "text-red-600"
+                            : "text-green-500"
+                        }`}
+                      >
+                        {" "}
+                        ₹ {summary.checkoutTotal}
+                      </span>
+                    </p>
+                    {walletData.totalAmount < summary.checkoutTotal && (
+                      <p className="text-red-600">
+                        Insufficient wallet balance, Try different payment
+                        method !
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex flex-col md:flex-row space-x-0 md:space-x-4">
               <button
-                className="bg-red-600 text-white px-8 py-3 rounded-md w-full mb-4 md:mb-0"
+                className={
+                  " text-white px-8 py-3 rounded-md w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
+                }
                 onClick={handlePlaceOrder}
+                disabled={walletData.totalAmount < summary.checkoutTotal}
               >
                 Place order
               </button>

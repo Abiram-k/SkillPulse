@@ -43,6 +43,9 @@ import About from "./Pages/User/about/About";
 import ForgotPassword from "./Pages/User/forgotPassword/ForgotPassword";
 import EmailVerification from "./Pages/User/forgotPassword/EmailVerification";
 import Wallet from "./Pages/User/wallet/Wallet";
+import CouponManagement from "./Pages/Admin/couponManagment/CouponManagement";
+import Coupon from "./Pages/User/coupon/Coupon";
+import { Toaster } from "./Components/ui/toaster";
 function App() {
   return (
     <>
@@ -164,6 +167,14 @@ function App() {
               }
             />
             <Route
+              path="coupon"
+              element={
+                <ProtectUserHome>
+                  <Coupon />
+                </ProtectUserHome>
+              }
+            />
+            <Route
               path="about"
               element={
                 <ProtectUserHome>
@@ -180,6 +191,7 @@ function App() {
                 </ProtectUserHome>
               }
             />
+
             <Route
               path="cart/checkout"
               element={
@@ -297,6 +309,14 @@ function App() {
               }
             />
             <Route
+              path="coupon"
+              element={
+                <ProtectedDashboardAdmin>
+                  <CouponManagement />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
               path="products"
               element={
                 <ProtectedDashboardAdmin>
@@ -367,6 +387,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
+      <Toaster />
     </>
   );
 }

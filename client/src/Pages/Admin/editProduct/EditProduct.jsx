@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Toast } from "../../../Components/Toast";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { context } from "../../../Components/Provider";
 import { useNavigate } from "react-router-dom";
 const EditProduct = () => {
@@ -124,13 +124,12 @@ const EditProduct = () => {
       if (Object.keys(formErrors).length === 0) {
         setSpinner(true);
         const response = await axios.put(
-          `http://localhost:3000/admin/product/${id}`,
+          `/admin/product/${id}`,
           formData,
           {
             headers: {
               "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true,
+            }
           }
         );
         // alert("hello");

@@ -1,7 +1,7 @@
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 import { SkeletonDemo } from "@/Components/SkeletonDemo";
 import { Toast } from "@/Components/Toast";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -13,10 +13,7 @@ const ManageAddress = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/address?id=${user?._id}`,
-          { withCredentials: true }
-        );
+        const response = await axios.get(`/address?id=${user?._id}`);
         console.log(response.data);
         setAddresses(response.data.addresses);
       } catch (error) {
@@ -27,10 +24,7 @@ const ManageAddress = () => {
 
   const handleDeleteAddress = async (id) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/address?id=${id}`,
-        { withCredentials: true }
-      );
+      const response = await axios.delete(`/address?id=${id}`);
       console.log(response.data);
       Toast.fire({
         icon: "success",

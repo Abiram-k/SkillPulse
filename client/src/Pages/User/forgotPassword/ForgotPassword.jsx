@@ -1,6 +1,6 @@
 import { Toast } from "@/Components/Toast";
 import { passwordReseted } from "@/redux/userSlice";
-import axios from "../../../axiosIntercepters/AxiosInstance";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";

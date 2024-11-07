@@ -5,7 +5,7 @@ import { useState } from "react";
 import { addUser, passwordReseted } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { Toast } from "@/Components/Toast";
 function Login() {
   const [email, setEmail] = useState("");
@@ -44,13 +44,7 @@ function Login() {
     }
     try {
       console.log(email, password);
-      const response = await axios.post(
-        "http://localhost:3000/login",
-        { email, password },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post("/login", { email, password });
       if (response.status === 200) {
         dispatch(addUser(response.data.user));
         setMessage({ response: response?.data?.message });

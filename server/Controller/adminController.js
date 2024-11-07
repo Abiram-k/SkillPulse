@@ -10,6 +10,7 @@ const Product = require("../models/productModel");
 const Orders = require("../models/orderModel");
 const mongoose = require("mongoose")
 const { listenerCount } = require("process");
+const Coupon = require("../models/couponModel.");
 
 exports.login = async (req, res) => {
     try {
@@ -344,7 +345,7 @@ exports.addProduct = async (req, res) => {
             productDescription,
             salesPrice,
             regularPrice,
-            units, 
+            units,
             category,
             brand,
         } = req.body;
@@ -380,7 +381,7 @@ exports.addProduct = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ message: error.message || "Error occurred while adding product" })
-      
+
     }
 }
 
@@ -588,3 +589,59 @@ exports.getOrder = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch orders" });
     }
 };
+
+
+exports.getCoupons = async (req, res) => {
+    try {
+        console.log("getted coupon");
+        const coupons =await Coupon.find();
+        if (coupons)
+            return res.status(200).json(coupons);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while fecthing coupon data" });
+    }
+}
+exports.addCoupons = async (req, res) => {
+    try {
+        console.log("added coupon");
+        const { couponCode,
+            couponType,
+            couponAmount,
+            description,
+            totalLimit,
+            perUserLimit,
+            purchaseAmount,
+            expiryDate, } = req.body;
+        console.log(
+            couponCode,
+            couponType,
+            couponAmount,
+            description,
+            totalLimit,
+            perUserLimit,
+            purchaseAmount,
+            expiryDate,)
+        const expirationDate = new Date(expiryDate + 'T00:00:00Z');
+        console.log(expirationDate)
+        const coupon = await Coupon.findOne({ couponCode });
+        console.log(coupon)
+        if (coupon)
+            return res.status(400).json({ message: "Coupon code already added" })
+        const newCouponData = new Coupon({
+            couponCode,
+            description,
+            couponType,
+            couponAmount,
+            purchaseAmount,
+            expirationDate,
+            totalLimit,
+            perUserLimit
+        })
+        await newCouponData.save();
+        return res.status(200).json({ message: "Coupon added successfully" })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while adding coupon" })
+    }
+}

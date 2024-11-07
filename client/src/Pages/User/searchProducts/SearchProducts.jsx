@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 import { Toast } from "../../../Components/Toast";
 import { useNavigate } from "react-router-dom";
@@ -14,9 +14,8 @@ const SearchProducts = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("http://localhost:3000/products", {
-          withCredentials: true,
-        });
+        const response = await axios.get("/products"
+        );
         console.log("product from homepage:", products);
         setProducts(response.data.products);
         setCategory(response.data.category);

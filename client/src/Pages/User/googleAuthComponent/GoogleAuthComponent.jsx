@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addUser } from "../../../redux/userSlice";
-import axios from "../../../axiosIntercepters/AxiosInstance";
+import axios from "@/axiosIntercepters/AxiosInstance";
 function GoogleAuthComponent() {
   const dispatch = useDispatch();
   const navigate = useNavigate();

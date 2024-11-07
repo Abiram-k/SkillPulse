@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import { context } from "../../../Components/Provider";
@@ -67,11 +67,10 @@ function EditBrand() {
 
     try {
       const response = await axios.put(
-        "http://localhost:3000/admin/brand",
+        "/admin/brand",
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" }
         }
       );
       setSpinner(false);

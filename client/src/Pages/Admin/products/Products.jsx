@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { context } from "../../../Components/Provider";
 import { useContext, useRef } from "react";
 import Pagination from "../../../Components/Pagination";
@@ -33,8 +33,7 @@ function Products() {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/admin/product?filter=${filterProduct}`,
-          { withCredentials: true }
+          `/admin/product?filter=${filterProduct}`
         );
         console.log(response.data.products);
         setProducts(response.data.products);
@@ -56,11 +55,7 @@ function Products() {
   const currentProducts = products.slice(firstPostIndex, lastPostIndex);
   const handleListing = async (id) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:3000/admin/productListing/${id}`,
-        {},
-        { withCredentials: true }
-      );
+      const response = await axios.patch(`/admin/productListing/${id}`);
       console.log(response.data);
       if (response.data.product.isListed) {
         Swal.fire({
@@ -95,10 +90,7 @@ function Products() {
     const result = confirm("Are you sure to delete this product");
     try {
       if (result) {
-        const response = await axios.delete(
-          `http://localhost:3000/admin/product/${id}`,
-          { withCredentials: true }
-        );
+        const response = await axios.delete(`/admin/product/${id}`);
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,
@@ -120,11 +112,7 @@ function Products() {
     const result = confirm("Are you sure to restore categorie");
     try {
       if (result) {
-        const response = await axios.patch(
-          `http://localhost:3000/admin/productRestore/${id}`,
-          {},
-          { withCredentials: true }
-        );
+        const response = await axios.patch(`/admin/productRestore/${id}`);
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,

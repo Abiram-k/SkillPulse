@@ -23,6 +23,8 @@ const generateOrderDate = () => {
 
 exports.addOrder = async (req, res) => {
     try {
+        const { paymentMethod, totalAmount } = req.query;
+        console.log(paymentMethod, totalAmount)
         const checkoutItems = req.body.map(item => {
             const { authUser, ...rest } = item;
             return rest;
@@ -40,25 +42,51 @@ exports.addOrder = async (req, res) => {
         console.log(address);
 
         let orderItems = [];
-        let totalAmount = 0;
+        // let totalAmount = 0;
         let totalQuantity = 0;
-        checkoutItems.forEach(async item => {
-            try {
 
+        // this is for to get check out totalAmount
+        // const cart = Cart.findOne({ user: id });
+        for (const item of checkoutItems) {
+            try {
                 const orderItem = {
                     product: item.product._id,
                     quantity: item.quantity,
-                    price: item.product.salesPrice * item.quantity
+                    price: item.product.salesPrice * item.quantity,
+                    paymentMethod
                 };
-                orderItems.push(orderItem);
+                if (paymentMethod === "wallet") {
+                    const wallet = await Wallet.findOne({ user: id });
+                    if (!wallet) {
+                        return res.status(404).json({ message: "Wallet not found" });
+                    }
+                    if (wallet.totalAmount < totalAmount) {
+                        return res.status(402).json({ message: `Wallet balance is insufficient: ${wallet.totalAmount}` });
+                    } else {
+                        const walletData = {
+                            amount: -totalAmount,
+                            description: "purchased product",
+                            transactionId: `REF-${item.product._id
+                                // .toString().slice(0, 5)
+                                }-${Date.now()}`
+                        }
+                        wallet.transaction.push(walletData);
+                        wallet.totalAmount -= totalAmount;
+                        await wallet.save();
+                        orderItems.push(orderItem);
+                    }
+                } else {
+                    orderItems.push(orderItem);
+                }
 
-                totalAmount += orderItem.price;
+                // totalAmount += orderItem.price;
                 totalQuantity += item.quantity;
-                await Product.findByIdAndUpdate(item.product._id, { $inc: { units: -item.quantity } })
+                await Product.findByIdAndUpdate(item.product._id, { $inc: { units: -item.quantity } });
             } catch (error) {
                 console.error(error);
+                return res.status(500).json({ message: "Error processing item" });
             }
-        });
+        }
 
         const currentOrderData = {
             user: id,
@@ -73,11 +101,12 @@ exports.addOrder = async (req, res) => {
         const newOrder = new Orders(currentOrderData);
         newOrder.save()
             .then(async order => {
-                const cart = await Cart.findOne({ user: id });
-                if (cart)
-                    cart.products = [];
-                await cart.save();
-                console.log("order placed", order);
+                const result = await Cart.deleteOne({ user: id });
+
+                if (result.deletedCount == 1)
+                    console.log("order placed", order);
+                else
+                    console.log("Cart not found while droping")
             })
             .catch(error => console.error("Error saving order:", error));
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import OtpInput from "./otpInputBox";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import "./otp.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -43,11 +43,7 @@ function Otp() {
 
   const handleClick = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/otp",
-        { otp },
-        { withCredentials: true }
-      );
+      const response = await axios.post("/otp", { otp });
       if (response.status === 200) {
         dispatch(otpSuccess());
         navigate("/login");
@@ -67,11 +63,7 @@ function Otp() {
     setResendOtp(false);
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/resendOtp",
-        {},
-        { withCredentials: true }
-      );
+      const response = await axios.post("/resendOtp");
       setSpinner(false);
       setMessage({ success: response.data.message });
     } catch (error) {

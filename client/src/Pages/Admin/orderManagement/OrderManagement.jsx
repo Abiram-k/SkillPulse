@@ -15,7 +15,7 @@ import {
   Edit,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { ChangeStatus } from "@/Components/ChangeStatus";
 import { logoutAdmin } from "@/redux/adminSlice";
 
@@ -34,10 +34,8 @@ const OrderManagement = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/admin/order?filter=${filterOrders}`,
-          {
-            withCredentials: true,
-          }
+          `/admin/order?filter=${filterOrders}`
+          
         );
         console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
@@ -58,11 +56,11 @@ const OrderManagement = () => {
     if (status) setUpdatedStatus(status);
   };
 
-  const handleCancelOrder = async () => {
-    const response = axios.post(
-      `http://localhost:3000/cancelOrder?id=${user._id}`
-    );
-  };
+  // const handleCancelOrder = async () => {
+  //   const response = axios.post(
+  //     `http://localhost:3000/cancelOrder?id=${user._id}`
+  //   );
+  // };
   console.log("From fronend", orders);
 
   const getStatusColor = (status) => {

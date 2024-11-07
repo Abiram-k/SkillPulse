@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { addAdmin } from "../../../redux/adminSlice";
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -41,11 +41,9 @@ const AdminLogin = () => {
     try {
       console.log(email, password);
       const response = await axios.post(
-        "http://localhost:3000/admin/adminLogin",
-        { email, password },
-        {
-          withCredentials: true,
-        }
+        "/admin/adminLogin",
+        { email, password }
+        
       );
       if (response.status === 200) {
         dispatch(addAdmin(response.data.adminData));

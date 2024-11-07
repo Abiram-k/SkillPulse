@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Trash2, Search, Heart, ShoppingCart, User } from "lucide-react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { Toast } from "@/Components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,21 +10,25 @@ import {
   logoutUser,
 } from "@/redux/userSlice";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
+import { CouponPopup } from "@/Components/CouponPopup";
+import { Button } from "@/Components/ui/button";
 
 const ShoppingCartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [trigger, setTrigger] = useState(1);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const openPopup = () => setIsPopupOpen(true);
+  const closePopup = () => setIsPopupOpen(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
+  const [selectedCoupons, setSelectedCoupons] = useState({});
   console.log(user);
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/cart/${user._id}`,
-          { withCredentials: true }
-        );
+        const response = await axios.get(`/cart/${user._id}`);
         setCartItems(response.data.cartItems);
 
         console.log("Cart itmes : ", response.data.cartItems);
@@ -63,15 +67,11 @@ const ShoppingCartPage = () => {
 
   const removeItem = async (id) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/cartItem/${id}`,
-        {
-          withCredentials: true,
-          params: {
-            userId: user._id,
-          },
-        }
-      );
+      const response = await axios.delete(`/cartItem/${id}`, {
+        params: {
+          userId: user._id,
+        },
+      });
       setTrigger((t) => t + 1);
       const alreadyHaveProducts =
         JSON.parse(localStorage.getItem(`cart_${user._id}`)) || [];
@@ -105,9 +105,9 @@ const ShoppingCartPage = () => {
           if (newQuantity <= availableQuantity || value == -1) {
             try {
               const response = await axios.post(
-                `http://localhost:3000/updateQuantity/${productId}`,
+                `/updateQuantity/${productId}`,
                 {},
-                { withCredentials: true, params: { userId: user._id, value } }
+                { params: { userId: user._id, value } }
               );
               setTrigger((t) => t + 1);
             } catch (error) {
@@ -171,6 +171,10 @@ const ShoppingCartPage = () => {
       totalPrice() + calculateGST(gstRate) + calculateDeliveryCharge();
     // alert(total);
     return total;
+  };
+  const handleGetSelectedCoupons = (coupons) => {
+    console.log(coupons, "from parent");
+    setSelectedCoupons(coupons);
   };
   return (
     <div className="min-h-screen bg-black text-white font-mono">
@@ -291,9 +295,22 @@ const ShoppingCartPage = () => {
                   <span>{cartTotalPrice()}</span>
                 </div>
               </div>
-              <button className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700">
+              <button
+                className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700"
+                onClick={openPopup}
+              >
                 APPLY Coupon
               </button>
+              <div className="relative">
+                {isPopupOpen && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <CouponPopup
+                      onClose={closePopup}
+                      getCoupons={handleGetSelectedCoupons}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

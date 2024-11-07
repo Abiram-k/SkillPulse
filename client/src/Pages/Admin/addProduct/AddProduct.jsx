@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
-import axios from "axios";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "../utils/cropImage"; // Your helper to crop image
+import axios from "@/axiosIntercepters/AxiosInstance";
 
 const AddProduct = () => {
   const [message, setMessage] = useState({});
@@ -65,7 +65,7 @@ const AddProduct = () => {
     (async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/admin/category"
+          "/admin/category"
         );
         setCategories(response?.data?.categories);
       } catch (err) {
@@ -77,7 +77,7 @@ const AddProduct = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("http://localhost:3000/admin/brand");
+        const response = await axios.get("/admin/brand");
         setBrands(response?.data?.brands);
       } catch (err) {
         alert(err?.response?.data?.message);
@@ -183,12 +183,10 @@ const AddProduct = () => {
         setSpinner(true);
 
         const response = await axios.post(
-          "http://localhost:3000/admin/product",
+          "/admin/product",
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" },
-            withCredentials: true,
-          }
+            headers: { "Content-Type": "multipart/form-data" }          }
         );
         setSpinner(false);
 

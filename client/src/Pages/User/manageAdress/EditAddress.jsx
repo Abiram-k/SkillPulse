@@ -1,5 +1,5 @@
 import { Toast } from "@/Components/Toast";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -63,8 +63,7 @@ const EditAddress = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/editAddress?id=${address}`,
-          { withCredentials: true }
+          `/editAddress?id=${address}`,
         );
         setCurrentAddress(response.data.address);
         setFirstName(response.data.address.firstName);
@@ -104,11 +103,10 @@ const EditAddress = () => {
       if (Object.keys(formErrors).length == 0) {
         const response = await axios.put(
           // changed some routes from post to put
-          `http://localhost:3000/address?id=${currentAddress._id}`,
+          `/address?id=${currentAddress._id}`,
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
-            withCredentials: true,
           }
         );
         console.log(response.data);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { useContext, useEffect } from "react";
 import { context } from "../../../Components/Provider";
 import { useNavigate } from "react-router-dom";
@@ -65,14 +65,9 @@ function EditCategory() {
     formData.append("file", image);
 
     try {
-      const response = await axios.put(
-        "http://localhost:3000/admin/category",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.put("/admin/category", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setSpinner(false);
       Toast.fire({
         icon: "success",

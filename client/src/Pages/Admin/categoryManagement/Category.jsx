@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { context } from "../../../Components/Provider";
 import { useContext } from "react";
@@ -52,7 +52,7 @@ const Category = () => {
   useEffect(() => {
     (async () => {
       await axios
-        .get("http://localhost:3000/admin/category", { withCredentials: true })
+        .get("/admin/category")
         .then((response) => {
           setCategories(response.data.categories);
         })
@@ -86,16 +86,11 @@ const Category = () => {
       if (Object.keys(formError).length == 0) {
         setSpinner(true);
 
-        const response = await axios.post(
-          "http://localhost:3000/admin/category",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true,
-          }
-        );
+        const response = await axios.post("/admin/category", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         setSpinner(false);
         navigate("/admin/category");
         Toast.fire({
@@ -117,11 +112,7 @@ const Category = () => {
     const result = confirm("Are you sure to restore categorie");
     try {
       if (result) {
-        const response = await axios.patch(
-          `http://localhost:3000/admin/categoryRestore/${id}`,
-          {},
-          { withCredentials: true }
-        );
+        const response = await axios.patch(`/admin/categoryRestore/${id}`);
         alert(response.data.message);
       }
     } catch (error) {
@@ -133,10 +124,7 @@ const Category = () => {
     // alert(result);
     try {
       if (result) {
-        const response = await axios.delete(
-          `http://localhost:3000/admin/category/${id}`,
-          { withCredentials: true }
-        );
+        const response = await axios.delete(`/admin/category/${id}`);
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,
@@ -156,11 +144,7 @@ const Category = () => {
   };
   const handleListing = async (id) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:3000/admin/categoryListing/${id}`,
-        {},
-        { withCredentials: true }
-      );
+      const response = await axios.patch(`/admin/categoryListing/${id}`);
       if (response.data.category.isListed) {
         Swal.fire({
           title: "Listed",

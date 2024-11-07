@@ -11,7 +11,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { Edit } from "lucide-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -31,9 +31,8 @@ export const ChangeStatus = ({
     updatedState(updatedStatus);
     try {
       const response = await axios.patch(
-        `http://localhost:3000/admin/status?id=${user?._id}`,
+        `/admin/status?id=${user?._id}`,
         { orderId, productId, updatedStatus },
-        { withCredentials: true }
       );
       console.log(response.data.message);
       Toast.fire({

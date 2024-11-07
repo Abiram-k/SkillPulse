@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const coupon = require("./couponModel.");
 
 const userSchema = new mongoose.Schema({
     profileImage: {
@@ -10,7 +11,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    lastName: { 
+    lastName: {
         type: String,
         default: ""
     },
@@ -80,10 +81,20 @@ const userSchema = new mongoose.Schema({
 
 
     }],
+    appliedCoupons: [{
+        coupon: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Coupon"
+        },
+        usedCount: {
+            type: String,
+            default: "0",
+        }
+    }],
     deliveryAddress: {
         type: String,
     },
-    createdAt: { 
+    createdAt: {
         type: Date,
         default: Date.now,
     },

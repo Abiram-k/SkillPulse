@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
 import { User, Package, MapPin, Wallet, LogOut } from "lucide-react";
 import { logoutUser } from "../../../redux/userSlice";
+import axios from "@/axiosIntercepters/AxiosInstance";
 
 function AccountLayout() {
   const [profileImage, setProfileImage] = useState(null);
@@ -22,12 +23,7 @@ function AccountLayout() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/user/${user._id}`,
-          {
-            withCredentials: true,
-          }
-        );
+        const response = await axios.get(`/user/${user._id}`);
         setProfileImage(response.data.userData.profileImage);
       } catch (error) {
         console.log(error?.response?.data?.message);
@@ -59,11 +55,10 @@ function AccountLayout() {
         </button>
 
         <div className="flex gap-6">
-          {/* Sidebar - Desktop and Mobile (Overlay) */}
           <div
             className={`${
               isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } lg:translate-x-0 fixed lg:static top-0 left-0 w-64 bg-black h-full lg:h-auto lg:bg-transparent lg:flex flex-col z-50 p-4 transition-transform duration-300 ease-in-out  -z-20`}
+            } lg:translate-x-0 fixed lg:static top-0 left-0 w-64 bg-black h-full lg:h-auto lg:bg-transparent lg:flex flex-col p-4 transition-transform duration-300 ease-in-out  `}
           >
             <div className="bg-black rounded-lg p-4 mb-4 lg:mt-5">
               <div className="flex items-center gap-3 mb-6">
@@ -119,7 +114,7 @@ function AccountLayout() {
               </nav>
 
               <button
-                className="w-full mt-6 bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
+                className="w-full mt-6 bg-red-600 text-white py-2 rounded-lg flex items-center  justify-center gap-2"
                 onClick={handleLogout}
               >
                 <LogOut className="w-5 h-5" />

@@ -79,7 +79,7 @@ export default function Dashboard() {
               <NavItem icon={Package} text="Products" redirect="products" />
               <NavItem icon={FileText} text="Orders" redirect="orders" />
               <NavItem icon={Image} text="Banner" redirect="bannerMangement" />
-              <NavItem icon={Tag} text="Coupon" redirect="coupons" />
+              <NavItem icon={Tag} text="Coupon" redirect="coupon" />
               <NavItem icon={CreditCard} text="Payments" redirect="payments" />
               <NavItem icon={ShoppingBag} text="Category" redirect="category" />
               <NavItem icon={Bandage} text="Brand" redirect="brand" />

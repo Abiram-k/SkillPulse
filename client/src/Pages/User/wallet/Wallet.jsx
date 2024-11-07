@@ -12,8 +12,8 @@ const Wallet = () => {
         setWalletData(response.data.wallet);
         console.log("Wallet data : ", response.data.wallet);
       } catch (error) {
-        console.log(error);
-        alert(error.response.data.message);
+        console.error(error);
+        // alert(error.response.data.message);
       }
     })();
   }, []);
@@ -26,7 +26,7 @@ const Wallet = () => {
         </div>
 
         <p className="font-bold text-green-600 text-xl">
-          {walletData?.totalAmount} ₹
+          {walletData?.totalAmount ? walletData?.totalAmount : "0"} ₹
         </p>
       </div>
       {/* <section className="bg-gray-900 p-6 rounded-lg ">
@@ -64,22 +64,34 @@ const Wallet = () => {
         </div>
       </section> */}
 
-      <section className="bg-gray-900 p-6 rounded-lg">
+      <section className="bg-gray-900 p-6 rounded-lg ">
         <h3 className="text-red-500 text-xl font-bold mb-4 lg:mb-10">
           WALLET HISTORY
         </h3>
 
-        <div className="hidden sm:grid grid-cols-4 gap-4 text-sm font-semibold text-gray-400 mb-4 lg:mb-8 lg:text-md font-sans">
-          <span>DESCRIPTION</span>
+        <div
+          className="hidden sm:grid grid-cols-4 gap-4 text-sm font-semibold tracking-widest mb-4 lg:mb-8 lg:text-md font-sans pb-2 border-b-4 border-gray-700 
+        "
+        >
+          <span className="lg:ms-3">DESCRIPTION</span>
           <span>DATE</span>
           <span>AMOUNT</span>
           <span>TRANSACTION ID</span>
         </div>
         {walletData?.transaction?.map((transact) => (
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-3 lg:mt-6 text-sm sm:text-base border-b-2 border-b-gray-500  ">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-3 lg:mt-6 text-sm sm:text-base text-gray-300
+           "
+          >
             <div className="sm:col-span-1 ">{transact.description}</div>
             <div className="sm:col-span-1">{transact.date}</div>
-            <div className="sm:col-span-1">RS.{transact.amount}</div>
+            <div
+              className={`sm:col-span-1 ${
+                transact.amount > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {transact.amount} ₹
+            </div>
             <div className="sm:col-span-1">{transact.transactionId}</div>
           </div>
         ))}

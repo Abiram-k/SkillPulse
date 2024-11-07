@@ -34,5 +34,7 @@ router.delete("/brand/:id", verifyAdmin, adminController.deleteBrand);
 router.patch("/status", adminController.editStatus)
 router.get("/order", adminController.getOrder)
 
+router.get("/coupon",adminController.getCoupons)
+router.post("/coupon",adminController.addCoupons)
 
 module.exports = router; 

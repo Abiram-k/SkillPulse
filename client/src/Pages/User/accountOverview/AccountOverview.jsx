@@ -14,7 +14,8 @@ import { logoutUser } from "../../../redux/userSlice";
 import { Toast } from "../../../Components/Toast";
 import { Link } from "react-router-dom";
 import { ChangePassword } from "@/Components/ChangePassword";
-import axios from "../../../axiosIntercepters/AxiosInstance";
+import axios from "@/axiosIntercepters/AxiosInstance";
+
 const AccountOverview = () => {
   const user = useSelector((state) => state.users.user);
   // console.log(user, "from profile page");

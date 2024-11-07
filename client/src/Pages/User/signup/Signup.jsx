@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./signup.css";
@@ -83,7 +83,7 @@ const Signup = () => {
       if (Object.keys(formErrors.length != 0)) {
         setSpinner(true);
         const response = await axios.post(
-          "http://localhost:3000/signUp",
+          "/signUp",
           {
             firstName,
             lastName,
@@ -93,7 +93,6 @@ const Signup = () => {
           },
           {
             headers: { "Content-Type": "application/json" },
-            withCredentials: true,
           }
         );
 
@@ -112,6 +111,8 @@ const Signup = () => {
     }
   };
 
+
+  
 const handleGoogleAuth = () => {
   window.location.href = `http://localhost:3000/auth/google?method=signup`;
 };

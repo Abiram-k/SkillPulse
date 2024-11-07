@@ -3,7 +3,7 @@ import banner from "../../../assets/homePageBanner.jpg";
 import productBanner from "../../../assets/homeProductBanner.webp";
 import { Link, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
-import axios from "../../../axiosIntercepters/AxiosInstance";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import {
   logoutUser,

@@ -4,7 +4,7 @@ import productBanner from "../../../assets/homeProductBanner.webp";
 import { useDispatch, useSelector } from "react-redux";
 import { setProductDetails } from "../../../redux/userSlice";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "../../../axiosIntercepters/AxiosInstance";
+import axios from "@/axiosIntercepters/AxiosInstance";
 const LandingPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [products, setProducts] = useState([]);

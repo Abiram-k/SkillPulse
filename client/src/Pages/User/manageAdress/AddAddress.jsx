@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -72,17 +72,9 @@ const AddAddress = () => {
     formData.append("type", type);
 
     try {
-      const response = await axios.post(
-        `http://localhost:3000/address?id=${user?._id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-          // params: {
-          //   id: user?._id,
-          // },
-        }
-      );
+      const response = await axios.post(`/address?id=${user?._id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       console.log(response.data);
 
       Toast.fire({

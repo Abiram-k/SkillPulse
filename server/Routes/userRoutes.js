@@ -3,6 +3,7 @@ const userController = require("../controller/userController");
 const cartController = require("../controller/cartController");
 const wishlistController = require("../controller/wishlistController");
 const orderController = require("../controller/orderController");
+const adminController = require("../controller/adminController")
 const express = require('express');
 const router = express.Router();
 const passport = require("passport");
@@ -10,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const { verifyUser } = require("../Middleware/userAuth");
 const { isBlocked } = require("../Middleware/isBlockedUser");
 const { uploadImage } = require("../Middleware/multer");
+
 const dotenv = require("dotenv");
 const path = require("node:path");
 const User = require("../models/userModel");
@@ -101,6 +103,8 @@ router.get("/order", verifyUser, isBlocked, orderController.getOrder);
 router.patch("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder);
 router.patch("/returnOrder", verifyUser, isBlocked, orderController.returnOrder);
 
-router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet)
+router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet);
+
+router.get("/coupon", adminController.getCoupons);
 
 module.exports = router;

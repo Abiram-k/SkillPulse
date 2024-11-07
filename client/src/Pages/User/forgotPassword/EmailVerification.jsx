@@ -1,6 +1,6 @@
 import { Toast } from "@/Components/Toast";
 import { forgotEmailVerified } from "@/redux/userSlice";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";

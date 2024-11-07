@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { context } from "../../../Components/Provider";
 import { useContext } from "react";
@@ -55,7 +55,7 @@ const Brand = () => {
   useEffect(() => {
     (async () => {
       await axios
-        .get("http://localhost:3000/admin/brand", { withCredentials: true })
+        .get("/admin/brand")
         .then((response) => {
           setBrands(response.data.brands);
         })
@@ -88,13 +88,12 @@ const Brand = () => {
       if (Object.keys(formError).length === 0) {
         setSpinner(true);
         const response = await axios.post(
-          "http://localhost:3000/admin/brand",
+          "admin/brand",
           formData,
           {
             headers: {
               "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true,
+            }
           }
         );
         setSpinner(false);
@@ -119,9 +118,7 @@ const Brand = () => {
     try {
       if (result) {
         const response = await axios.patch(
-          `http://localhost:3000/admin/brandRestore/${id}`,
-          {},
-          { withCredentials: true }
+          `/admin/brandRestore/${id}`,
         );
         alert(response.data.message);
       }
@@ -135,10 +132,8 @@ const Brand = () => {
     try {
       if (result) {
         const response = await axios.delete(
-          `http://localhost:3000/admin/brand/${id}`,
-          // {},
-          { withCredentials: true }
-        );
+          `/admin/brand/${id}`
+                  );
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,
@@ -160,9 +155,7 @@ const Brand = () => {
   const handleListing = async (id) => {
     try {
       const response = await axios.patch(
-        `http://localhost:3000/admin/brandListing/${id}`,
-        {},
-        { withCredentials: true }
+        `/admin/brandListing/${id}`
       );
       if (response.data.brand.isListed) {
         Swal.fire({

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import axios from "@/axiosIntercepters/AxiosInstance";
 import Pagination from "../../../Components/Pagination";
 import { User } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -18,8 +18,7 @@ const Customers = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/admin/customers?filter=${filterUser}`,
-          { withCredentials: true }
+          `/admin/customers?filter=${filterUser}`
         );
         console.log(response.data.users);
         setUsers(response.data.users);
@@ -42,10 +41,7 @@ const Customers = () => {
 
   const handleblocking = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/admin/block/${id}`,
-        { withCredentials: true }
-      );
+      const response = await axios.get(`/admin/block/${id}`);
       if (response.data.user.isBlocked) {
         Swal.fire({
           title: "Blocked",
@@ -102,7 +98,7 @@ const Customers = () => {
                 value={filterUser}
                 onChange={(e) => setFilterUser(e.target.value)}
               >
-                <option  value="">All Costumers</option>
+                <option value="">All Costumers</option>
                 <option value="Recently added">Recently added</option>
                 <option value="A-Z">A-Z</option>
                 <option value="Z-A">Z-A</option>
