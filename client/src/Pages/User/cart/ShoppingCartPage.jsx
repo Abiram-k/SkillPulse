@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Trash2, Search, Heart, ShoppingCart, User } from "lucide-react";
-import axios from "@/axiosIntercepters/AxiosInstance";
+import { Trash2, Search, Heart, ShoppingCart, User, Check } from "lucide-react";
 import { Toast } from "@/Components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,18 +11,21 @@ import {
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 import { CouponPopup } from "@/Components/CouponPopup";
 import { Button } from "@/Components/ui/button";
+import axios from "@/axiosIntercepters/AxiosInstance";
 
 const ShoppingCartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [trigger, setTrigger] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
+  const [maxDiscount, setMaxDiscount] = useState("");
   const openPopup = () => setIsPopupOpen(true);
   const closePopup = () => setIsPopupOpen(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
-  const [selectedCoupons, setSelectedCoupons] = useState({});
+  const [selectedCoupons, setSelectedCoupons] = useState("");
+  const [minPurchaseAmount, setMinPurchaseAmount] = useState(null);
+  const [couponCode, setCouponCode] = useState("");
   console.log(user);
   useEffect(() => {
     (async () => {
@@ -73,6 +75,7 @@ const ShoppingCartPage = () => {
         },
       });
       setTrigger((t) => t + 1);
+      setSelectedCoupons("");
       const alreadyHaveProducts =
         JSON.parse(localStorage.getItem(`cart_${user._id}`)) || [];
       const updatedProducts = alreadyHaveProducts.filter(
@@ -138,17 +141,34 @@ const ShoppingCartPage = () => {
         title: `Add some items and checkout`,
       });
     } else {
-      dispatch(checkoutItems(cartItems[0]?.products));
+      dispatch(checkoutItems(cartItems));
       navigate("checkout");
     }
   };
 
+  const handleCouponDelete = async () => {
+    try {
+      const response = await axios.patch(`/cartCouponRemove/${user._id}`);
+      setTrigger((prev) => prev + 1);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    } catch (error) {
+      console.log(error);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
+  };
   const totalPrice = () => {
     return cartItems[0]?.products.reduce(
       (acc, item) => acc + item.product?.salesPrice * item.quantity,
       0
     );
   };
+
   const calculateDeliveryCharge = () => {
     if (totalPrice() < 1000) return Math.round((2 / 100) * totalPrice());
     else return 0;
@@ -169,12 +189,37 @@ const ShoppingCartPage = () => {
     const gstRate = 18;
     const total =
       totalPrice() + calculateGST(gstRate) + calculateDeliveryCharge();
-    // alert(total);
     return total;
   };
-  const handleGetSelectedCoupons = (coupons) => {
-    console.log(coupons, "from parent");
-    setSelectedCoupons(coupons);
+
+  const offerPrice = (couponAmount = 0, couponType) => {
+    const totalPrice = cartItems[0]?.products.reduce(
+      (acc, item) => acc + item.offeredPrice,
+      0
+    );
+    const gstRate = 18;
+    const total =
+      totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
+    return total;
+  };
+  const handleGetSelectedCoupons = async (
+    selectedCoupon,
+    maxDiscount,
+    minPurchaseAmount,
+    couponCode
+  ) => {
+    setSelectedCoupons(selectedCoupon);
+    setMaxDiscount(maxDiscount);
+    setMinPurchaseAmount(minPurchaseAmount);
+    setCouponCode(couponCode);
+    try {
+      const response = await axios.patch(
+        `/cartCouponApply?id=${user._id}&couponId=${selectedCoupon}`
+      );
+      setTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="min-h-screen bg-black text-white font-mono">
@@ -205,12 +250,20 @@ const ShoppingCartPage = () => {
                       available stock : {item?.product?.units}
                     </p>
                     <div className="flex gap-2">
-                      <p className="text-xl mt-2">
-                        ₹{item?.product?.salesPrice.toLocaleString()}
-                      </p>
-                      <p className="text-xl mt-2 line-through text-gray-400">
-                        ₹{item?.product?.regularPrice.toLocaleString()}
-                      </p>
+                      <p className="text-xl mt-2">₹ {item.offeredPrice}</p>
+                      {cartItems[0].appliedCoupon &&
+                        parseFloat(item.totalPrice - item.offeredPrice) > 0 && (
+                          <>
+                            <p className="text-xl mt-2 line-through text-gray-400">
+                              ₹{item?.product?.salesPrice * item?.quantity}
+                            </p>
+
+                            <p className="text-xl mt-2  text-green-400">
+                              -₹
+                              {item.totalPrice - item.offeredPrice}
+                            </p>
+                          </>
+                        )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -240,6 +293,7 @@ const ShoppingCartPage = () => {
                 </div>
               ))}
             </div>
+
             <div className="flex lg:gap-3 gap-1">
               <button
                 to={"checkout"}
@@ -290,23 +344,82 @@ const ShoppingCartPage = () => {
                   <span>Discount 0%</span>
                   <span>0 ₹</span>
                 </div>
-                <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
-                  <span>Total Price</span>
-                  <span>{cartTotalPrice()}</span>
-                </div>
+                {cartItems[0]?.appliedCoupon && (
+                  <div className="flex justify-between">
+                    <div className="flex gap-2 items-center">
+                      <span>
+                        {cartItems[0].appliedCoupon.couponCode} -(Coupon)
+                      </span>
+                    </div>
+                    <span className="text-green-600">
+                      {cartItems[0].appliedCoupon.couponType == "Amount"
+                        ? "-" + cartItems[0]?.appliedCoupon.couponAmount
+                        : cartItems[0].appliedCoupon.couponAmount + "%"}
+                    </span>
+                  </div>
+                )}
+                {cartItems[0]?.appliedCoupon ? (
+                  <>
+                    <div className="flex justify-between font-bold border-gray-200">
+                      <span>Sub Total</span>
+                      <span>{cartTotalPrice()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-mono">Saved Amount </span>{" "}
+                      <span className="text-green-500">
+                        -
+                        {cartTotalPrice() -
+                          offerPrice(
+                            cartItems[0]?.appliedCoupon?.couponAmount,
+                            cartItems[0]?.appliedCoupon?.couponType
+                          )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+                      <span>Payable Amount</span>
+                      <span>
+                        {offerPrice(
+                          cartItems[0]?.appliedCoupon?.couponAmount,
+                          cartItems[0]?.appliedCoupon?.couponType
+                        )}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between font-bold border-gray-200">
+                    <span>Payable Amount</span>
+                    <span>{cartTotalPrice()}</span>
+                  </div>
+                )}
               </div>
-              <button
-                className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700"
-                onClick={openPopup}
-              >
-                APPLY Coupon
-              </button>
+              {cartItems[0]?.appliedCoupon ? (
+                <>
+                  <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded-lg mt-6  flex items-center justify-around cursor-default">
+                    <div className="flex lg:gap-1">
+                      Coupon Applied
+                      <Check className="text-xs" />{" "}
+                    </div>
+                    <i
+                      className="fas fa-trash cursor-pointer text-red-500 "
+                      onClick={() => handleCouponDelete(selectedCoupons)}
+                    ></i>
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700"
+                  onClick={openPopup}
+                >
+                  APPLY Coupon
+                </button>
+              )}
               <div className="relative">
                 {isPopupOpen && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <CouponPopup
                       onClose={closePopup}
                       getCoupons={handleGetSelectedCoupons}
+                      totalAmount={totalPrice()}
                     />
                   </div>
                 )}

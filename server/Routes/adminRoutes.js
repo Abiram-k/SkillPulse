@@ -5,7 +5,7 @@ const { uploadImage } = require("../Middleware/multer")
 const { verifyAdmin } = require("../Middleware/adminAuth");
 
 
-router.post("/adminLogin", adminController.login); 
+router.post("/adminLogin", adminController.login);
 
 router.get("/customers", verifyAdmin, adminController.customers);
 router.get("/block/:id", verifyAdmin, adminController.blockUser);
@@ -21,7 +21,7 @@ router.get("/category", adminController.getCategory)
 router.post("/category", uploadImage.single("file"), verifyAdmin, adminController.addCategory);
 router.put("/category", uploadImage.single("file"), verifyAdmin, adminController.editCategory);
 router.patch("/categoryRestore/:id", verifyAdmin, adminController.categoryRestore);
-router.patch("/categoryListing/:id", verifyAdmin, adminController.listCategory);4
+router.patch("/categoryListing/:id", verifyAdmin, adminController.listCategory); 4
 router.delete("/category/:id", verifyAdmin, adminController.deleteCategory);
 
 router.get("/brand", adminController.getBrand)
@@ -34,7 +34,8 @@ router.delete("/brand/:id", verifyAdmin, adminController.deleteBrand);
 router.patch("/status", adminController.editStatus)
 router.get("/order", adminController.getOrder)
 
-router.get("/coupon",adminController.getCoupons)
-router.post("/coupon",adminController.addCoupons)
+router.get("/coupon", adminController.getCoupons)
+router.post("/coupon", adminController.addCoupons)
+router.delete("/coupon/:id", adminController.deleteCoupon) 
 
 module.exports = router; 

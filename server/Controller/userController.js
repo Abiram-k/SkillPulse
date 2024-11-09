@@ -639,19 +639,39 @@ exports.addToCart = async (req, res) => {
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
-        let cart = await Cart.findOne({ user: userId });
+        let cart = await Cart.findOne({ user: userId }).populate("appliedCoupon")
 
         console.log(cart)
         if (cart) {
             const productIndex = cart.products.findIndex((p) => p.product.toString() == id);
-            if (productIndex != -1)
+            if (productIndex != -1) {
                 cart.products[productIndex].quantity += 1;
-            else
-                cart.products.push({ product: id, quantity: 1 });
+            }
+            else {
+                let offeredPrice;
+                if (cart.appliedCoupon) {
+                    if (cart.appliedCoupon.couponType == "Percentage") {
+                        let discountAmount = Math.round(product.salesPrice * (cart.appliedCoupon.couponAmount / 100));
+                        discountAmount < cart.appliedCoupon.maxDiscount ?
+                            offeredPrice = product.salesPrice - discountAmount :
+                            offeredPrice = product.salesPrice - cart.appliedCoupon.maxDiscount
+                    } else {
+                        offeredPrice = Math.round((product.salesPrice / cart.grandTotal) * 100)
+                    }
+                }
+                else {
+                    offeredPrice = product.salesPrice
+                }
+                cart.products.push({ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice });
+                cart.grandTotal = cart.products.reduce((acc, product, index) => product.totalPrice + acc, 0);
+                cart.totalDiscount = cart.products.reduce((acc, product) => product.offeredPrice + acc, 0);
+            }
         } else {
             cart = new Cart({
-                products: [{ product: id, quantity: 1 }],
-                user: userId
+                products: [{ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice: product.salesPrice }],
+                user: userId,
+                grandTotal: product.salesPrice,
+                totalDiscount: product.salesPrice
             })
         }
         await cart.save();
@@ -665,7 +685,7 @@ exports.addToCart = async (req, res) => {
 exports.getWallet = async (req, res) => {
     try {
         const { id } = req.params;
-        const wallet =await Wallet.findOne({ user: id })
+        const wallet = await Wallet.findOne({ user: id })
         if (!wallet)
             return res.status(400).json({ message: "Wallet not found" });
         return res.status(200).json({ message: "successfully fetched wallet data", wallet })

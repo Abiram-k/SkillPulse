@@ -106,5 +106,8 @@ router.patch("/returnOrder", verifyUser, isBlocked, orderController.returnOrder)
 router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet);
 
 router.get("/coupon", adminController.getCoupons);
+router.patch("/cartCouponApply", cartController.applyCoupon)
+router.patch("/cartCouponRemove/:id", cartController.removeCoupon)
+// router.patch("/cartCouponRemove", cartController.removeCoupon)
 
 module.exports = router;

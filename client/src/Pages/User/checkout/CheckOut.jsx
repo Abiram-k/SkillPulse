@@ -54,7 +54,7 @@ const Checkout = () => {
       0
     );
 
-    calcs.totalPrice = checkoutItems.reduce(
+    calcs.totalPrice = checkoutItems[0].products.reduce(
       (acc, item) => acc + item.quantity * item.product.salesPrice,
       0
     );
@@ -65,7 +65,7 @@ const Checkout = () => {
 
     calcs.GST = Math.round(
       (18 / 100) *
-        checkoutItems.reduce(
+        checkoutItems[0].products.reduce(
           (acc, item) => acc + item.product.salesPrice * item.quantity,
           0
         )
@@ -73,7 +73,6 @@ const Checkout = () => {
 
     calcs.checkoutTotal =
       (calcs.totalPrice || 0) + (calcs.deliveryCharge || 0) + (calcs.GST || 0);
-
     return calcs;
   };
 
@@ -123,7 +122,17 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    alert("hello");
+    if (
+      paymentMethod == "cod" &&
+      summary.checkoutTotal - checkoutItems[0]?.appliedCoupon?.couponAmount >=
+        1000
+    ) {
+      Toast.fire({
+        icon: "success",
+        title: `Cash on delivery is not applicable`,
+      });
+      return;
+    }
     try {
       const response = await axios.post(`/order/${user._id}`, checkoutItems, {
         params: { paymentMethod, totalAmount: summary.checkoutTotal },
@@ -162,8 +171,8 @@ const Checkout = () => {
               </p>
             </div>
 
-            {checkoutItems.length > 0 ? (
-              checkoutItems.map((item) => (
+            {checkoutItems[0].products.length > 0 ? (
+              checkoutItems[0].products.map((item) => (
                 <div
                   className="flex items-start space-x-4 mb-8"
                   key={item.product._id}
@@ -178,19 +187,17 @@ const Checkout = () => {
                   />
                   <div>
                     <h3 className="text-lg font-semibold">
-                      {item.product.productName ||
+                      {item.productName ||
                         "Pro Based Ear buds, Vortex-continent X-R"}
                     </h3>
                     <p className="text-gray-400">
-                      {item.product.productDescription ||
+                      {item.productDescription ||
                         "High bass with noise cancellation"}
                     </p>
                     <div className="flex space-x-2">
-                      <p className="text-gray-100">
-                        {item.product.salesPrice || 999}
-                      </p>
+                      <p className="text-gray-100">{item.salesPrice || 999}</p>
                       <p className="text-gray-500 line-through">
-                        {item.product.regularPrice || 1999}
+                        {item.regularPrice || 1999}
                       </p>
                     </div>
                     <div className="mt-2 flex items-center">
@@ -350,14 +357,11 @@ const Checkout = () => {
               >
                 Place order
               </button>
-              <button className="bg-red-600 text-white px-8 py-3 rounded-md w-full">
-                APPLY Coupon
-              </button>
             </div>
           </div>
 
           <div className="w-full md:w-80 mt-6 md:mt-0">
-            <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
+            <div className="bg-red-700 text-white p-4 rounded-lg mb-4">
               Checkout Details
             </div>
             <div className="bg-pink-50 text-black p-6 rounded-lg">
@@ -383,9 +387,20 @@ const Checkout = () => {
                   <span>Discount 0%</span>
                   <span>0 ₹</span>
                 </div>
+                {checkoutItems[0]?.appliedCoupon && (
+                  <div className="flex justify-between">
+                    <span>Applied Coupon</span>
+                    <span className="text-green-600">
+                      -{checkoutItems[0]?.appliedCoupon?.couponAmount}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
                   <span>Total Price</span>
-                  <span>{summary.checkoutTotal}</span>
+                  <span>
+                    {summary.checkoutTotal -
+                      checkoutItems[0]?.appliedCoupon?.couponAmount}
+                  </span>
                 </div>
               </div>
             </div>

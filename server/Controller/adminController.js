@@ -594,7 +594,7 @@ exports.getOrder = async (req, res) => {
 exports.getCoupons = async (req, res) => {
     try {
         console.log("getted coupon");
-        const coupons =await Coupon.find();
+        const coupons = await Coupon.find();
         if (coupons)
             return res.status(200).json(coupons);
     } catch (error) {
@@ -612,7 +612,8 @@ exports.addCoupons = async (req, res) => {
             totalLimit,
             perUserLimit,
             purchaseAmount,
-            expiryDate, } = req.body;
+            expiryDate,
+            maxDiscount } = req.body;
         console.log(
             couponCode,
             couponType,
@@ -621,7 +622,8 @@ exports.addCoupons = async (req, res) => {
             totalLimit,
             perUserLimit,
             purchaseAmount,
-            expiryDate,)
+            expiryDate,
+            maxDiscount)
         const expirationDate = new Date(expiryDate + 'T00:00:00Z');
         console.log(expirationDate)
         const coupon = await Coupon.findOne({ couponCode });
@@ -636,12 +638,29 @@ exports.addCoupons = async (req, res) => {
             purchaseAmount,
             expirationDate,
             totalLimit,
-            perUserLimit
+            perUserLimit,
+            maxDiscount
         })
         await newCouponData.save();
         return res.status(200).json({ message: "Coupon added successfully" })
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error occured while adding coupon" })
+    }
+}
+
+exports.deleteCoupon = async (req, res) => {
+    try {
+        console.log("hey")
+        const { id } = req.params;
+        console.log(id, "delete coupon id")
+        const coupon =await Coupon.findOneAndDelete({_id:id}, { new: true });
+        if (coupon)
+            return res.status(200).json({ message: "Coupon deleted successfully" });
+        else
+            return res.status(400).json({ message: "Coupon failed to delete" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while deleting coupon" })
     }
 }

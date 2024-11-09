@@ -47,7 +47,8 @@ exports.addOrder = async (req, res) => {
 
         // this is for to get check out totalAmount
         // const cart = Cart.findOne({ user: id });
-        for (const item of checkoutItems) {
+
+        for (const item of checkoutItems[0].products) {
             try {
                 const orderItem = {
                     product: item.product._id,

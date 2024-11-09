@@ -7,6 +7,7 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast";
+import { CopyCheck } from "lucide-react";
 
 export function Toaster() {
   const { toasts } = useToast();
@@ -14,9 +15,14 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(({ id, title, description, action, ...props }) => (
-        <Toast key={id} {...props}>
+        <Toast key={id} {...props} className="bg-white font-mono text-black">
           <div className="grid gap-1">
-            {title && <ToastTitle>{title}</ToastTitle>}
+            {title && (
+              <div className="flex gap-2 text-green-600">
+                <ToastTitle >{title}</ToastTitle>
+                <CopyCheck className="text-sm" />
+              </div>
+            )}
             {description && <ToastDescription>{description}</ToastDescription>}
           </div>
           {action}
