@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAsyncError, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "../utils/cropImage"; // Your helper to crop image
@@ -17,6 +17,7 @@ const AddProduct = () => {
   const [brands, setBrands] = useState([]);
   const [units, setUnits] = useState("");
   const [categories, setCategories] = useState([]);
+  const [offerPrice, setOfferPrice] = useState("");
 
   const [productImage, setProductImage] = useState([]); // Array of images to send to backend
   const [images, setImages] = useState({
@@ -45,6 +46,10 @@ const AddProduct = () => {
     else if (isNaN(regularPriceInt))
       error.regularPrice = "regular price must a number";
 
+    if (isNaN(offerPrice)) error.offerPrice = "offerPrice price must a number";
+    else if (offerPrice < 0 || offerPrice > 100)
+      error.offerPrice = "offerPrice must between 0% and 100%";
+
     if (salesPrice.trim() === "") error.salesPrice = "salesPrice is required *";
     else if (regularPrice < salesPrice)
       error.salesPrice =
@@ -64,14 +69,12 @@ const AddProduct = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          "/admin/category"
-        );
+        const response = await axios.get("/admin/category");
         setCategories(response?.data?.categories);
       } catch (err) {
         alert(err?.response?.data?.message);
       }
-    })()
+    })();
   }, []);
 
   useEffect(() => {
@@ -88,7 +91,7 @@ const AddProduct = () => {
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const maxSize = 1 * 1024 * 1024 *1024;
+    const maxSize = 1 * 1024 * 1024 * 1024;
     if (
       imageFile &&
       allowedTypes.includes(imageFile.type) &&
@@ -159,8 +162,8 @@ const AddProduct = () => {
 
   // Handle adding the product with images
   const handleAddProduct = async (e) => {
-    console.log("BRAASDGJASJEFGJG",brand)
-    console.log("cartergsdgdgf",category)
+    console.log("BRAASDGJASJEFGJG", brand);
+    console.log("cartergsdgdgf", category);
     e.preventDefault();
     const formErrors = validateForm();
     setMessage(formErrors);
@@ -174,7 +177,7 @@ const AddProduct = () => {
     formData.append("brand", brand);
     formData.append("units", units); // Add product details like name, price, etc.
 
-    productImage.forEach((image,index) => {
+    productImage.forEach((image, index) => {
       formData.append("file", image?.file); // Append cropped images to formData
     });
 
@@ -182,12 +185,9 @@ const AddProduct = () => {
       if (Object.keys(formErrors).length === 0) {
         setSpinner(true);
 
-        const response = await axios.post(
-          "/admin/product",
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" }          }
-        );
+        const response = await axios.post("/admin/product", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         setSpinner(false);
 
         Toast.fire({ icon: "success", title: `${response.data.message}` });
@@ -220,6 +220,7 @@ const AddProduct = () => {
           </label>
           {message.name && <p className="text-red-600">{message.name}</p>}
         </div>
+
         <div>
           <label className="flex items-center">
             Category:
@@ -252,11 +253,12 @@ const AddProduct = () => {
               onChange={(e) => setBrand(e.target.value)}
             >
               {brands.length > 0 ? (
-                brands.map((brand) => (<>
-                  <option key={brand._id} value={brand.name}>
-                    {brand.name}
-                  </option>
-                </>
+                brands.map((brand) => (
+                  <>
+                    <option key={brand._id} value={brand.name}>
+                      {brand.name}
+                    </option>
+                  </>
                 ))
               ) : (
                 <option value="">No Brands were added</option>
@@ -318,6 +320,20 @@ const AddProduct = () => {
           </label>
           {message.regularPrice && (
             <p className="text-red-600">{message.regularPrice}</p>
+          )}
+        </div>
+        <div>
+          <label className="flex items-center">
+            Discount offer:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={offerPrice}
+              onChange={(e) => setOfferPrice(e.target.value)}
+            />
+          </label>
+          {message.offerPrice && (
+            <p className="text-red-600">{message.offerPrice}</p>
           )}
         </div>
         <div>

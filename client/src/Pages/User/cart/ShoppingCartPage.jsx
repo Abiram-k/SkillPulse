@@ -12,6 +12,7 @@ import AlertDialogueButton from "@/Components/AlertDialogueButton";
 import { CouponPopup } from "@/Components/CouponPopup";
 import { Button } from "@/Components/ui/button";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { Alert } from "@/Components/ui/alert";
 
 const ShoppingCartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -27,6 +28,7 @@ const ShoppingCartPage = () => {
   const [minPurchaseAmount, setMinPurchaseAmount] = useState(null);
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
+  const [isDelete, setIsDelete] = useState(false);
   console.log(user);
   useEffect(() => {
     setCouponMessage("");
@@ -104,7 +106,6 @@ const ShoppingCartPage = () => {
     if (item) {
       const newQuantity = item.quantity + value;
       const availableQuantity = item.product.units;
-
       if (newQuantity >= 1) {
         if (newQuantity <= 5) {
           if (newQuantity <= availableQuantity || value == -1) {
@@ -149,22 +150,22 @@ const ShoppingCartPage = () => {
     }
   };
 
-  const handleCouponDelete = async () => {
-    try {
-      const response = await axios.patch(`/cartCouponRemove/${user._id}`);
-      setTrigger((prev) => prev + 1);
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
-    } catch (error) {
-      console.log(error);
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data.message}`,
-      });
-    }
-  };
+  // const handleCouponDelete = async () => {
+  //   try {
+  //     const response = await axios.patch(`/cartCouponRemove/${user._id}`);
+  //     setTrigger((prev) => prev + 1);
+  //     Toast.fire({
+  //       icon: "success",
+  //       title: `${response.data.message}`,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //     Toast.fire({
+  //       icon: "error",
+  //       title: `${error?.response?.data.message}`,
+  //     });
+  //   }
+  // };
   const totalPrice = () => {
     return cartItems[0]?.products.reduce(
       (acc, item) => acc + item.product?.salesPrice * item.quantity,
@@ -255,18 +256,15 @@ const ShoppingCartPage = () => {
                       {item?.product?.units < 0 && "Out of stock"}{" "}
                     </p>
                     <div className="flex gap-2">
-                      <p className="text-xl mt-2">₹ {item.offeredPrice.toFixed(0)}</p>
+                      <p className="text-xl mt-2">
+                        ₹ {item.offeredPrice.toFixed(0)}
+                      </p>
                       {cartItems[0].appliedCoupon &&
                         parseFloat(item.totalPrice - item.offeredPrice) > 0 && (
                           <>
                             <p className="text-xl mt-2 line-through text-gray-400">
                               ₹{item?.product?.salesPrice * item?.quantity}
                             </p>
-                            {/* 
-                            <p className="text-xl mt-2  text-green-400">
-                              -₹
-                              {item.totalPrice - item.offeredPrice}
-                            </p> */}
                           </>
                         )}
                     </div>
@@ -276,6 +274,7 @@ const ShoppingCartPage = () => {
                       <button
                         onClick={() => updateQuantity(item?.product._id, -1)}
                         className="bg-gray-800 px-3 py-1 rounded"
+                        disabled={item.quantity == 1}
                       >
                         -
                       </button>

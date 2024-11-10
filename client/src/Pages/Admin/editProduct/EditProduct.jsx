@@ -10,6 +10,7 @@ const EditProduct = () => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [offerPrice, setOfferPrice] = useState("");
   const [regularPrice, setRegularPrice] = useState("");
   const [salesPrice, setSalesPrice] = useState("");
   const [brand, setBrand] = useState("");
@@ -47,10 +48,15 @@ const EditProduct = () => {
     if (category.trim() === "") error.category = "Category is required *";
     if (description.trim() === "")
       error.description = "description is required *";
+
     if (String(regularPrice).trim() === "")
       error.regularPrice = "regularPrice is required *";
     else if (isNaN(regularPriceInt))
       error.regularPrice = "regular price must a number";
+
+    if (isNaN(offerPrice)) error.offerPrice = "offerPrice price must a number";
+    else if (offerPrice < 0 || offerPrice > 100)
+      error.offerPrice = "offerPrice must between 0% and 100%";
 
     if (String(salesPrice).trim() === "")
       error.salesPrice = "salesPrice is required *";
@@ -123,15 +129,11 @@ const EditProduct = () => {
     try {
       if (Object.keys(formErrors).length === 0) {
         setSpinner(true);
-        const response = await axios.put(
-          `/admin/product/${id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            }
-          }
-        );
+        const response = await axios.put(`/admin/product/${id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         // alert("hello");
         setSpinner(false);
 
@@ -242,6 +244,20 @@ const EditProduct = () => {
           </label>
           {message.regularPrice && (
             <p className="text-red-600">{message.regularPrice}</p>
+          )}
+        </div>
+        <div>
+          <label className="flex items-center">
+            Discount offer:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded w-full focus:outline-none"
+              value={offerPrice}
+              onChange={(e) => setOfferPrice(e.target.value)}
+            />
+          </label>
+          {message.offerPrice && (
+            <p className="text-red-600">{message.offerPrice}</p>
           )}
         </div>
         <div>

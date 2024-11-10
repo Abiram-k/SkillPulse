@@ -87,8 +87,8 @@ const userSchema = new mongoose.Schema({
             ref: "Coupon"
         },
         usedCount: {
-            type: String,
-            default: "0",
+            type: Number,
+            default: 0,
         }
     }],
     deliveryAddress: {

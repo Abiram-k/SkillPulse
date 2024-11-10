@@ -23,9 +23,11 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   offer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Offer',
-    required: false
+    type: Number,
+    required: false,
+    default: 0,
+    min: 0,
+    max: 100
   },
   ratings: {
     type: Number,
@@ -57,7 +59,7 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   brand: {
-    type: mongoose.Schema.Types.ObjectId ,
+    type: mongoose.Schema.Types.ObjectId,
     // type: String,
     ref: 'brand',
   }

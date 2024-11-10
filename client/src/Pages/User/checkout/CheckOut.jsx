@@ -66,10 +66,7 @@ const Checkout = () => {
       0
     );
 
-    calcs.totalPrice = checkoutItems[0].products.reduce(
-      (acc, item) => acc + item.quantity * item.product.salesPrice,
-      0
-    );
+    calcs.totalPrice = cartItems[0]?.totalDiscount;
 
     if (calcs?.totalPrice < 1000)
       calcs.deliveryCharge = Math.round((2 / 100) * calcs.totalPrice);
@@ -203,7 +200,8 @@ const Checkout = () => {
   const handlePlaceOrder = async () => {
     if (
       paymentMethod == "cod" &&
-      summary.checkoutTotal - checkoutItems[0]?.appliedCoupon?.couponAmount >=
+      summary.checkoutTotal >=
+        //  - checkoutItems[0]?.appliedCoupon?.couponAmount
         1000
     ) {
       Toast.fire({
@@ -213,8 +211,12 @@ const Checkout = () => {
       return;
     }
     try {
-      const response = await axios.post(`/order/${user._id}`, checkoutItems, {
-        params: { paymentMethod, totalAmount: summary.checkoutTotal },
+      const response = await axios.post(`/order/${user._id}`, cartItems, {
+        params: {
+          paymentMethod,
+          totalAmount: cartItems[0]?.totalDiscount,
+          appliedCoupon: cartItems[0]?.appliedCoupon._id,
+        },
       });
       setCheckoutComplete((prev) => !prev);
       localStorage.removeItem(`cart_${user._id}`);
@@ -434,7 +436,10 @@ const Checkout = () => {
                   " text-white px-8 py-3 rounded-md w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
                 }
                 onClick={handlePlaceOrder}
-                disabled={walletData.totalAmount < summary.checkoutTotal}
+                disabled={
+                  paymentMethod == "wallet" &&
+                  walletData.totalAmount < summary.checkoutTotal
+                }
               >
                 Place order
               </button>
@@ -499,7 +504,7 @@ const Checkout = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>
-                    {checkoutItems[0]?.products.reduce(
+                    {checkoutItems[0]?.products?.reduce(
                       (acc, item) => item.quantity + acc,
                       0
                     )}{" "}

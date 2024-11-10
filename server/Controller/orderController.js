@@ -4,6 +4,7 @@ const Orders = require('../models/orderModel');
 const User = require("../models/userModel");
 const Product = require('../models/productModel');
 const Wallet = require('../models/walletModel');
+const Coupon = require('../models/couponModel.');
 
 let orderCounter = 0;
 
@@ -23,8 +24,8 @@ const generateOrderDate = () => {
 
 exports.addOrder = async (req, res) => {
     try {
-        const { paymentMethod, totalAmount } = req.query;
-        console.log(paymentMethod, totalAmount)
+        const { paymentMethod, totalAmount, appliedCoupon } = req.query;
+        console.log(paymentMethod, totalAmount, appliedCoupon);
         const checkoutItems = req.body.map(item => {
             const { authUser, ...rest } = item;
             return rest;
@@ -34,6 +35,9 @@ exports.addOrder = async (req, res) => {
         const order = await Orders.findOne({ user: id });
         console.log(order);
         const user = await User.findById(id);
+        if (!user.appliedCoupons) {
+            user.appliedCoupons = [];
+        }
         const deliveryAddressId = user.deliveryAddress;
         if (!deliveryAddressId)
             return res.status(400).json({ message: "Add a delivery Address" })
@@ -42,11 +46,7 @@ exports.addOrder = async (req, res) => {
         console.log(address);
 
         let orderItems = [];
-        // let totalAmount = 0;
         let totalQuantity = 0;
-
-        // this is for to get check out totalAmount
-        // const cart = Cart.findOne({ user: id });
 
         for (const item of checkoutItems[0].products) {
             try {
@@ -79,7 +79,6 @@ exports.addOrder = async (req, res) => {
                 } else {
                     orderItems.push(orderItem);
                 }
-
                 // totalAmount += orderItem.price;
                 totalQuantity += item.quantity;
                 await Product.findByIdAndUpdate(item.product._id, { $inc: { units: -item.quantity } });
@@ -96,16 +95,38 @@ exports.addOrder = async (req, res) => {
             orderItems,
             totalAmount,
             totalQuantity,
-            address
+            address,
+            appliedCoupon
         };
 
         const newOrder = new Orders(currentOrderData);
-        newOrder.save()
+
+        const coupon = await Coupon.findById(appliedCoupon);
+        if (!coupon) {
+            cosole.log("No Coupon founded")
+            // return res.status(404).json({ message: "Coupon not found" });
+        }
+        if (appliedCoupon) {
+            const couponIndex = user.appliedCoupons.findIndex((c) => c.coupon.toString() == appliedCoupon.toString());
+            if (couponIndex === -1) {
+                user.appliedCoupons.push({ coupon: appliedCoupon, usedCount: 1 });
+            } else {
+                const userCoupon = user.appliedCoupons[couponIndex];
+                if (userCoupon.usedCount >= coupon.perUserLimit || coupon.totalLimit <= 0) {
+                    return res.status(402).json({ message: "Coupon is unavailable" });
+                }
+                userCoupon.usedCount += 1;
+                coupon.totalLimit -= 1;
+            }
+        }
+        await coupon.save();
+        await user.save();
+        await newOrder.save()
             .then(async order => {
                 const result = await Cart.deleteOne({ user: id });
 
                 if (result.deletedCount == 1)
-                    console.log("order placed", order);
+                    console.log("order placed");
                 else
                     console.log("Cart not found while droping")
             })
