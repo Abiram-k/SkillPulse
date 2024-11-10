@@ -26,8 +26,10 @@ const ShoppingCartPage = () => {
   const [selectedCoupons, setSelectedCoupons] = useState("");
   const [minPurchaseAmount, setMinPurchaseAmount] = useState(null);
   const [couponCode, setCouponCode] = useState("");
+  const [couponMessage, setCouponMessage] = useState("");
   console.log(user);
   useEffect(() => {
+    setCouponMessage("");
     (async () => {
       try {
         const response = await axios.get(`/cart/${user._id}`);
@@ -114,6 +116,7 @@ const ShoppingCartPage = () => {
               );
               setTrigger((t) => t + 1);
             } catch (error) {
+              setCouponMessage(error?.response.data?.couponMessage);
               console.log(error);
             }
           } else {
@@ -193,10 +196,11 @@ const ShoppingCartPage = () => {
   };
 
   const offerPrice = (couponAmount = 0, couponType) => {
-    const totalPrice = cartItems[0]?.products.reduce(
-      (acc, item) => acc + item.offeredPrice,
-      0
-    );
+    const totalPrice = Math.abs(cartItems[0]?.totalDiscount);
+    // const totalPrice = cartItems[0]?.products.reduce(
+    //   (acc, item) => acc + item.offeredPrice,
+    //   0
+    // );
     const gstRate = 18;
     const total =
       totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
@@ -246,22 +250,23 @@ const ShoppingCartPage = () => {
                     <p className="text-md mt-2">
                       {item?.product?.productDescription}
                     </p>
-                    <p className="text-md mt-2">
-                      available stock : {item?.product?.units}
+
+                    <p className="text-md mt-2 text-orange-600">
+                      {item?.product?.units < 0 && "Out of stock"}{" "}
                     </p>
                     <div className="flex gap-2">
-                      <p className="text-xl mt-2">₹ {item.offeredPrice}</p>
+                      <p className="text-xl mt-2">₹ {item.offeredPrice.toFixed(0)}</p>
                       {cartItems[0].appliedCoupon &&
                         parseFloat(item.totalPrice - item.offeredPrice) > 0 && (
                           <>
                             <p className="text-xl mt-2 line-through text-gray-400">
                               ₹{item?.product?.salesPrice * item?.quantity}
                             </p>
-
+                            {/* 
                             <p className="text-xl mt-2  text-green-400">
                               -₹
                               {item.totalPrice - item.offeredPrice}
-                            </p>
+                            </p> */}
                           </>
                         )}
                     </div>
@@ -293,7 +298,9 @@ const ShoppingCartPage = () => {
                 </div>
               ))}
             </div>
-
+            {couponMessage && (
+              <p className="text-orange-600">{couponMessage}</p>
+            )}
             <div className="flex lg:gap-3 gap-1">
               <button
                 to={"checkout"}
@@ -312,6 +319,99 @@ const ShoppingCartPage = () => {
           </div>
 
           <div className="w-full md:w-80 ">
+            <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
+              Checkout Details
+            </div>
+            <div className="bg-pink-50 text-black p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span>
+                    {cartItems[0]?.products.reduce(
+                      (acc, item) => item.quantity + acc,
+                      0
+                    )}{" "}
+                    Items
+                  </span>
+                  <span>{totalPrice()} ₹</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Charges</span>
+                  <span className="text-green-600">
+                    {totalPrice() > 1000
+                      ? "Free"
+                      : calculateDeliveryCharge() + " ₹"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>GST Amount (18%)</span>
+                  <span>{calculateGST(18)} ₹</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Discount 0%</span>
+                  <span>0 ₹</span>
+                </div>
+                {cartItems[0]?.appliedCoupon && (
+                  <div className="flex justify-between">
+                    <div className="flex gap-2 items-center">
+                      <span>
+                        {cartItems[0].appliedCoupon.couponCode} -(Coupon)
+                      </span>
+                    </div>
+                    <span className="text-green-600">
+                      {cartItems[0].appliedCoupon.couponType == "Amount"
+                        ? "-" + cartItems[0]?.appliedCoupon.couponAmount
+                        : cartItems[0].appliedCoupon.couponAmount + "%"}
+                    </span>
+                  </div>
+                )}
+                {cartItems[0]?.appliedCoupon ? (
+                  <>
+                    <div className="flex justify-between font-bold border-gray-200">
+                      <span>Sub Total</span>
+                      <span>{cartTotalPrice().toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-mono">Saved Amount </span>{" "}
+                      <span className="text-green-500">
+                        -
+                        {cartTotalPrice() -
+                          offerPrice(
+                            cartItems[0]?.appliedCoupon?.couponAmount,
+                            cartItems[0]?.appliedCoupon?.couponType
+                          )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+                      <span>Payable Amount</span>
+                      <span>
+                        {offerPrice(
+                          cartItems[0]?.appliedCoupon?.couponAmount,
+                          cartItems[0]?.appliedCoupon?.couponType
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between font-bold border-gray-200">
+                    <span>Payable Amount</span>
+                    <span>{cartTotalPrice()}</span>
+                  </div>
+                )}
+              </div>
+              {cartItems[0]?.appliedCoupon && (
+                <>
+                  <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded-lg mt-6  flex items-center justify-around cursor-default">
+                    <div className="flex lg:gap-1">
+                      Coupon Applied
+                      <Check className="text-xs" />{" "}
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          {/* <div className="w-full md:w-80 ">
             <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
               Checkout Details
             </div>
@@ -425,7 +525,7 @@ const ShoppingCartPage = () => {
                 )}
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
     </div>

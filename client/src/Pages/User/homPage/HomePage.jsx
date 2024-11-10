@@ -21,7 +21,6 @@ const HomePage = () => {
   const [isBlocked, setIsBlocked] = useState(false);
   const [addedToWishlist, setAddedToWishlist] = useState(false);
 
-  const [trigger1, setTrigger1] = useState(0);
   const [trigger, setTrigger] = useState(0);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -75,24 +74,9 @@ const HomePage = () => {
   const handleAddToWishList = async (product) => {
     try {
       await addToWishList(product, user, dispatch);
-      //   const response = await axios.post("/wishList", {
-      //     user: user._id,
-      //     product,
-      //   });
       setTrigger((prev) => prev + 1);
-      //   Toast.fire({
-      //     icon: "success",
-      //     title: `${response.data.message}`,
-      //   });
     } catch (error) {
-      //   console.log(error);
-      //   if (error?.response.data.isBlocked) {
-      //     dispatch(logoutUser());
-      //   }
-      //   Toast.fire({
-      //     icon: "error",
-      //     title: `${error?.response?.data.message}`,
-      //   });
+      console.log(error);
     }
   };
 
@@ -100,27 +84,8 @@ const HomePage = () => {
     try {
       await removeFromWishlist(product, user, dispatch);
       setTrigger((prev) => prev + 1);
-      // const response = await axios.delete(
-      //   `/wishList?user=${user._id}&product=${product}`
-      // );
-      // if (response.status == 200) {
-      //   Toast.fire({
-      //     icon: "success",
-      //     title: `${response.data.message}`,
-      //   });
-      //   dispatch(removefromWishlist(product));
-      //   setTrigger((prev) => prev + 2);
-      //   window.location.reload();
-      // }
     } catch (error) {
-      // console.log(error);
-      // if (error?.response.data.isBlocked) {
-      //   dispatch(logoutUser());
-      // }
-      // Toast.fire({
-      //   icon: "error",
-      //   title: `${error?.response?.data.message}`,
-      // });
+      console.log(error);
     }
   };
   useEffect(() => {

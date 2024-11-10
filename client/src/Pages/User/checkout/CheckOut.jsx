@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ChangeAddress } from "@/Components/ChangeAddress";
-import { ShoppingCart } from "lucide-react";
+import { Check, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Toast } from "@/Components/Toast";
 import { logoutUser } from "@/redux/userSlice";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { CouponPopup } from "@/Components/CouponPopup";
+import { Axios } from "axios";
+import axiosInstance from "@/axiosIntercepters/AxiosInstance";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
@@ -20,17 +23,26 @@ const Checkout = () => {
   const [summary, setSummary] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("Razorpay");
   const [walletData, setWalletData] = useState({});
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedCoupons, setSelectedCoupon] = useState("");
+  const [maxDiscount, setMaxDiscount] = useState("");
+  const [minPurchaseAmount, setMinPurchaseAmount] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [cartItems, setCartItems] = useState([]);
+  const [trigger, setTrigger] = useState(0);
 
+  const openPopup = () => setIsPopupOpen(true);
+  const closePopup = () => setIsPopupOpen(false);
   const totalPrice = () => {
-    return checkoutItems[0]?.products.reduce(
-      (acc, item) => acc + item.product.salesPrice * item.quantity,
+    return cartItems[0]?.products.reduce(
+      (acc, item) => acc + item.product?.salesPrice * item.quantity,
       0
     );
   };
   const calculateDeliveryCharge = () => {
     if (totalPrice() < 1000) return Math.round((2 / 100) * totalPrice());
+    else return 0;
   };
-
   const calculateGST = (gstRate) => {
     return Math.round(
       (gstRate / 100) *
@@ -76,7 +88,74 @@ const Checkout = () => {
     return calcs;
   };
 
+  const offerPrice = (couponAmount = 0, couponType) => {
+    const totalPrice = Math.abs(cartItems[0]?.totalDiscount);
+    // const totalPrice = cartItems[0]?.products.reduce(
+    //   (acc, item) => acc + item.offeredPrice,
+    //   0
+    // );
+    const gstRate = 18;
+    const total =
+      totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
+    return total;
+  };
+
+  const handleCouponDelete = async () => {
+    try {
+      const response = await axiosInstance.patch(
+        `/cartCouponRemove/${user._id}`
+      );
+      setTrigger((prev) => prev + 1);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+    } catch (error) {
+      console.log(error);
+      Toast.fire({
+        icon: "error",
+        title: `${error?.response?.data.message}`,
+      });
+    }
+  };
+  const handleGetSelectedCoupons = async (
+    selectedCoupon,
+    maxDiscount,
+    minPurchaseAmount,
+    couponCode
+  ) => {
+    setSelectedCoupon(selectedCoupon);
+    setMaxDiscount(maxDiscount);
+    setMinPurchaseAmount(minPurchaseAmount);
+    setCouponCode(couponCode);
+    try {
+      const response = await axios.patch(
+        `/cartCouponApply?id=${user._id}&couponId=${selectedCoupon}`
+      );
+      setTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(`/cart/${user._id}`);
+        setCartItems(response.data.cartItems);
+
+        console.log("Cart itmes : ", response.data.cartItems);
+      } catch (error) {
+        if (error?.response.data.isBlocked) {
+          dispatch(logoutUser());
+        }
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: `${error?.response?.data.message}`,
+        });
+      }
+    })();
+
     (async () => {
       try {
         const response = await axios.get(`/wallet/${user._id}`);
@@ -92,7 +171,7 @@ const Checkout = () => {
       setSummary(calculations());
       return;
     }
-  }, []);
+  }, [trigger]);
 
   useEffect(() => {
     (async () => {
@@ -171,8 +250,8 @@ const Checkout = () => {
               </p>
             </div>
 
-            {checkoutItems[0].products.length > 0 ? (
-              checkoutItems[0].products.map((item) => (
+            {cartItems[0]?.products.length > 0 ? (
+              cartItems[0].products.map((item) => (
                 <div
                   className="flex items-start space-x-4 mb-8"
                   key={item.product._id}
@@ -187,17 +266,19 @@ const Checkout = () => {
                   />
                   <div>
                     <h3 className="text-lg font-semibold">
-                      {item.productName ||
+                      {item.product.productName ||
                         "Pro Based Ear buds, Vortex-continent X-R"}
                     </h3>
                     <p className="text-gray-400">
-                      {item.productDescription ||
+                      {item.product.productDescription ||
                         "High bass with noise cancellation"}
                     </p>
                     <div className="flex space-x-2">
-                      <p className="text-gray-100">{item.salesPrice || 999}</p>
+                      <p className="text-gray-100">
+                        {parseFloat(item.offeredPrice).toFixed(0) || 999}
+                      </p>
                       <p className="text-gray-500 line-through">
-                        {item.regularPrice || 1999}
+                        {item?.totalPrice || 1999}
                       </p>
                     </div>
                     <div className="mt-2 flex items-center">
@@ -360,7 +441,7 @@ const Checkout = () => {
             </div>
           </div>
 
-          <div className="w-full md:w-80 mt-6 md:mt-0">
+          {/* <div className="w-full md:w-80 mt-6 md:mt-0">
             <div className="bg-red-700 text-white p-4 rounded-lg mb-4">
               Checkout Details
             </div>
@@ -407,6 +488,127 @@ const Checkout = () => {
             <div className="bg-red-600 p-4 rounded-lg mt-4 text-center flex flex-col items-center">
               <ShoppingCart size={40} />
               <p className="text-white font-bold mt-2">Offers Only For Today</p>
+            </div>
+          </div> */}
+          <div className="w-full md:w-80 ">
+            <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
+              Checkout Details
+            </div>
+            <div className="bg-pink-50 text-black p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span>
+                    {checkoutItems[0]?.products.reduce(
+                      (acc, item) => item.quantity + acc,
+                      0
+                    )}{" "}
+                    Items
+                  </span>
+                  <span>{totalPrice()} ₹</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Charges</span>
+                  <span className="text-green-600">
+                    {totalPrice() > 1000
+                      ? "Free"
+                      : calculateDeliveryCharge() + " ₹"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>GST Amount (18%)</span>
+                  <span>{calculateGST(18)} ₹</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Discount 0%</span>
+                  <span>0 ₹</span>
+                </div>
+                {cartItems[0]?.appliedCoupon && (
+                  <div className="flex justify-between">
+                    <div className="flex gap-2 items-center">
+                      <span>
+                        {cartItems[0].appliedCoupon.couponCode} -(Coupon)
+                      </span>
+                    </div>
+                    <span className="text-green-600">
+                      {cartItems[0].appliedCoupon.couponType == "Amount"
+                        ? "-" + cartItems[0]?.appliedCoupon.couponAmount
+                        : cartItems[0].appliedCoupon.couponAmount + "%"}
+                    </span>
+                  </div>
+                )}
+                {cartItems[0]?.appliedCoupon ? (
+                  <>
+                    <div className="flex justify-between font-bold border-gray-200">
+                      <span>Sub Total</span>
+                      <span>{cartTotalPrice()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-mono">Saved Amount </span>{" "}
+                      <span className="text-green-500">
+                        -
+                        {
+                          // cartTotalPrice() -
+                          //   offerPrice(
+                          //     cartItems[0]?.appliedCoupon?.couponAmount,
+                          //     cartItems[0]?.appliedCoupon?.couponType
+                          //   )
+                          parseFloat(
+                            cartItems[0]?.grandTotal -
+                              cartItems[0]?.totalDiscount
+                          ).toFixed(2)
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+                      <span>Payable Amount</span>
+                      <span>
+                        {offerPrice(
+                          cartItems[0]?.appliedCoupon?.couponAmount,
+                          cartItems[0]?.appliedCoupon?.couponType
+                        )}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between font-bold border-gray-200">
+                    <span>Payable Amount</span>
+                    <span>{cartTotalPrice()}</span>
+                  </div>
+                )}
+              </div>
+              {cartItems[0]?.appliedCoupon ? (
+                <>
+                  <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded-lg mt-6  flex items-center justify-around cursor-default">
+                    <div className="flex lg:gap-1">
+                      Coupon Applied
+                      <Check className="text-xs" />{" "}
+                    </div>
+                    <i
+                      className="fas fa-trash cursor-pointer text-red-500 "
+                      onClick={() => handleCouponDelete(selectedCoupons)}
+                    ></i>
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700"
+                  onClick={openPopup}
+                >
+                  APPLY Coupon
+                </button>
+              )}
+              <div className="relative">
+                {isPopupOpen && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <CouponPopup
+                      onClose={closePopup}
+                      getCoupons={handleGetSelectedCoupons}
+                      totalAmount={totalPrice()}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

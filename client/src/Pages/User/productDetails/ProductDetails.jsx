@@ -303,7 +303,7 @@ const ProductDetails = () => {
                   key={product._id}
                   className="bg-gray-900 rounded-lg p-4 relative"
                 >
-                  <Heart className="absolute top-4 right-4 w-6 h-6" />
+                
                   <img
                     src={product.productImage[0]}
                     alt={product.productName}
