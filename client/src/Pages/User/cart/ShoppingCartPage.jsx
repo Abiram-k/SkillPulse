@@ -205,6 +205,7 @@ const ShoppingCartPage = () => {
     const gstRate = 18;
     const total =
       totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
+    // if (isNaN(total)) return 0;
     return total;
   };
   const handleGetSelectedCoupons = async (

@@ -38,4 +38,5 @@ router.get("/coupon", adminController.getCoupons)
 router.post("/coupon", adminController.addCoupons)
 router.delete("/coupon/:id", adminController.deleteCoupon) 
 
+router.get("/recentSales",adminController.getAllOrders)
 module.exports = router; 

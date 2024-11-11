@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import "./manageOrder.css";
 import { Toast } from "@/Components/Toast";
 import { logoutUser } from "@/redux/userSlice";
+import AlertDialogueButton from "@/Components/AlertDialogueButton";
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -134,7 +135,7 @@ const ManageOrders = () => {
                     <div>Order Date: {orders.orderDate}</div>
                     <div>Order Number: {orders.orderId}</div>
                     <div>Ship To: {orders.address.firstName}</div>
-                    <div>Total: ₹ {orders.totalAmount}</div>
+                    <div>Total: ₹ {orders.totalDiscount}</div>
                   </div>
                   <div className="flex flex-col lg:flex-row gap-4">
                     <img
@@ -175,20 +176,26 @@ const ManageOrders = () => {
                       item.productStatus !== "delivered" &&
                       item.productStatus !== "cancelled" &&
                       item.productStatus !== "returned" && (
-                        <button
-                          className="bg-red-500 p-2 rounded text-xs lg:text-sm"
-                          onClick={() => handleCancelOrder(item)}
-                        >
-                          Cancel
-                        </button>
+                        // <button
+                        //   className="bg-red-500 p-2 rounded text-xs lg:text-sm"
+                        // >
+                        //   Cancel
+                        // </button>
+
+                        <div className="flex gap-2 justify-center align-middle bg-red-500 p-3 rounded">
+                          <AlertDialogueButton
+                            name="Cancel"
+                            onClick={() => handleCancelOrder(item)}
+                          />
+                        </div>
                       )}
                     {item.productStatus === "delivered" && (
-                      <button
-                        className="bg-red-500 p-2 rounded text-xs lg:text-sm"
-                        onClick={() => handleReturnOrder(item)}
-                      >
-                        Return
-                      </button>
+                      <div className="flex gap-2 justify-center align-middle bg-red-500 p-3 rounded">
+                        <AlertDialogueButton
+                          name="Return"
+                          onClick={() => handleReturnOrder(item)}
+                        />
+                      </div>
                     )}
                     <button className="bg-gray-700 p-2 rounded text-xs lg:text-sm">
                       Invoice

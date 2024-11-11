@@ -61,11 +61,11 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white text-black transition-transform transform ${
+        className={`fixed top-0 left-0  w-64 bg-white text-black transition-transform transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:block`}
       >
-        <div className="p-4 bg-slate-300">
+        <div className="p-4 bg-slate-300 h-screen">
           <button className="text-2xl font-bold mb-8">SkillPulse</button>
           <nav className="lg:space-y-12 flex flex-col ">
             <div className="flex flex-col lg:space-y-3">
@@ -83,7 +83,7 @@ export default function Dashboard() {
               <NavItem icon={CreditCard} text="Payments" redirect="payments" />
               <NavItem icon={ShoppingBag} text="Category" redirect="category" />
               <NavItem icon={Bandage} text="Brand" redirect="brand" />
-              <NavItem icon={Percent} text="Offers" redirect="offers" />
+              {/* <NavItem icon={Percent} text="Offers" redirect="offers" /> */}
             </div>
             <div>
               <NavItem icon={Settings} text="Settings" redirect="settings" />

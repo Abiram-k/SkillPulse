@@ -215,7 +215,7 @@ const Checkout = () => {
         params: {
           paymentMethod,
           totalAmount: cartItems[0]?.totalDiscount,
-          appliedCoupon: cartItems[0]?.appliedCoupon._id,
+          appliedCoupon: cartItems[0]?.appliedCoupon?._id || null,
         },
       });
       setCheckoutComplete((prev) => !prev);

@@ -36,6 +36,7 @@ const EditProduct = () => {
     setBrand(data?.brand?.name || "not fetched");
     setUnits(data?.units || "");
     setProductImage(data?.productImage || []);
+    setOfferPrice(data?.offer);
     // console.log("BRANDD DATAA ", data?.brand)
   }, [data]);
 
@@ -58,13 +59,13 @@ const EditProduct = () => {
     else if (offerPrice < 0 || offerPrice > 100)
       error.offerPrice = "offerPrice must between 0% and 100%";
 
-    if (String(salesPrice).trim() === "")
-      error.salesPrice = "salesPrice is required *";
-    else if (regularPrice < salesPrice)
-      error.salesPrice =
-        "Sales price must be less than or equal to regular price *";
-    else if (isNaN(salesPriceInt))
-      error.salesPrice = "Sales price must a number";
+    // if (String(salesPrice).trim() === "")
+    //   error.salesPrice = "salesPrice is required *";
+    // else if (regularPrice < salesPrice)
+    //   error.salesPrice =
+    //     "Sales price must be less than or equal to regular price *";
+    // else if (isNaN(salesPriceInt))
+    //   error.salesPrice = "Sales price must a number";
 
     if (brand.trim() === "") error.brand = "brand is required *";
     if (String(units).trim() === "") error.units = "units is required *";
@@ -117,7 +118,7 @@ const EditProduct = () => {
     formData.append("productName", name);
     formData.append("productDescription", description);
     formData.append("category", category);
-    formData.append("salesPrice", salesPrice);
+    formData.append("offer", offerPrice);
     formData.append("regularPrice", regularPrice);
     formData.append("brand", brand);
     formData.append("units", units);
@@ -206,7 +207,7 @@ const EditProduct = () => {
             <p className="text-red-600">{message.description}</p>
           )}
         </div>
-        <div>
+        {/* <div>
           <label className="flex items-center">
             Sale Price :
             <input
@@ -214,12 +215,13 @@ const EditProduct = () => {
               className="ml-2 p-2 border rounded w-full focus:outline-none"
               value={salesPrice}
               onChange={(e) => setSalesPrice(e.target.value)}
+              disabled
             />
           </label>
           {message.salesPrice && (
             <p className="text-red-600">{message.salesPrice}</p>
           )}
-        </div>
+        </div> */}
         <div>
           <label className="flex items-center">
             Brand:

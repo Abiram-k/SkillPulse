@@ -235,7 +235,7 @@ const ProductDetails = () => {
                 </h2>
                 <div className="flex items-baseline space-x-4">
                   <span className="text-2xl font-bold text-green-500">
-                    ₹{product.salesPrice}
+                    ₹{product.salesPrice.toFixed(0)}
                   </span>
                   <span className="text-gray-400 line-through">
                     ₹{product.regularPrice}
@@ -303,7 +303,6 @@ const ProductDetails = () => {
                   key={product._id}
                   className="bg-gray-900 rounded-lg p-4 relative"
                 >
-                
                   <img
                     src={product.productImage[0]}
                     alt={product.productName}
@@ -316,12 +315,14 @@ const ProductDetails = () => {
                     </h3>
                     <p className="font-semibold">{product.productName}</p>
                     <div className="flex items-baseline space-x-2">
-                      <span className="font-bold">{product.salesPrice}</span>
+                      <span className="font-bold">
+                        {product.salesPrice.toFixed(0)}
+                      </span>
                       <span className="text-sm text-gray-400 line-through">
                         {product.regularPrice}
                       </span>
                       <span className="text-green-500 text-sm">
-                        {product.offer || "99% off"}
+                        {product.offer + "% off" || "99% off"}
                       </span>
                     </div>
                     {product.salesPrice > 1000 && (

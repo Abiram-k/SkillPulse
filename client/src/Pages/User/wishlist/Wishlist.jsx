@@ -6,22 +6,23 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToWishList, removeFromWishlist } from "./addRemoveWishlit";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
+import { Link } from "react-router-dom";
 
 const Wishlist = () => {
-  const [wishlist, setwishlist] = useState({});
-  const [trigger, setTrigger] = useState(0);
+  const [wishlist, setWishlist] = useState({});
   const user = useSelector((state) => state.users.user);
   const [cartProduct, setCartProduct] = useState(
     JSON.parse(localStorage.getItem(`cart_${user._id}`)) || []
   );
   const dispatch = useDispatch();
 
+  const [trigger, setTrigger] = useState(0);
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(`wishlist?user=${user._id}`);
         console.log(response.data.wishlist[0]);
-        setwishlist(response.data.wishlist);
+        setWishlist(response.data.wishlist);
         console.log("Wishlist Items : ", response.data.wishlist);
       } catch (error) {
         if (error?.response.data.isBlocked) {
@@ -43,6 +44,7 @@ const Wishlist = () => {
       console.log(error);
     }
   };
+
   const handleAddToCart = async (id) => {
     try {
       const response = await axios.post(
@@ -136,9 +138,9 @@ const Wishlist = () => {
                     Add to cart
                   </button>
                 ) : (
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-200">
+                  <Link to={"/user/cart"} className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-200">
                     Go to Cart
-                  </button>
+                  </Link>
                 )}
                 <div className="flex gap-2 justify-center align-middle">
                   <AlertDialogueButton

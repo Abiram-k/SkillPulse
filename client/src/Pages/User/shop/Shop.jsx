@@ -27,6 +27,7 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(8);
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [trigger, setTrigger] = useState(0);
   const user = useSelector((state) => state.users.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const Shop = () => {
   useEffect(() => {
     fetchProducts();
     fetchWishlist();
-  }, [filter]);
+  }, [filter, trigger]);
 
   const fetchProducts = async () => {
     try {
@@ -73,26 +74,11 @@ const Shop = () => {
   const currentProduct = products.slice(firstPostIndex, lastPostIndex);
 
   const handleAddToWishList = async (product) => {
+    setTrigger((prev) => prev + 1);
     try {
       await addToWishList(product, user, dispatch);
-      //   const response = await axios.post("/wishList", {
-      //     user: user._id,
-      //     product,
-      //   });
-      setTrigger((prev) => prev + 1);
-      //   Toast.fire({
-      //     icon: "success",
-      //     title: `${response.data.message}`,
-      //   });
     } catch (error) {
-      //   console.log(error);
-      //   if (error?.response.data.isBlocked) {
-      //     dispatch(logoutUser());
-      //   }
-      //   Toast.fire({
-      //     icon: "error",
-      //     title: `${error?.response?.data.message}`,
-      //   });
+      console.log(error);
     }
   };
 
@@ -100,27 +86,8 @@ const Shop = () => {
     try {
       await removeFromWishlist(product, user, dispatch);
       setTrigger((prev) => prev + 1);
-      // const response = await axios.delete(
-      //   `/wishList?user=${user._id}&product=${product}`
-      // );
-      // if (response.status == 200) {
-      //   Toast.fire({
-      //     icon: "success",
-      //     title: `${response.data.message}`,
-      //   });
-      //   dispatch(removefromWishlist(product));
-      //   setTrigger((prev) => prev + 2);
-      //   window.location.reload();
-      // }
     } catch (error) {
-      // console.log(error);
-      // if (error?.response.data.isBlocked) {
-      //   dispatch(logoutUser());
-      // }
-      // Toast.fire({
-      //   icon: "error",
-      //   title: `${error?.response?.data.message}`,
-      // });
+      console.log(error);
     }
   };
   const fetchWishlist = async () => {
@@ -147,10 +114,10 @@ const Shop = () => {
       if (error?.response?.data.isBlocked) {
         dispatch(logoutUser());
       }
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data.message}`,
-      });
+      // Toast.fire({
+      //   icon: "error",
+      //   title: `${error?.response?.data.message}`,
+      // });
     }
   };
   return (
@@ -200,13 +167,13 @@ const Shop = () => {
 
         {/* Discount Offers Filter */}
         <div>
-          <p className="font-bold text-2xl mb-4">Discount Offers</p>
+          <p className="font-bold text-2xl mb-4">__________</p>
           <select
             className="w-full p-2 bg-gray-800 text-white rounded font-mono"
             defaultValue=""
           >
             <option value="" disabled>
-              Select Discount Offer
+              
             </option>
             <option value="10-20">10% - 20%</option>
             <option value="20-30">20% - 30%</option>
@@ -277,14 +244,14 @@ const Shop = () => {
                   onClick={() => goToDetails(product)}
                 />
 
-                <Heart
+                {/* <Heart
                   className="absolute top-3 right-3 w-7 h-7 text-gray-300 hover:text-red-500 transition-colors cursor-pointer"
                   onClick={() =>
                     addedToWishlist
                       ? handleRemoveFromWishlist()
                       : handleAddToWishlist()
                   }
-                />
+                /> */}
 
                 <div className="p-3 text-center">
                   <p className="text-sm font-medium text-gray-300 truncate">
@@ -296,9 +263,10 @@ const Shop = () => {
                     <span className="line-through text-gray-500 ml-2">
                       ₹{product.regularPrice}
                     </span>
-                    <span className="text-red-500 ml-2 text-xs">20% off</span>
+                    {product?.offer > 0 && 
+                    <span className="text-red-500 ml-2 text-xs">{product.offer}% off</span>
+                    }
                   </p>
-
                   {wishlistItems.includes(product._id) ? (
                     <Heart
                       className="absolute top-3 right-3 w-7 h-7 fill-red-600 text-red-600 cursor-pointer"

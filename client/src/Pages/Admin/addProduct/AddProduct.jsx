@@ -50,13 +50,6 @@ const AddProduct = () => {
     else if (offerPrice < 0 || offerPrice > 100)
       error.offerPrice = "offerPrice must between 0% and 100%";
 
-    if (salesPrice.trim() === "") error.salesPrice = "salesPrice is required *";
-    else if (regularPrice < salesPrice)
-      error.salesPrice =
-        "Sales price must be less than or equal to regular price *";
-    else if (isNaN(salesPriceInt))
-      error.salesPrice = "Sales price must a number";
-
     if (brand.trim() === "") error.brand = "brand is required *";
     if (units.trim() === "") error.units = "units is required *";
     else if (isNaN(unitsInt)) error.units = "Units  must a number";
@@ -162,17 +155,16 @@ const AddProduct = () => {
 
   // Handle adding the product with images
   const handleAddProduct = async (e) => {
-    console.log("BRAASDGJASJEFGJG", brand);
-    console.log("cartergsdgdgf", category);
     e.preventDefault();
     const formErrors = validateForm();
+    console.log(formErrors);
     setMessage(formErrors);
     console.log(productImage);
     const formData = new FormData();
     formData.append("productName", name);
     formData.append("productDescription", description);
     formData.append("category", category);
-    formData.append("salesPrice", salesPrice);
+    formData.append("offer", offerPrice);
     formData.append("regularPrice", regularPrice);
     formData.append("brand", brand);
     formData.append("units", units); // Add product details like name, price, etc.
@@ -281,7 +273,7 @@ const AddProduct = () => {
             <p className="text-red-600">{message.description}</p>
           )}
         </div>
-        <div>
+        {/* <div>
           <label className="flex items-center">
             Sale Price :
             <input
@@ -294,7 +286,7 @@ const AddProduct = () => {
           {message.salesPrice && (
             <p className="text-red-600">{message.salesPrice}</p>
           )}
-        </div>
+        </div> */}
         {/* <div>
           <label className="flex items-center">
             Brand:

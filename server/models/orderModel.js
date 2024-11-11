@@ -40,6 +40,10 @@ const OrderSchema = new mongoose.Schema({
             paymentMethod: {
                 type: String,
                 required: true
+            },
+            totalPrice: {
+                type: Number,
+                required: true,
             }
         }
     ],
@@ -49,6 +53,10 @@ const OrderSchema = new mongoose.Schema({
         default: null
     },
     totalAmount: {
+        type: Number,
+        required: true
+    },
+    totalDiscount: {
         type: Number,
         required: true
     },

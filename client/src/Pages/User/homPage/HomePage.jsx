@@ -250,7 +250,7 @@ const HomePage = () => {
                     </p>
 
                     <p className="text-sm font-bold text-green-400 mt-1">
-                      ₹{product.salesPrice}
+                      ₹{product.salesPrice.toFixed(0)}
                       <span className="line-through text-gray-500 ml-2">
                         ₹{product.regularPrice}
                       </span>

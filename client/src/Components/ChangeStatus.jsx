@@ -30,17 +30,18 @@ export const ChangeStatus = ({
   const handleChangeStatus = async () => {
     updatedState(updatedStatus);
     try {
-      const response = await axios.patch(
-        `/admin/status?id=${user?._id}`,
-        { orderId, productId, updatedStatus },
-      );
+      const response = await axios.patch(`/admin/status?id=${user?._id}`, {
+        orderId,
+        productId,
+        updatedStatus,
+      });
       console.log(response.data.message);
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,
       });
       setOpen(false);
-    } catch (error) { 
+    } catch (error) {
       console.log(error);
       setOpen(false);
       Toast.fire({
@@ -75,13 +76,18 @@ export const ChangeStatus = ({
               onChange={(e) => setUpdatedStatus(e.target.value)}
             >
               <option value="">----- Select status -----</option>
+
               <option value="processing">processing</option>
               <option value="shipped">shipped</option>
-              <option value="delivered">delivered</option>
+              {currentStatus !== "processing" ||
+                (currentStatus !== "delivered" && (
+                  <option value="delivered">delivered</option>
+                ))}
               <option value="cancelled">cancelled</option>
-              {currentStatus !== "returned" &&
-              <option value="returned">returned</option>
-              }
+              {currentStatus !== "returned" ||
+                (currentStatus !== "cancelled" && (
+                  <option value="returned">returned</option>
+                ))}
             </select>
           </div>
         </div>

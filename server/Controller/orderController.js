@@ -53,8 +53,9 @@ exports.addOrder = async (req, res) => {
                 const orderItem = {
                     product: item.product._id,
                     quantity: item.quantity,
-                    price: item.product.salesPrice * item.quantity,
-                    paymentMethod
+                    totalPrice: item.product.salesPrice * item.quantity,
+                    paymentMethod,
+                    price: item.offeredPrice
                 };
                 if (paymentMethod === "wallet") {
                     const wallet = await Wallet.findOne({ user: id });
@@ -68,7 +69,6 @@ exports.addOrder = async (req, res) => {
                             amount: -totalAmount,
                             description: "purchased product",
                             transactionId: `REF-${item.product._id
-                                // .toString().slice(0, 5)
                                 }-${Date.now()}`
                         }
                         wallet.transaction.push(walletData);
@@ -96,30 +96,32 @@ exports.addOrder = async (req, res) => {
             totalAmount,
             totalQuantity,
             address,
-            appliedCoupon
+            appliedCoupon,
+            totalDiscount: checkoutItems[0].totalDiscount
         };
 
         const newOrder = new Orders(currentOrderData);
 
         const coupon = await Coupon.findById(appliedCoupon);
         if (!coupon) {
-            cosole.log("No Coupon founded")
-            // return res.status(404).json({ message: "Coupon not found" });
+            console.log("No Coupon founded")
         }
-        if (appliedCoupon) {
-            const couponIndex = user.appliedCoupons.findIndex((c) => c.coupon.toString() == appliedCoupon.toString());
-            if (couponIndex === -1) {
-                user.appliedCoupons.push({ coupon: appliedCoupon, usedCount: 1 });
-            } else {
-                const userCoupon = user.appliedCoupons[couponIndex];
-                if (userCoupon.usedCount >= coupon.perUserLimit || coupon.totalLimit <= 0) {
-                    return res.status(402).json({ message: "Coupon is unavailable" });
+        else {
+            if (appliedCoupon) {
+                const couponIndex = user.appliedCoupons.findIndex((c) => c.coupon.toString() == appliedCoupon.toString());
+                if (couponIndex === -1) {
+                    user.appliedCoupons.push({ coupon: appliedCoupon, usedCount: 1 });
+                } else {
+                    const userCoupon = user.appliedCoupons[couponIndex];
+                    if (userCoupon.usedCount >= coupon.perUserLimit || coupon.totalLimit <= 0) {
+                        return res.status(402).json({ message: "Coupon is unavailable" });
+                    }
+                    userCoupon.usedCount += 1;
+                    coupon.totalLimit -= 1;
                 }
-                userCoupon.usedCount += 1;
-                coupon.totalLimit -= 1;
             }
+            await coupon.save();
         }
-        await coupon.save();
         await user.save();
         await newOrder.save()
             .then(async order => {
@@ -169,8 +171,11 @@ exports.cancelOrder = async (req, res) => {
             return res.status(400).json({ message: "Order not found" })
         }
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
+        if (orderIndex == -1)
+            console.log("Failed to find order")
         order.orderItems[orderIndex].productStatus = "cancelled";
-        const refundPrice = order.orderItems[orderIndex]?.product?.salesPrice * order.orderItems[orderIndex]?.quantity;
+        const refundPrice = order.orderItems[orderIndex]?.price;
+        console.log(refundPrice, "DSFADASFASf")
         await order.save();
         const walletData = {
             amount: refundPrice,
@@ -188,16 +193,29 @@ exports.cancelOrder = async (req, res) => {
         return res.status(500).json({ message: "Error occured while cancelling the order" })
     }
 }
+
 exports.returnOrder = async (req, res) => {
     try {
         const { id, itemId } = req.query;
         const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
 
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
+        if (orderIndex == -1)
+            console.log("Failed to find order")
         order.orderItems[orderIndex].productStatus = "returned";
         await order.save();
+        const refundPrice = order.orderItems[orderIndex]?.price;
+        const walletData = {
+            amount: refundPrice,
+            description: "Return Refund",
+            transactionId: `REF-${itemId}-${Date.now()}`
+        }
+        const wallet = await Wallet.findOneAndUpdate({ user: id }, { $push: { transaction: walletData }, $inc: { totalAmount: parseFloat(refundPrice) } }, { upsert: true, new: true });
 
-        return res.status(200).json({ message: "Order Returned successfully" })
+        if (!wallet)
+            return res.status(400).json({ message: "Wallet not found to refund money " });
+
+        return res.status(200).json({ message: "Order Returned successfully" });
 
     } catch (error) {
         console.log(error);

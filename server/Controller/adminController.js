@@ -272,20 +272,33 @@ exports.categoryRestore = async (req, res) => {
 
 exports.editCategory = async (req, res) => {
     try {
-        let { id, name, description } = req.body;
-        // const objectId = new mongoose.Types.ObjectId(id);
+        let { id, name, description, offer } = req.body;
+        console.log(offer)
         if (!description) {
             description = undefined;
         }
         const isExistcategory = await Category.findOne({ name, _id: { $ne: id } });
+
         if (isExistcategory) {
             return res.status(400).json({ message: "Category already exists" });
         }
-        const updateData = { name };
+
+        const updateData = { name, offer };
         if (description) updateData.description = description;
         if (req.file?.path) updateData.image = req.file.path;
 
         const updatedCategory = await Category.findByIdAndUpdate(id, updateData, { new: true });
+
+        const products = await Product.find({ category: id });
+
+        products.forEach((product) => {
+            product.offer = offer;
+            product.salesPrice = product.regularPrice - (product.regularPrice * (offer / 100));
+        });
+
+        for (const product of products) {
+            await product.save();
+        }
 
         return res.status(200).json({
             message: "Successfully edited the category",
@@ -301,7 +314,7 @@ exports.listCategory = async (req, res) => {
 
         const { id } = req.params;
         const category = await Category.findById(id);
-        console.log(category);
+        // console.log(category);
         category.isListed = !category?.isListed
         category.save();
         return res.status(200).json({ message: "success", category })
@@ -343,16 +356,20 @@ exports.addProduct = async (req, res) => {
         const {
             productName,
             productDescription,
-            salesPrice,
+            offer,
             regularPrice,
             units,
             category,
             brand,
         } = req.body;
-
+        let salesPrice;
         const productImage = req.files.map((file) => file.path)
         console.log(productImage)
         const existProduct = await Product.findOne({ productName });
+
+        if (!existProduct) {
+            salesPrice = offer ? (regularPrice - (offer / 100) * regularPrice) : regularPrice
+        }
 
         const categoryDoc = await Category.findOne({ name: category });
         const brandDoc = await Brand.findOne({ name: brand })
@@ -390,7 +407,7 @@ exports.editProduct = async (req, res) => {
         const {
             productName,
             productDescription,
-            salesPrice,
+            offer,
             regularPrice,
             units,
             category,
@@ -400,7 +417,7 @@ exports.editProduct = async (req, res) => {
         console.log(
             productName,
             productDescription,
-            salesPrice,
+            offer,
             regularPrice,
             units,
             category,
@@ -423,6 +440,10 @@ exports.editProduct = async (req, res) => {
             productName: { $regex: new RegExp(`^${productName}$`), $options: 'i' },
             _id: { $ne: id }
         });
+        let salesPrice;
+        if (!existProduct) {
+            salesPrice = offer ? regularPrice - ((offer / 100) * regularPrice) : regularPrice
+        }
         const categoryDoc = await Category.findOne({ name: { $regex: new RegExp(`^${category}$`, 'i') } })
         const brandDoc = await Brand.findOne({ name: { $regex: new RegExp(`^${brand}$`, 'i') } })
         if (!brandDoc)
@@ -442,7 +463,8 @@ exports.editProduct = async (req, res) => {
                 units,
                 category: categoryDoc._id,
                 brand: brandDoc._id,
-                productImage
+                productImage,
+                offer
             });
             // console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
             return res.status(200).json({ message: "product edited successully" })
@@ -654,7 +676,7 @@ exports.deleteCoupon = async (req, res) => {
         console.log("hey")
         const { id } = req.params;
         console.log(id, "delete coupon id")
-        const coupon =await Coupon.findOneAndDelete({_id:id}, { new: true });
+        const coupon = await Coupon.findOneAndDelete({ _id: id }, { new: true });
         if (coupon)
             return res.status(200).json({ message: "Coupon deleted successfully" });
         else
@@ -662,5 +684,20 @@ exports.deleteCoupon = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error occured while deleting coupon" })
+    }
+}
+
+
+exports.getAllOrders = async (req, res) => {
+    try {
+        const orders = await Orders.find()
+            .populate([{ path: "user" }, { path: "orderItems.product" }]);
+        console.log(orders, "<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>..")
+        if (!orders)
+            return res.status(400).json({ message: "No orders were found" });
+        return res.status(200).json({ message: "Successfully fetched all orders", orders })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error occred while fetching order details" });
     }
 }

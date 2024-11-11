@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 const Category = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [offer, setOffer] = useState("");
   const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState({});
   const [categoryImage, setCategoryImage] = useState("");
@@ -271,6 +272,7 @@ const Category = () => {
         <h2 className="text-xl font-bold mb-4">Add New Category</h2>
         <form className="flex flex-col space-y-6">
           <div className="flex flex-col lg:flex-row lg:space-x-8 space-y-6 lg:space-y-0">
+            
             <div className="flex flex-col">
               <label className="mr-2 font-mono">Name :</label>
               <input

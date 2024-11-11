@@ -8,6 +8,7 @@ function EditCategory() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [id, setId] = useState("");
+  const [offer, setOffer] = useState("");
   const [message, setMessage] = useState({});
   const [existingImage, setExistingImage] = useState("");
   const [categoryImage, setCategoryImage] = useState("");
@@ -19,6 +20,10 @@ function EditCategory() {
   const error = {};
   const validateForm = () => {
     if (name.trim() === "") error.name = "Category name is required *";
+
+    if (isNaN(offer)) error.offer = "offer price must a number";
+    else if (offer < 0 || offer > 100)
+      error.offer = "offer must between 0% and 100%";
     return error;
   };
 
@@ -29,6 +34,7 @@ function EditCategory() {
       setDescription(data.description || "");
       setId(data._id || "");
       setExistingImage(data.image);
+      setOffer(data.offer);
     }
   }, [data]);
 
@@ -52,16 +58,17 @@ function EditCategory() {
 
   const handleEditCategory = async (e) => {
     e.preventDefault();
-    setSpinner(true);
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setMessage(formErrors);
       return;
     }
+    setSpinner(true);
     const formData = new FormData();
     formData.append("id", id);
     formData.append("name", name);
     formData.append("description", description);
+    formData.append("offer", offer);
     formData.append("file", image);
 
     try {
@@ -109,6 +116,17 @@ function EditCategory() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <label className="mr-2">Offer :</label>
+        <input
+          type="text"
+          className="border-2 border-gray-400 p-2 rounded-lg flex-grow font-mono"
+          value={offer}
+          onChange={(e) => setOffer(e.target.value)}
+        />
+        {message.offer && (
+          <p className="text-red-700 text-sm">{message.offer}</p>
+        )}
+
         {/* </div> */}
 
         {/* </div> */}
