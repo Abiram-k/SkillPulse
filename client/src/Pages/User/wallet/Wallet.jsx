@@ -90,7 +90,7 @@ const Wallet = () => {
                 transact.amount > 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              {transact.amount} ₹
+              {parseInt(transact.amount).toFixed(0)} ₹
             </div>
             <div className="sm:col-span-1">{transact.transactionId}</div>
           </div>

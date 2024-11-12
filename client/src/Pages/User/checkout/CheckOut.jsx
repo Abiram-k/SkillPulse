@@ -9,6 +9,7 @@ import axios from "@/axiosIntercepters/AxiosInstance";
 import { CouponPopup } from "@/Components/CouponPopup";
 import { Axios } from "axios";
 import axiosInstance from "@/axiosIntercepters/AxiosInstance";
+import Razorpay from "../paymentComoponent/RazorPay";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
@@ -66,7 +67,7 @@ const Checkout = () => {
       0
     );
 
-    calcs.totalPrice = cartItems[0]?.totalDiscount;
+    calcs.totalPrice = cartItems[0]?.totalDiscount || cartItems[0]?.grandTotal;
 
     if (calcs?.totalPrice < 1000)
       calcs.deliveryCharge = Math.round((2 / 100) * calcs.totalPrice);
@@ -198,14 +199,9 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (
-      paymentMethod == "cod" &&
-      summary.checkoutTotal >=
-        //  - checkoutItems[0]?.appliedCoupon?.couponAmount
-        1000
-    ) {
+    if (paymentMethod == "cod" && summary.checkoutTotal >= 1000) {
       Toast.fire({
-        icon: "success",
+        icon: "error",
         title: `Cash on delivery is not applicable`,
       });
       return;
@@ -214,7 +210,7 @@ const Checkout = () => {
       const response = await axios.post(`/order/${user._id}`, cartItems, {
         params: {
           paymentMethod,
-          totalAmount: cartItems[0]?.totalDiscount,
+          totalAmount: cartItems[0]?.grandTotal,
           appliedCoupon: cartItems[0]?.appliedCoupon?._id || null,
         },
       });
@@ -431,70 +427,36 @@ const Checkout = () => {
             </div>
 
             <div className="flex flex-col md:flex-row space-x-0 md:space-x-4">
-              <button
-                className={
-                  " text-white px-8 py-3 rounded-md w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
-                }
-                onClick={handlePlaceOrder}
-                disabled={
-                  paymentMethod == "wallet" &&
-                  walletData.totalAmount < summary.checkoutTotal
-                }
-              >
-                Place order
-              </button>
+              {paymentMethod != "Razorpay" && (
+                <button
+                  className={
+                    " text-white px-8 py-3 rounded-md w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
+                  }
+                  onClick={handlePlaceOrder}
+                  disabled={
+                    paymentMethod == "wallet" &&
+                    walletData.totalAmount < summary.checkoutTotal
+                  }
+                >
+                  Place order
+                </button>
+              )}
+              {paymentMethod == "Razorpay" && (
+                <div className="w-full">
+                  <Razorpay
+                    orderId={cartItems[0]?._id}
+                    PayAmount={parseInt(
+                      offerPrice(
+                        cartItems[0]?.appliedCoupon?.couponAmount,
+                        cartItems[0]?.appliedCoupon?.couponType
+                      )
+                    )}
+                    handlePlaceOrder={handlePlaceOrder}
+                  />
+                </div>
+              )}
             </div>
           </div>
-
-          {/* <div className="w-full md:w-80 mt-6 md:mt-0">
-            <div className="bg-red-700 text-white p-4 rounded-lg mb-4">
-              Checkout Details
-            </div>
-            <div className="bg-pink-50 text-black p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>{summary.totalItems} Items</span>
-                  <span>{summary.totalPrice} ₹</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Delivery Charges</span>
-                  <span className="text-green-600">
-                    {summary.totalPrice > 1000
-                      ? "Free"
-                      : summary.deliveryCharge}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>GST Amount (18%)</span>
-                  <span>{summary.GST} ₹</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Discount 0%</span>
-                  <span>0 ₹</span>
-                </div>
-                {checkoutItems[0]?.appliedCoupon && (
-                  <div className="flex justify-between">
-                    <span>Applied Coupon</span>
-                    <span className="text-green-600">
-                      -{checkoutItems[0]?.appliedCoupon?.couponAmount}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
-                  <span>Total Price</span>
-                  <span>
-                    {summary.checkoutTotal -
-                      checkoutItems[0]?.appliedCoupon?.couponAmount}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="bg-red-600 p-4 rounded-lg mt-4 text-center flex flex-col items-center">
-              <ShoppingCart size={40} />
-              <p className="text-white font-bold mt-2">Offers Only For Today</p>
-            </div>
-          </div> */}
           <div className="w-full md:w-80 ">
             <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
               Checkout Details
@@ -524,10 +486,10 @@ const Checkout = () => {
                   <span>GST Amount (18%)</span>
                   <span>{calculateGST(18)} ₹</span>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span>Discount 0%</span>
                   <span>0 ₹</span>
-                </div>
+                </div> */}
                 {cartItems[0]?.appliedCoupon && (
                   <div className="flex justify-between">
                     <div className="flex gap-2 items-center">

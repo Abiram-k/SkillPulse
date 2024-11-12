@@ -11,7 +11,6 @@ const walletSchema = new mongoose.Schema({
             amount: {
                 type: String,
                 required: true,
-                // default: 0
             },
             description: {
                 type: String,

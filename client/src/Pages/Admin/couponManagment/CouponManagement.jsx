@@ -13,6 +13,7 @@ const CouponManagement = () => {
   const [expiryDate, setExpiryDate] = useState("");
   const [maxDiscount, setMaxDiscount] = useState("");
   const [message, setMessage] = useState({});
+  const [search, setSearch] = useState("");
 
   const [coupons, setCoupons] = useState([]);
 
@@ -49,7 +50,6 @@ const CouponManagement = () => {
     if (couponType == "Amount" && couponAmount != maxDiscount)
       error.maxDiscount = "Field must be same as coupon Amount*";
 
-
     if (!expiryDate.trim()) error.expiryDate = "Required *";
     if (new Date(expiryDate) <= new Date()) {
       error.expiryDate = "Expiry must be after creation *";
@@ -74,7 +74,7 @@ const CouponManagement = () => {
         });
       }
     })();
-  }, []);
+  }, [message]);
 
   const handleAddCoupon = async () => {
     setMessage({});
@@ -141,21 +141,15 @@ const CouponManagement = () => {
 
       <div className="bg-gray-300 p-6 rounded shadow-md">
         <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
-          <div className="flex items-center space-x-2">
-            <span>Sort</span>
-            <select className="border p-2 px-4 rounded text-black focus:outline-none">
-              <option>Coupon</option>
-            </select>
-            <span>By</span>
-            <select className="border p-2 rounded text-black focus:outline-none">
-              <option>Ascending</option>
-            </select>
-          </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center  space-x-2 ">
+            <label htmlFor="search"></label>
             <input
               type="text"
+              id="search"
               className="border p-2 px-4 rounded text-black focus:outline-none"
               placeholder="Search by coupon type"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
@@ -180,37 +174,53 @@ const CouponManagement = () => {
             </thead>
             <tbody>
               {coupons.length > 0 ? (
-                coupons.map((coupon) => (
-                  <tr className="border-b">
-                    <td className="px-6 py-4 text-black">
-                      {coupon.couponCode}
-                    </td>
-                    <td className="px-6 py-4 text-black">
-                      {coupon.description}
-                    </td>
-                    <td className="px-6 py-4 text-black">
-                      {coupon.couponAmount}
-                    </td>
-                    <td className="px-6 py-4 text-black">
-                      {coupon.totalLimit}
-                    </td>
-                    <td className="px-6 py-4 text-black">
-                      {coupon.perUserLimit}
-                    </td>
-                    <td className="px-6 py-4 text-black">
-                      {coupon.purchaseAmount}
-                    </td>
-                    <td className="px-6 py-4 text-black">
-                      {getDate(coupon.expirationDate)}
-                    </td>
-                    <td className="px-6 py-4 text-center text-black">
-                      <i
-                        className="fas fa-times cursor-pointer"
-                        onClick={() => handleCouponDelete(coupon._id)}
-                      ></i>
+                coupons.filter((coupon) =>
+                  coupon.couponCode.toLowerCase().includes(search.toLowerCase())
+                ).length > 0 ? (
+                  coupons
+                    .filter((coupon) =>
+                      coupon.couponCode
+                        .toLowerCase()
+                        .includes(search.toLowerCase())
+                    )
+                    .map((coupon) => (
+                      <tr className="border-b">
+                        <td className="px-6 py-4 text-black">
+                          {coupon.couponCode}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {coupon.description}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {coupon.couponAmount}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {coupon.totalLimit}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {coupon.perUserLimit}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {coupon.purchaseAmount}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {getDate(coupon.expirationDate)}
+                        </td>
+                        <td className="px-6 py-4 text-center text-black">
+                          <i
+                            className="fas fa-times cursor-pointer"
+                            onClick={() => handleCouponDelete(coupon._id)}
+                          ></i>
+                        </td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td className="px-6 py-4 text-black" colSpan="8">
+                      "{search}" Coupon code not found !
                     </td>
                   </tr>
-                ))
+                )
               ) : (
                 <tr>
                   <td className="px-6 py-4 text-black" colSpan="8">

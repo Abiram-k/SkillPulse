@@ -139,14 +139,14 @@ const ShoppingCartPage = () => {
   };
 
   const handleCheckout = () => {
-    if (cartItems[0].products.length == 0) {
+    if (!cartItems[0]) {
       Toast.fire({
         icon: "error",
         title: `Add some items and checkout`,
       });
     } else {
       dispatch(checkoutItems(cartItems));
-      navigate("checkout");
+      navigate("/user/checkout");
     }
   };
 
@@ -197,17 +197,15 @@ const ShoppingCartPage = () => {
   };
 
   const offerPrice = (couponAmount = 0, couponType) => {
-    const totalPrice = Math.abs(cartItems[0]?.totalDiscount);
-    // const totalPrice = cartItems[0]?.products.reduce(
-    //   (acc, item) => acc + item.offeredPrice,
-    //   0
-    // );
+    const totalPrice = Math.abs(cartItems[0]?.totalDiscount) || 0;
     const gstRate = 18;
-    const total =
-      totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
-    // if (isNaN(total)) return 0;
-    return total;
+
+    const gstAmount = calculateGST(gstRate) || 0;
+    const deliveryCharge = calculateDeliveryCharge() || 0;
+    const total = totalPrice + gstAmount + deliveryCharge;
+    return isNaN(total) ? 0 : total;
   };
+
   const handleGetSelectedCoupons = async (
     selectedCoupon,
     maxDiscount,
@@ -303,7 +301,6 @@ const ShoppingCartPage = () => {
             )}
             <div className="flex lg:gap-3 gap-1">
               <button
-                to={"checkout"}
                 className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
                 onClick={handleCheckout}
               >
@@ -333,7 +330,7 @@ const ShoppingCartPage = () => {
                     )}{" "}
                     Items
                   </span>
-                  <span>{totalPrice()} ₹</span>
+                  <span>{totalPrice() || 0} ₹</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
@@ -347,10 +344,10 @@ const ShoppingCartPage = () => {
                   <span>GST Amount (18%)</span>
                   <span>{calculateGST(18)} ₹</span>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span>Discount 0%</span>
                   <span>0 ₹</span>
-                </div>
+                </div> */}
                 {cartItems[0]?.appliedCoupon && (
                   <div className="flex justify-between">
                     <div className="flex gap-2 items-center">
@@ -395,7 +392,7 @@ const ShoppingCartPage = () => {
                 ) : (
                   <div className="flex justify-between font-bold border-gray-200">
                     <span>Payable Amount</span>
-                    <span>{cartTotalPrice()}</span>
+                    <span>{cartTotalPrice() || 0} ₹</span>
                   </div>
                 )}
               </div>

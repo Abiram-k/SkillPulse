@@ -46,6 +46,8 @@ import Wallet from "./Pages/User/wallet/Wallet";
 import CouponManagement from "./Pages/Admin/couponManagment/CouponManagement";
 import Coupon from "./Pages/User/coupon/Coupon";
 import { Toaster } from "./Components/ui/toaster";
+import ProtectCheckout from "./Protected/ProtectCheckout";
+import OrderReport from "./Pages/SalesReport/OrderReport";
 function App() {
   return (
     <>
@@ -187,7 +189,9 @@ function App() {
               path="checkout"
               element={
                 <ProtectUserHome>
-                  <Checkout />
+                  <ProtectCheckout>
+                    <Checkout />
+                  </ProtectCheckout>
                 </ProtectUserHome>
               }
             />
@@ -289,6 +293,14 @@ function App() {
               element={
                 <ProtectedDashboardAdmin>
                   <Dashboard />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
+              path="orderReport"
+              element={
+                <ProtectedDashboardAdmin>
+                  <OrderReport />
                 </ProtectedDashboardAdmin>
               }
             />

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useAsyncError, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import Cropper from "react-easy-crop";
-import { getCroppedImg } from "../utils/cropImage"; // Your helper to crop image
+import { getCroppedImg } from "../utils/cropImage"; 
 import axios from "@/axiosIntercepters/AxiosInstance";
 
 const AddProduct = () => {

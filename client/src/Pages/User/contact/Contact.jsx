@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 const web3key = import.meta.env.VITE_WEB3_API_KEY;
 import {
   Facebook,
@@ -25,6 +25,7 @@ const Contact = () => {
     let error = {};
 
     // Name validation
+
     if (name.trim() === "") {
       error.name = "Name is required";
     } else if (name.length < 2) {
@@ -52,8 +53,14 @@ const Contact = () => {
 
     return error;
   };
+  useEffect(() => {
+    setEmail("");
+    setName("");
+    setMessage("");
+    setPhone("")
+  }, []);
   const handleSubmit = async (event) => {
-      event.preventDefault();
+    event.preventDefault();
     try {
       const formErrors = validateForm();
       if (Object.keys(formErrors).length > 0) {

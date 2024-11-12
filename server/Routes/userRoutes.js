@@ -110,4 +110,36 @@ router.patch("/cartCouponApply", cartController.applyCoupon)
 router.patch("/cartCouponRemove/:id", cartController.removeCoupon)
 // router.patch("/cartCouponRemove", cartController.removeCoupon)
 
+router.post("/verify-payment", orderController.verifyPayment)
+const Razorpay = require("razorpay");
+
+router.post("/create-razorpay-order", async (req, res) => {
+    const instance = new Razorpay({
+        key_id: process.env.RAZORPAY_ID,
+        key_secret: process.env.RAZORPAY_KEY,
+    });
+    const { orderId, amount } = req.body;
+    try {
+
+        console.log("hey", orderId, amount)
+
+        const options = {
+            amount: amount * 100,
+            currency: "INR",
+            receipt: `receipt_order_${orderId}`,
+        };
+        console.log("hey", orderId, amount)
+        const order = await instance.orders.create(options);
+        console.log("hey", orderId, amount)
+        // await saveOrderInDatabase({ orderId, razorpayOrderId: order.id });
+        // console.log("hey", orderId, amount)
+        res.status(200).json({ success: true, orderId: order.id });
+        console.log("hey", orderId, amount)
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+        console.log(error)
+    }
+});
+
+
 module.exports = router;

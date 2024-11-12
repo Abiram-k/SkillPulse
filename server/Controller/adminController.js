@@ -282,7 +282,6 @@ exports.editCategory = async (req, res) => {
         if (isExistcategory) {
             return res.status(400).json({ message: "Category already exists" });
         }
-
         const updateData = { name, offer };
         if (description) updateData.description = description;
         if (req.file?.path) updateData.image = req.file.path;
@@ -292,10 +291,11 @@ exports.editCategory = async (req, res) => {
         const products = await Product.find({ category: id });
 
         products.forEach((product) => {
-            product.offer = offer;
-            product.salesPrice = product.regularPrice - (product.regularPrice * (offer / 100));
+            if (!product.offer || product.offer < offer) {
+                product.offer = offer;
+                product.salesPrice = product.regularPrice - (product.regularPrice * (offer / 100));
+            }
         });
-
         for (const product of products) {
             await product.save();
         }

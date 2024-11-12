@@ -16,6 +16,7 @@ import {
   Percent,
 } from "lucide-react";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { Link } from "react-router-dom";
 
 // Sample data for the chart
 const chartData = Array.from({ length: 12 }, (_, i) => ({
@@ -72,9 +73,7 @@ export default function Dashboard() {
         />
         <StatsCard
           title="Users"
-          value={
-            new Set(recentSales.map((order) => order.user?.email)).size
-          }
+          value={new Set(recentSales.map((order) => order.user?.email)).size}
           bgColor="bg-gray-800"
         />
       </div>
@@ -92,11 +91,11 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+
         {/* Recent Sales */}
-        <div className="bg-white p-6 rounded-lg shadow overflow-y-scroll">
+        <div className="bg-white p-6 rounded-lg  shadow overflow-y-scroll">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Sales</h2>
-            {/* <button className="text-blue-600">View all</button> */}
           </div>
           <div className="space-y-4">
             {recentSales.length > 0 ? (
@@ -140,6 +139,14 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+        </div>
+        <div>
+          <Link
+            to={"/admin/orderReport"}
+            className="bg-gray-300 p-3 rounded font-bold text-orange-600 shadow-lg hover:scale-105 duration-150"
+          >
+            Download Sales Report
+          </Link>
         </div>
       </div>
     </>

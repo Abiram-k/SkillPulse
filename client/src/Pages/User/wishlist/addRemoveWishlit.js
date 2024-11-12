@@ -10,19 +10,19 @@ export const addToWishList = async (product, user, dispatch) => {
       user: user._id,
       product,
     });
-    Toast.fire({
-      icon: "success",
-      title: `${response.data.message}`,
-    });
+    // Toast.fire({
+    //   icon: "success",
+    //   title: `${response.data.message}`,
+    // });
   } catch (error) {
     console.log(error);
     if (error?.response?.data?.isBlocked) {
       dispatch(logoutUser());
     }
-    Toast.fire({
-      icon: "error",
-      title: `${error?.response?.data?.message}`,
-    });
+    // Toast.fire({
+    //   icon: "error",
+    //   title: `${error?.response?.data?.message}`,
+    // });
   }
 };
 export const removeFromWishlist = async (product,user,dispatch) => {

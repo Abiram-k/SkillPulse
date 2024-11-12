@@ -27,7 +27,6 @@ export const CouponPopup = ({ onClose, getCoupons, totalAmount }) => {
         const response = await axios.get("/coupon");
         console.log(response?.data, "Coupons for management");
         setCoupons(response?.data);
-
       } catch (error) {
         console.log(error);
         toast({
@@ -50,7 +49,7 @@ export const CouponPopup = ({ onClose, getCoupons, totalAmount }) => {
   };
 
   const handleApply = () => {
-    getCoupons(selectedCoupon, maxDiscount, purchaseAmount,couponCode);
+    getCoupons(selectedCoupon, maxDiscount, purchaseAmount, couponCode);
     if (selectedCoupon) {
       const coupon = coupons.find((c) => c._id === selectedCoupon);
       if (coupon) {
@@ -99,8 +98,13 @@ export const CouponPopup = ({ onClose, getCoupons, totalAmount }) => {
               onValueChange={handleSelectedCoupon}
               className="bg-red-600 p-4 rounded-lg space-y-4"
             >
-              {coupons.filter((coupon) => parseInt(totalAmount) >= coupon.purchaseAmount)
-                .length > 0 ? (
+              {coupons.filter(
+                (coupon) =>
+                  parseInt(totalAmount) >= coupon.purchaseAmount 
+                &&
+                  new Date(coupon.expirationDate).setHours(0, 0, 0, 0) >=
+                    new Date().setHours(0, 0, 0, 0)
+              ).length > 0 ? (
                 coupons
                   .filter((coupon) => totalAmount >= coupon.purchaseAmount)
                   .map((coupon) => (

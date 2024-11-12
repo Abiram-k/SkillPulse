@@ -253,7 +253,16 @@ exports.login = async (req, res) => {
                 return res.status(400).json({ message: "User were blocked " });
             }
             else {
-                // jwt toke sign
+                const walletDoc = await Wallet.findOne({ user: user._id })
+                if (!walletDoc) {
+                    const wallet = new Wallet({
+                        user: user._id,
+                        totalAmount: 0,
+                        transaction: []
+                    })
+                    await wallet.save();
+                }
+                // jwt token sign
                 const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE, process.env.JWT_SECERETE, { expiresIn: '1h' })
                 res.cookie('userToken',
                     token,
