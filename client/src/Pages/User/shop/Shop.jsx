@@ -68,7 +68,7 @@ const Shop = () => {
       [name]: value,
     }));
   };
-
+  
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
   const currentProduct = products.slice(firstPostIndex, lastPostIndex);
@@ -167,17 +167,20 @@ const Shop = () => {
 
         {/* Discount Offers Filter */}
         <div>
-          <p className="font-bold text-2xl mb-4">__________</p>
+          <p className="font-bold text-2xl mb-4">Discount offers</p>
           <select
             className="w-full p-2 bg-gray-800 text-white rounded font-mono"
             defaultValue=""
+            onChange={handleFilter}
+            value={filter.offer}
+            name="offer"
           >
             <option value="" disabled>
-              
+              Select a Offer
             </option>
             <option value="10-20">10% - 20%</option>
             <option value="20-30">20% - 30%</option>
-            <option value="upto-50">Up to 50%</option>
+            <option value="above-50">Up to 50%</option>
           </select>
         </div>
 
@@ -254,18 +257,34 @@ const Shop = () => {
                 /> */}
 
                 <div className="p-3 text-center">
-                  <p className="text-sm font-medium text-gray-300 truncate">
+                  <p className="text-sm  text-white truncate lg:text-lg font-bold">
                     {product.productName}
+                  </p>
+                  <p className="text-sm font-medium text-gray-400 ">
+                    {product.productDescription}
                   </p>
 
                   <p className="text-lg font-bold text-green-400 mt-1">
-                    ₹{product.salesPrice.toFixed(0)}
-                    <span className="line-through text-gray-500 ml-2">
-                      ₹{product.regularPrice}
+                    {product.salesPrice < product.regularPrice && (
+                      <span>₹ {product.salesPrice.toFixed(0)}</span>
+                    )}
+                    <span
+                      className={`${
+                        product.salesPrice < product.regularPrice
+                          ? "line-through text-gray-500"
+                          : "text-green-400"
+                      }  ml-2`}
+                    >
+                      ₹ {product.regularPrice}
                     </span>
-                    {product?.offer > 0 && 
-                    <span className="text-red-500 ml-2 text-xs">{product.offer}% off</span>
-                    }
+                    {(product.categoryOffer || product?.offer > 0) && (
+                      <span className="text-red-500 ml-2 text-xs">
+                        {product.categoryOffer >= product.offer
+                          ? product.categoryOffer
+                          : product.offer}{" "}
+                        % off
+                      </span>
+                    )}
                   </p>
                   {wishlistItems.includes(product._id) ? (
                     <Heart

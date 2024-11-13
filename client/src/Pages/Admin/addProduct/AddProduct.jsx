@@ -17,7 +17,7 @@ const AddProduct = () => {
   const [brands, setBrands] = useState([]);
   const [units, setUnits] = useState("");
   const [categories, setCategories] = useState([]);
-  const [offerPrice, setOfferPrice] = useState("");
+  const [offerPrice, setOfferPrice] = useState("0");
 
   const [productImage, setProductImage] = useState([]); // Array of images to send to backend
   const [images, setImages] = useState({

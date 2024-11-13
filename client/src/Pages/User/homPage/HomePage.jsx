@@ -211,7 +211,7 @@ const HomePage = () => {
         </div>
       </section>
       <h2 className="text-md lg:text-xl  ps-8 font-bold ">New Arrivals</h2>
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black ">
         {products.length > 0 ? (
           products.map(
             (product) =>
@@ -250,11 +250,26 @@ const HomePage = () => {
                     </p>
 
                     <p className="text-sm font-bold text-green-400 mt-1">
-                      ₹{product.salesPrice.toFixed(0)}
-                      <span className="line-through text-gray-500 ml-2">
-                        ₹{product.regularPrice}
+                      {product.salesPrice < product.regularPrice && (
+                        <span>₹ {product.salesPrice.toFixed(0)}</span>
+                      )}
+                      <span
+                        className={`${
+                          product.salesPrice < product.regularPrice
+                            ? "line-through text-gray-500"
+                            : "text-green-400"
+                        }  ml-2`}
+                      >
+                        ₹ {product.regularPrice}
                       </span>
-                      <span className="text-red-500 ml-2 text-xs">20% off</span>
+                      {(product.categoryOffer || product?.offer > 0) && (
+                        <span className="text-red-500 ml-2 text-xs">
+                          {product.categoryOffer >= product.offer
+                            ? product.categoryOffer
+                            : product.offer}{" "}
+                          % off
+                        </span>
+                      )}{" "}
                     </p>
 
                     <p className="text-xs text-gray-400 mt-1">

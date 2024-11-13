@@ -1,5 +1,9 @@
-import axiosInstance from "@/axiosIntercepters/AxiosInstance";
-import React, { useState, useEffect } from "react";
+import axios from "@/axiosIntercepters/AxiosInstance";
+import React, { useState, useEffect, useRef } from "react";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import { ArrowDown } from "lucide-react";
+import PieChart from "./PieChart";
 
 const OrderReport = () => {
   const [filter, setFilter] = useState("Daily");
@@ -7,209 +11,324 @@ const OrderReport = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [orders, setOrders] = useState([]);
+  const [totalCategoryDiscount, setTotalCategoryDiscount] = useState("");
+  const [totalCouponDiscount, setTotalCouponDiscount] = useState("");
+  const [totalProductDiscount, setTotalProductDiscount] = useState("");
+  const reportRef = useRef();
 
-  const filterOrders = () => {
-    let filteredData = [];
-    const today = new Date();
-    const oneDayAgo = new Date(today);
-    const oneWeekAgo = new Date(today);
-    const oneMonthAgo = new Date(today);
-
-    oneDayAgo.setDate(today.getDate() - 1);
-    oneWeekAgo.setDate(today.getDate() - 7);
-    oneMonthAgo.setMonth(today.getMonth() - 1);
-    switch (filter) {
-      case "Daily":
-        filteredData = orders?.filter(
-          (order) => new Date(order?.orderDate) >= oneDayAgo
-        );
-        break;
-      case "Weekly":
-        filteredData = orders?.filter(
-          (order) => new Date(order?.orderDate) >= oneWeekAgo
-        );
-        break;
-      case "Monthly":
-        filteredData = orders?.filter(
-          (order) => new Date(order?.orderDate) >= oneMonthAgo
-        );
-        break;
-      case "Custom":
-        if (startDate && endDate) {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          filteredData = orders?.filter(
-            (order) =>
-              new Date(order?.orderDate) >= start &&
-              new Date(order?.orderDate) <= end
-          );
-        }
-        break;
-      default:
-        filteredData = orders;
-    }
-    setFilteredOrders(filteredData);
-  };
-
-  // Assuming `filteredOrders` contains the list of orders
-  const paymentMethodCounts = filteredOrders.reduce((acc, order) => {
+  const paymentMethodCounts = orders.reduce((acc, order) => {
     const method = order.paymentMethod;
     acc[method] = (acc[method] || 0) + 1;
     return acc;
   }, {});
 
-  // Assuming `filteredStatus` contains the list of orders
-  const orderStatusCount = filteredOrders.reduce((acc, order) => {
+  const downloadPDF = async () => {
+    const reportElement = reportRef.current;
+
+    const canvas = await html2canvas(reportElement, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    pdf.save(`${filter} Sales-report.pdf`);
+  };
+
+  const calculateTotalProductOffer = () => {
+    let total = 0;
+    orders.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        if (item.product.offer > item.product.categoryOffer)
+          total = item.product.regularPrice - item.product.salesPrice;
+      });
+    });
+    return total;
+  };
+  const calculateTotalCategoryOffer = () => {
+    let total = 0;
+    orders.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        if (item.product.categoryOffer) {
+          if (item.product.offer < item.product.categoryOffer)
+            total = item.product.regularPrice - item.product.salesPrice;
+        }
+      });
+    });
+    return total;
+  };
+
+  const orderStatusCount = orders.reduce((acc, order) => {
     order.orderItems.forEach(
       (item) => (acc[item.productStatus] = (acc[item.productStatus] || 0) + 1)
     );
     return acc;
   }, {});
 
+  const topSellingProduct = () => {
+    const productQuantities = {};
+
+    orders.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        if (productQuantities[item.product.productName]) {
+          productQuantities[item.product.productName] += item.quantity;
+        } else {
+          productQuantities[item.product.productName] = item.quantity;
+        }
+      });
+    });
+
+    let topSellingProduct = null;
+    let maxQuantity = 0;
+
+    for (const product in productQuantities) {
+      if (productQuantities[product] > maxQuantity) {
+        maxQuantity = productQuantities[product];
+        topSellingProduct = product;
+      }
+    }
+    return { topSellingProduct, maxQuantity };
+  };
+
+  const costumers = {};
+  const totalCustomers = () => {
+    orders.forEach((order, index) => {
+      if (costumers[order.user._id]) {
+        costumers[order.user._id] = costumers[order.user._id] + 1;
+      } else {
+        costumers[order.user._id] = 1;
+      }
+    });
+    return Object.keys(costumers).length;
+  };
   useEffect(() => {
-    filterOrders();
+    if (filter !== "Custom") {
+      setStartDate("");
+      setEndDate("");
+    }
     (async () => {
       try {
-        const response = await axiosInstance("/admin/recentSales");
+        const response = await axios(
+          `/admin/recentSales?filter=${filter}&startDate=${startDate}&endDate=${endDate}`
+        );
         setOrders(response?.data?.orders);
         console.log("hellooooo", response?.data?.orders);
       } catch (error) {
         console.log(error);
       }
     })();
-  }, [filter]);
+  }, [filter, startDate, endDate]);
 
   return (
-    <div className="p-6 font-mono rounded">
-      <h2 className="text-2xl font-bold mb-4 text-black">Order Report</h2>
-
-      <div className="mb-4 flex space-x-4">
-        {["Daily", "Weekly", "Monthly", "Custom"].map((option) => (
-          <button
-            key={option}
-            className={`px-4 py-2 rounded ${
-              filter === option
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-black"
-            }`}
-            onClick={() => setFilter(option)}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-
-      {/* Date Range Picker for Custom Filter */}
-      {filter === "Custom" && (
+    <div className="p-6 font-mono rounded ">
+      <h2 className="text-2xl font-bold mb-4 text-gray-400 ms-1">
+        Order Report
+      </h2>
+      <div className="flex justify-between">
         <div className="mb-4 flex space-x-4">
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="border p-2 rounded text-black"
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="border p-2 rounded text-black"
-          />
-        </div>
-      )}
-
-      {/* Order Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 border text-black">Order ID</th>
-              <th className="px-4 py-2 border text-black">Date</th>
-              <th className="px-4 py-2 border text-black">Customer</th>
-              <th className="px-4 py-2 border text-black">Payment Method</th>
-              <th className="px-4 py-2 border text-black">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders?.length > 0 ? (
-              filteredOrders.map((order) => (
-                <tr key={order?.id} className="text-center text-black">
-                  <td className="px-4 py-2 border">{order?.orderId}</td>
-                  <td className="px-4 py-2 border">{order?.orderDate}</td>
-                  <td className="px-4 py-2 border">
-                    {order?.user.firstName} {order?.user?.lastName}
-                  </td>
-                  <td className="px-4 py-2 border">{order?.paymentMethod}</td>
-                  <td className="px-4 py-2 border">
-                    ₹{order?.totalAmount}
-                    {!order?.totalAmount - order?.totalDiscount && (
-                      <p className="text-green-400 text-sm font-bold">
-                        saved amount:
-                        {order?.totalAmount - order?.totalDiscount}
-                        <p className="text-orange-500">
-                          {" "}
-                          {order?.appliedCoupon && "Coupon applied"}
-                        </p>
-                      </p>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="px-4 py-2 border text-black">
-                  No orders found for the selected filter.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-4 bg-gray-100 p-4 rounded shadow flex justify-between">
-        <div>
-          <h3 className="text-xl font-semibold text-black mb-2">Summary</h3>
-          <p className="text-black">Total Orders: {orders?.length}</p>
-          <p className="text-black">
-            Total Amount: ₹
-            {orders.reduce((acc, order, index) => order?.totalAmount + acc, 0)}
-          </p>
-          <p className="text-black">
-            Total Discount: ₹
-            {orders.reduce((acc, order, index) => order?.totalAmount + acc, 0) -
-              orders.reduce(
-                (acc, order, index) => order?.totalDiscount + acc,
-                0
-              )}
-          </p>
-          <p className="text-black">
-            Total Amount after discount: ₹
-            {orders.reduce(
-              (acc, order, index) => order?.totalDiscount + acc,
-              0
-            )}
-          </p>
-        </div>
-
-        <div className="mt-2">
-          <h3 className="text-xl font-semibold text-black mb-2">
-            Payment Method Usage
-          </h3>
-          {Object.keys(paymentMethodCounts).map((method) => (
-            <p key={method} className="text-black">
-              {method}: {paymentMethodCounts[method]}
-            </p>
+          {["Daily", "Weekly", "Monthly", "Custom"].map((option) => (
+            <button
+              key={option}
+              className={`px-4 py-2 rounded ${
+                filter === option
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setFilter(option)}
+            >
+              {option}
+            </button>
           ))}
         </div>
+        {filter === "Custom" && (
+          <div className="mb-4 flex space-x-4">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border p-2 rounded text-black"
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border p-2 rounded text-black"
+            />
+          </div>
+        )}
 
-        <div className="mt-2">
-          <h3 className="text-xl font-semibold text-black mb-2">
+        <button
+          className="bg-green-500 rounded shadow-md font-bold px-4 h-10 flex items-center justify-center space-x-1"
+          onClick={downloadPDF}
+        >
+          <ArrowDown className="w-4 h-4" />
+          <span>Download</span>
+        </button>
+      </div>
+      <div className="p-6 rounded-lg bg-white shadow-lg" ref={reportRef}>
+        <h3 className="text-3xl font-extrabold mb-6 text-gray-900">
+          {`${filter == "Daily" ? "Today's" : filter}`} Sales Report
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg shadow-md">
+          <div className="flex flex-col gap-4">
+            <h3 className="text-2xl font-semibold text-gray-800">Summary</h3>
+            <p className="text-lg text-gray-700">
+              Total Orders:{" "}
+              <span className="font-semibold text-gray-900">
+                {orders?.length}
+              </span>
+            </p>
+            <p className="text-lg text-gray-700">
+              Total Customers:{" "}
+              <span className="font-semibold text-gray-900">
+                {totalCustomers()}
+              </span>
+            </p>
+            <p className="text-lg text-gray-700">
+              Total Revenue: ₹
+              <span className="font-semibold text-gray-900">
+                {orders
+                  .reduce((acc, order) => order?.totalAmount + acc, 0)
+                  .toFixed(2)}
+              </span>
+            </p>
+            <p className="text-lg text-gray-700">
+              Total Revenue after Discount: ₹
+              <span className="font-semibold text-gray-900">
+                {Math.round(
+                  orders.reduce((acc, order) => order?.totalDiscount + acc, 0)
+                ).toFixed(2)}
+              </span>
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <h3 className="text-2xl font-semibold text-gray-800">
+              Top Selling Product
+            </h3>
+            <p className="text-lg text-gray-700">
+              Product Name:{" "}
+              <span className="font-semibold text-gray-900">
+                {topSellingProduct().topSellingProduct}
+              </span>
+            </p>
+            <p className="text-lg text-gray-700">
+              Quantity Purchased:{" "}
+              <span className="font-semibold text-gray-900">
+                {topSellingProduct().maxQuantity}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+              Total Discounts
+            </h3>
+            <p className="text-lg text-gray-700">
+              Coupon: ₹
+              <span className="font-semibold text-gray-900">
+                {Math.round(
+                  orders.reduce((acc, order) => order?.totalAmount + acc, 0) -
+                    orders.reduce((acc, order) => order?.totalDiscount + acc, 0)
+                ).toFixed(2)}
+              </span>
+            </p>
+            <p className="text-lg text-gray-700">
+              Product Offer: ₹
+              <span className="font-semibold text-gray-900">
+                {calculateTotalProductOffer().toFixed(2)}
+              </span>
+            </p>
+            <p className="text-lg text-gray-700">
+              Category Offer: ₹
+              <span className="font-semibold text-gray-900">
+                {calculateTotalCategoryOffer().toFixed(2)}
+              </span>
+            </p>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+              Payment Method Usage
+            </h3>
+            {Object.keys(paymentMethodCounts).map((method) => (
+              <p key={method} className="text-lg text-gray-700">
+                {method}:{" "}
+                <span className="font-semibold text-gray-900">
+                  {paymentMethodCounts[method]}
+                </span>
+              </p>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 bg-gray-50 p-6 rounded-lg shadow-md flex justify-between items-center">
+          <div>
+
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
             Order Status
           </h3>
-          {Object.keys(orderStatusCount).map((method) => (
-            <p key={method} className="text-black">
-              {method}: {orderStatusCount[method]}
+          {Object.keys(orderStatusCount).map((status) => (
+            <p key={status} className="text-lg text-gray-700">
+              {status}:{" "}
+              <span className="font-semibold text-gray-900">
+                {orderStatusCount[status]}
+              </span>
             </p>
           ))}
+          </div>      
+          <PieChart orderStatusCount={orderStatusCount}/>
+        </div>
+
+        <div className="overflow-x-auto mt-6 rounded-lg shadow-md">
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="px-6 py-3 border text-sm text-gray-600">
+                  Order ID
+                </th>
+                <th className="px-6 py-3 border text-sm text-gray-600">Date</th>
+                <th className="px-6 py-3 border text-sm text-gray-600">
+                  Customer
+                </th>
+                <th className="px-6 py-3 border text-sm text-gray-600">
+                  Payment Method
+                </th>
+                <th className="px-6 py-3 border text-sm text-gray-600">
+                  Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders?.length > 0 ? (
+                orders.map((order) => (
+                  <tr key={order?.id} className="text-center text-gray-700">
+                    <td className="px-6 py-3 border">{order?.orderId}</td>
+                    <td className="px-6 py-3 border">{order?.orderDate}</td>
+                    <td className="px-6 py-3 border">
+                      {order?.user.firstName} {order?.user?.lastName}
+                    </td>
+                    <td className="px-6 py-3 border">{order?.paymentMethod}</td>
+                    <td className="px-6 py-3 border">₹{order?.totalAmount}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="px-6 py-3 border text-center text-gray-600"
+                  >
+                    No orders found for the selected filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

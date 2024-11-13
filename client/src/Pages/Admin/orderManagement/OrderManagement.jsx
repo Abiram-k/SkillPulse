@@ -33,10 +33,7 @@ const OrderManagement = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `/admin/order?filter=${filterOrders}`
-          
-        );
+        const response = await axios.get(`/admin/order?filter=${filterOrders}`);
         console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
       } catch (error) {
@@ -81,10 +78,9 @@ const OrderManagement = () => {
       <div className="flex min-h-screen bg-black font-mono">
         <div className="flex-1 bg-black">
           <main className="p-6">
-
             <div className="bg-black rounded-lg overflow-hidden">
               <table className="w-full">
-                <thead >
+                <thead>
                   <tr className="bg-black text-white text-lg mb-5">
                     <th className="px-6 py-3 text-left">ORDER ID</th>
                     <th className="px-6 py-3 text-left">PRODUCT</th>
@@ -121,14 +117,16 @@ const OrderManagement = () => {
                         >
                           {item.productStatus}
                         </td>
-                        <td className="px-6 py-4">
-                          <ChangeStatus
-                            updatedState={handleUpdatedStatus}
-                            orderId={order.orderId}
-                            productId={item._id}
-                            currentStatus={item.productStatus}
-                          />
-                        </td>
+                        {item.productStatus !== "delivered" && (
+                          <td className="px-6 py-4">
+                            <ChangeStatus
+                              updatedState={handleUpdatedStatus}
+                              orderId={order.orderId}
+                              productId={item._id}
+                              currentStatus={item.productStatus}
+                            />
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}

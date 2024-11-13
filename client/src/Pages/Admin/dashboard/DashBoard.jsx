@@ -24,15 +24,6 @@ const chartData = Array.from({ length: 12 }, (_, i) => ({
   sales: Math.floor(Math.random() * 7000) + 1000,
 }));
 
-// const recentSales = [
-//   { id: 1, name: "James B", amount: "₹61,231.00", time: "30 minutes ago" },
-//   { id: 2, name: "Megan Markle", amount: "₹263,099.00", time: "5 minutes ago" },
-//   { id: 3, name: "Amy", amount: "₹45,922.00", time: "15 minutes ago" },
-//   { id: 4, name: "James B", amount: "₹61,231.00", time: "30 minutes ago" },
-//   { id: 5, name: "Megan Markle", amount: "₹263,099.00", time: "5 minutes ago" },
-//   // Add more sales data as needed
-// ];
-
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [recentSales, setRecentSales] = useState([]);

@@ -14,12 +14,16 @@ function EditCategory() {
   const [categoryImage, setCategoryImage] = useState("");
   const [image, setImage] = useState(null);
   const [spinner, setSpinner] = useState(false);
+  const [maxDiscount, setMaxDiscount] = useState("");
 
   const { data } = useContext(context); //to field data by default
 
   const error = {};
   const validateForm = () => {
     if (name.trim() === "") error.name = "Category name is required *";
+
+    if (maxDiscount.trim() === "")
+      error.maxDiscount = "Max discount is required *";
 
     if (isNaN(offer)) error.offer = "offer price must a number";
     else if (offer < 0 || offer > 100)
@@ -70,7 +74,7 @@ function EditCategory() {
     formData.append("description", description);
     formData.append("offer", offer);
     formData.append("file", image);
-
+    formData.append("maxDiscount", maxDiscount);
     try {
       const response = await axios.put("/admin/category", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -116,9 +120,23 @@ function EditCategory() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        {offer?.length > 0 && (
+          <>
+            <label className="mr-2">Max Discount :</label>
+            <input
+              type="text"
+              className="border-2 border-gray-400 p-2 rounded-lg flex-grow font-mono"
+              value={maxDiscount}
+              onChange={(e) => setMaxDiscount(e.target.value)}
+            />
+            {message.maxDiscount && (
+              <p className="text-red-700 text-sm">{message.maxDiscount}</p>
+            )}
+          </>
+        )}
         <label className="mr-2">Offer :</label>
         <input
-          type="text"
+          type="number"
           className="border-2 border-gray-400 p-2 rounded-lg flex-grow font-mono"
           value={offer}
           onChange={(e) => setOffer(e.target.value)}
@@ -126,11 +144,6 @@ function EditCategory() {
         {message.offer && (
           <p className="text-red-700 text-sm">{message.offer}</p>
         )}
-
-        {/* </div> */}
-
-        {/* </div> */}
-
         <label className="mr-2">Description :</label>
         <input
           type="text"
@@ -145,7 +158,7 @@ function EditCategory() {
                 categoryImage || existingImage || "https://placehold.co/100x100"
               }
               alt="product image"
-              className="mb-2 w-1/3 h-auto rounded" // Ensures responsive scaling
+              className="mb-2 w-1/3 h-auto rounded"
             />
           </label>
           <input
@@ -162,7 +175,6 @@ function EditCategory() {
             Change image
           </p>
         </div>
-
         {message.name && <p className="text-red-700 text-sm">{message.name}</p>}
         <button
           type="submit"

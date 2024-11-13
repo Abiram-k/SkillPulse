@@ -75,19 +75,26 @@ export const ChangeStatus = ({
               value={updatedStatus}
               onChange={(e) => setUpdatedStatus(e.target.value)}
             >
-              <option value="">----- Select status -----</option>
+              {/* {currentStatus == "processing" && (
+                <option value="processing">processing</option>
+              )} */}
+              {currentStatus == "processing" && (
+                <option value="shipped">shipped</option>
+              )}
 
-              <option value="processing">processing</option>
-              <option value="shipped">shipped</option>
-              {currentStatus !== "processing" ||
-                (currentStatus !== "delivered" && (
-                  <option value="delivered">delivered</option>
-                ))}
-              <option value="cancelled">cancelled</option>
-              {currentStatus !== "returned" ||
+              {currentStatus == "shipped" && (
+                <option value="delivered">delivered</option>
+              )}
+
+              {(currentStatus != "returned" ||
+                currentStatus != "delivered") && (
+                <option value="cancelled">cancelled</option>
+              )}
+
+              {/* {currentStatus !== "returned" ||
                 (currentStatus !== "cancelled" && (
                   <option value="returned">returned</option>
-                ))}
+                ))} */}
             </select>
           </div>
         </div>

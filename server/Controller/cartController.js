@@ -109,7 +109,11 @@ exports.removeCartItem = async (req, res) => {
             const deletedItem = cart.products.splice(productIndex, 1);
 
             cart.grandTotal -= deletedItem[0]?.totalPrice;
-            cart.totalDiscount -= deletedItem[0].offeredPrice;
+            // cart.totalDiscount -= deletedItem[0].offeredPrice;
+            if (deletedItem[0].offeredPrice <= cart.totalDiscount) {
+                cart.totalDiscount -= deletedItem[0].offeredPrice;
+            }
+
             if (cart.grandTotal < cart.appliedCoupon?.purchaseAmount) {
                 cart.appliedCoupon = null
             }
@@ -118,7 +122,6 @@ exports.removeCartItem = async (req, res) => {
                 cart.grandTotal = 0
                 cart.totalDiscount = 0
             }
-
             await cart.save();
             return res.status(200).json({ message: "Item were deleted" })
         } else {
@@ -200,15 +203,19 @@ exports.applyCoupon = async (req, res) => {
             if (cart.appliedCoupon) {
                 if (cart.appliedCoupon.couponType === "Percentage") {
                     cart.products.forEach((product) => {
-                        if (coupon.purchaseAmount <= product.totalPrice) {
-                            const discountAmount = Math.round(product.totalPrice * (coupon.couponAmount / 100));
+                        // if (coupon.purchaseAmount <= product.totalPrice) {
+                        if (coupon.purchaseAmount <= cart.grandTotal) {
+                            const discountAmount =
+                                //  Math.round(
+                                product.totalPrice * (coupon.couponAmount / 100)
+                            // );
 
                             const maxDiscountExceedPercentage = (cart.appliedCoupon.maxDiscount / cart.grandTotal) * 100;
                             const maxDiscountExceedAmount =
                                 product.totalPrice * (maxDiscountExceedPercentage / 100)
 
-                            let appliedDiscount = cart.grandTotal * (coupon.couponAmount / 100).toFixed(2);
-                            
+                            let appliedDiscount = cart.grandTotal * (coupon.couponAmount / 100)
+                            // .toFixed(2);
                             console.log(appliedDiscount, coupon.maxDiscount)
                             if (appliedDiscount > coupon.maxDiscount) {
                                 console.log("working this...")
@@ -218,13 +225,16 @@ exports.applyCoupon = async (req, res) => {
                                 product.offeredPrice = product.totalPrice - discountAmount;
                             }
                         } else {
-                            product.offeredPrice = product.totalPrice; 
+                            product.offeredPrice = product.totalPrice;
                         }
                     });
                 } else {
                     cart.products.forEach((product) => {
                         if (coupon.purchaseAmount <= product.totalPrice) {
-                            const proportionalDiscount = Math.round((product.totalPrice / cart.grandTotal) * coupon.couponAmount);
+                            const proportionalDiscount =
+                                //  Math.round(
+                                (product.totalPrice / cart.grandTotal) * coupon.couponAmount
+                            // );
                             product.offeredPrice = Math.max(0, product.totalPrice - proportionalDiscount);
                         } else {
                             product.offeredPrice = product.totalPrice;

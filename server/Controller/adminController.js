@@ -272,7 +272,7 @@ exports.categoryRestore = async (req, res) => {
 
 exports.editCategory = async (req, res) => {
     try {
-        let { id, name, description, offer } = req.body;
+        let { id, name, description, offer, maxDiscount } = req.body;
         console.log(offer)
         if (!description) {
             description = undefined;
@@ -289,11 +289,16 @@ exports.editCategory = async (req, res) => {
         const updatedCategory = await Category.findByIdAndUpdate(id, updateData, { new: true });
 
         const products = await Product.find({ category: id });
-
         products.forEach((product) => {
-            if (!product.offer || product.offer < offer) {
-                product.offer = offer;
-                product.salesPrice = product.regularPrice - (product.regularPrice * (offer / 100));
+            if (product.offer < offer) {
+                const discountAmount = product.regularPrice * (offer / 100);
+                product.categoryOffer = offer;
+                product.salesPrice = (discountAmount <= maxDiscount)
+                    ? product.regularPrice - discountAmount
+                    : product.regularPrice - maxDiscount;
+            } else {
+                product.categoryOffer = 0;
+                product.salesPrice = product.regularPrice - (product.regularPrice * (product.offer / 100));
             }
         });
         for (const product of products) {
@@ -370,7 +375,6 @@ exports.addProduct = async (req, res) => {
         if (!existProduct) {
             salesPrice = offer ? (regularPrice - (offer / 100) * regularPrice) : regularPrice
         }
-
         const categoryDoc = await Category.findOne({ name: category });
         const brandDoc = await Brand.findOne({ name: brand })
         if (!categoryDoc)
@@ -414,17 +418,6 @@ exports.editProduct = async (req, res) => {
             brand,
             file
         } = req.body;
-        console.log(
-            productName,
-            productDescription,
-            offer,
-            regularPrice,
-            units,
-            category,
-            brand,
-            file
-        )
-
         const { id } = req.params;
         let productImage = []
         productImage = req.files?.flatMap((file) => file?.path)
@@ -435,7 +428,6 @@ exports.editProduct = async (req, res) => {
                 productImage.push(file);
             }
         }
-        console.log("id:", id)
         const existProduct = await Product.findOne({
             productName: { $regex: new RegExp(`^${productName}$`), $options: 'i' },
             _id: { $ne: id }
@@ -545,9 +537,13 @@ exports.editStatus = async (req, res) => {
                 console.log("Product not found in order items");
                 return res.status(404).json({ message: "Product not found" });
             }
-            console.log("test flag", updatedStatus)
+            if (updatingOrder.paymentMethod == "cod" &&
+                updatedStatus == "delivered") {
+                updatingOrder.paymentStatus = "Success";
+            }
             updatingOrder.orderItems[productIndex].productStatus = updatedStatus;
             console.log(updatingOrder);
+
             await updatingOrder.save();
             console.log("saved")
             return res.status(200).json({ message: "updated order status" })
@@ -690,9 +686,67 @@ exports.deleteCoupon = async (req, res) => {
 
 exports.getAllOrders = async (req, res) => {
     try {
-        const orders = await Orders.find()
+        const { filter, startDate, endDate } = req.query;
+        function formatDateToDDMMYYYY(date) {
+            const day = String(date.getDate())
+                .padStart(2, '0');
+            const month = String(date.getMonth() + 1)
+                .padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        console.log(filter, startDate, endDate);
+        let from;
+        let to;
+
+        switch (filter) {
+            case "Daily": {
+                from = formatDateToDDMMYYYY(new Date());
+                to = formatDateToDDMMYYYY(new Date());
+                break;
+            }
+            case "Weekly": {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                from = formatDateToDDMMYYYY(weekAgo);
+                to = formatDateToDDMMYYYY(new Date());
+                break;
+            }
+            case "Monthly": {
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                monthAgo.setDate(1);
+                monthAgo.setHours(0, 0, 0, 0);
+                from = formatDateToDDMMYYYY(monthAgo);
+                const currentMonth = new Date();
+                currentMonth.setHours(23, 59, 59, 999);
+                to = formatDateToDDMMYYYY(currentMonth);
+                break;
+            }
+            case "Custom": {
+                if (!startDate || !endDate)
+                    return res.status(400).json({ message: "Enter date range" });
+
+                from = formatDateToDDMMYYYY(new Date(startDate));
+                to = formatDateToDDMMYYYY(new Date(endDate));
+                break;
+            }
+            default: {
+                console.log("No filter option was found");
+
+            }
+        }
+
+
+        const query = {};
+
+        if (from && to) {
+            query.orderDate = { $gte: from, $lte: to };
+        }
+        const orders = await Orders.find(query)
+
             .populate([{ path: "user" }, { path: "orderItems.product" }]);
-        console.log(orders, "<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>..")
+
         if (!orders)
             return res.status(400).json({ message: "No orders were found" });
         return res.status(200).json({ message: "Successfully fetched all orders", orders })

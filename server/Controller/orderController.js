@@ -8,6 +8,7 @@ const User = require("../models/userModel");
 const Product = require('../models/productModel');
 const Wallet = require('../models/walletModel');
 const Coupon = require('../models/couponModel.');
+const Razorpay = require("razorpay");
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
@@ -323,9 +324,11 @@ exports.cancelOrder = async (req, res) => {
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
         if (orderIndex == -1)
             console.log("Failed to find order")
+        
         order.orderItems[orderIndex].productStatus = "cancelled";
         const refundPrice = order.orderItems[orderIndex]?.price;
-        console.log(refundPrice, "DSFADASFASf")
+        console.log(refundPrice, "DSFADASFASf");
+
         await order.save();
         const walletData = {
             amount: refundPrice,
@@ -372,7 +375,6 @@ exports.returnOrder = async (req, res) => {
         return res.status(500).json({ message: "Error occured while returning the order" })
     }
 }
-const Razorpay = require("razorpay");
 exports.verifyPayment = async (req, res) => {
     const instance = new Razorpay({
         key_id: process.env.RAZORPAY_ID,

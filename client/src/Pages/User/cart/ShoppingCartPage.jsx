@@ -376,7 +376,7 @@ const ShoppingCartPage = () => {
                           offerPrice(
                             cartItems[0]?.appliedCoupon?.couponAmount,
                             cartItems[0]?.appliedCoupon?.couponType
-                          )}
+                          ).toFixed()}
                       </span>
                     </div>
                     <div className="flex justify-between font-bold pt-3 border-t border-gray-200">

@@ -199,7 +199,7 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (paymentMethod == "cod" && summary.checkoutTotal >= 1000) {
+    if (paymentMethod == "cod" && summary.checkoutTotal >= 100000) {
       Toast.fire({
         icon: "error",
         title: `Cash on delivery is not applicable`,
@@ -412,7 +412,7 @@ const Checkout = () => {
                         }`}
                       >
                         {" "}
-                        ₹ {summary.checkoutTotal}
+                        ₹ {Math.round(summary.checkoutTotal)}
                       </span>
                     </p>
                     {walletData.totalAmount < summary.checkoutTotal && (
@@ -520,10 +520,12 @@ const Checkout = () => {
                           //     cartItems[0]?.appliedCoupon?.couponAmount,
                           //     cartItems[0]?.appliedCoupon?.couponType
                           //   )
-                          parseFloat(
-                            cartItems[0]?.grandTotal -
-                              cartItems[0]?.totalDiscount
-                          ).toFixed(2)
+                          Math.round(
+                            parseFloat(
+                              cartItems[0]?.grandTotal -
+                                cartItems[0]?.totalDiscount
+                            )
+                          )
                         }
                       </span>
                     </div>
@@ -533,7 +535,7 @@ const Checkout = () => {
                         {offerPrice(
                           cartItems[0]?.appliedCoupon?.couponAmount,
                           cartItems[0]?.appliedCoupon?.couponType
-                        )}
+                        ).toFixed()}
                       </span>
                     </div>
                   </>

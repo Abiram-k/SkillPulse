@@ -22,6 +22,13 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  categoryOffer: {
+    type: Number,
+    required: false,
+    default: 0,
+    min: 0,
+    max: 100
+  },
   offer: {
     type: Number,
     required: false,

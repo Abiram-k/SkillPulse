@@ -14,8 +14,7 @@ const SearchProducts = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("/products"
-        );
+        const response = await axios.get("/products");
         console.log("product from homepage:", products);
         setProducts(response.data.products);
         setCategory(response.data.category);
@@ -95,14 +94,26 @@ const SearchProducts = () => {
                     {product.productDescription}
                   </p>
                   <p className="price font-bold  text-md ">
-                    {" "}
-                    {product.salesPrice}₹
-                    <span className="lg:ms-3 old-price line-through text-gray-500 text-sm">
-                      {product.regularPrice}₹
-                    </span>{" "}
-                    <span className="discount text-green-600 text-sm">
-                      {index % 2 === 0 ? "20% off" : "75% off"}
+                    {product.salesPrice < product.regularPrice && (
+                      <span>₹ {product.salesPrice.toFixed(0)}</span>
+                    )}
+                    <span
+                      className={`${
+                        product.salesPrice < product.regularPrice
+                          ? "line-through text-gray-500"
+                          : "text-green-400"
+                      }  ml-2`}
+                    >
+                      ₹ {product.regularPrice}{" "}
                     </span>
+                    {(product.categoryOffer || product?.offer > 0) && (
+                      <span className="text-red-500 ml-2 text-xs">
+                        {product.categoryOffer >= product.offer
+                          ? product.categoryOffer
+                          : product.offer}{" "}
+                        % off
+                      </span>
+                    )}{" "}
                   </p>
                   <p className="text-green-600 text-xs">
                     {product.salesPrice > 1000 ? "Free Delivery" : ""}

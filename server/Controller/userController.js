@@ -301,9 +301,10 @@ exports.getUserData = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
     try {
-        const { brand, category, price, newArrivals } = req.query;
+        const { brand, category, price, newArrivals, offer } = req.query;
         const query = {};
 
+        console.log(">>>>>>>>><<<<<<<<<<<", offer, ">>>>>>>>>>>>>>>>>>>?>>>>>>>>>>>>>")
         if (category) {
             const categoryDoc = await Category.findOne({ name: category });
             if (categoryDoc) query.category = categoryDoc._id.toString();
@@ -323,6 +324,15 @@ exports.getProducts = async (req, res) => {
                 query.salesPrice = { $gte: 10000, $lte: 50000 };
             } else if (price === 'above-50000') {
                 query.salesPrice = { $gt: 50000 };
+            }
+        }
+        if (offer) {
+            if (offer === "10-20") {
+                query.offer = { $lte: 20, $gte: 10 };
+            } else if (offer === "20-30") {
+                query.offer = { $lte: 30, $gte: 20 };
+            } else if (offer === "above-50") {
+                query.offer = { $gte: 50 };
             }
         }
 
@@ -346,6 +356,7 @@ exports.getProducts = async (req, res) => {
             .populate('category')
             .populate('brand');
 
+            console.log(products)
         const categoryDoc = await Category.find();
         const brandDoc = await Brand.find();
 
