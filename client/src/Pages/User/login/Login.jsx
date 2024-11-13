@@ -11,6 +11,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({});
+  const [referralCode, setReferralCode] = useState("");
+  const [isReferral, setIsReferral] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   let error = {};
@@ -26,8 +28,12 @@ function Login() {
     } else if (password.length < 8) {
       error.password = "Password is incorrect";
     }
+    if (referralCode.trim() !== "" && referralCode.length != 8) {
+      error.referralCode = "referralCode is incorrect";
+    }
     return error;
   };
+
   useEffect(() => {
     localStorage.removeItem("otpTimer");
     dispatch(passwordReseted());
@@ -43,8 +49,8 @@ function Login() {
       return;
     }
     try {
-      console.log(email, password);
-      const response = await axios.post("/login", { email, password });
+      console.log(email, password,referralCode);
+      const response = await axios.post("/login", { email, password,referralCode });
       if (response.status === 200) {
         dispatch(addUser(response.data.user));
         setMessage({ response: response?.data?.message });
@@ -56,6 +62,9 @@ function Login() {
   };
   const handleGoogleAuth = () => {
     window.location.href = `http://localhost:3000/auth/google?method=login`;
+  };
+  const toggleReferral = () => {
+    setIsReferral((prev) => !prev);
   };
 
   useEffect(() => {
@@ -109,13 +118,30 @@ function Login() {
               {message.email && <p className="error">{message.email}</p>}
             </div>
             <div>
+              <div>
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="rounded p-2 mx-28 sm:mx-0 w-3/4 sm:w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
+                />
+                {message.password && (
+                  <p className="error">{message.password}</p>
+                )}
+              </div>
+            </div>
+            <div>
               <input
-                type="password"
-                placeholder="Enter password"
-                onChange={(e) => setPassword(e.target.value)}
+                type="text"
+                placeholder="Referral Code"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
                 className="rounded p-2 mx-28 sm:mx-0 w-3/4 sm:w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
               />
-              {message.password && <p className="error">{message.password}</p>}
+              {message.referralCode && (
+                <p className="error">{message.referralCode}</p>
+              )}
             </div>
             <div className="flex justify-center">
               <button
@@ -126,6 +152,17 @@ function Login() {
               </button>
             </div>
           </form>
+          <div></div>
+          {/* {!isReferral && (
+                <div className="text-center mt-4">
+                  <button
+                    onClick={toggleReferral}
+                    className="text-gray-400 text-sm hover:underline"
+                  >
+                    Referral Code ?
+                  </button>
+                </div>
+              )} */}
           <div className="text-center mt-4">
             <Link
               to="/verifyEmail"

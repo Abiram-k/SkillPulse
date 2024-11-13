@@ -102,8 +102,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: true
+    },
+    isreferredUser: {
+        type: Boolean,
+        default: false
+    },
+    referredCount: {
+        type: Number,
+        default: 0
     }
-
 }, { timestamps: true }
 )
 

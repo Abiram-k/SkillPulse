@@ -246,8 +246,8 @@ exports.forgotPassword = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body;
-        console.log(email, password);
+        const { email, password, referralCode } = req.body;
+        console.log(email, password, referralCode);
         // const user = await User.findOne({ email });
         const user = await User.findOne({
             email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
@@ -257,6 +257,50 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: "User not found !" });
         }
         else {
+            const walletDoc = await Wallet.findOne({ user: user._id })
+            if (!walletDoc) {
+                const wallet = new Wallet({
+                    user: user._id,
+                    totalAmount: 0,
+                    transaction: []
+                })
+                await wallet.save();
+            }
+            if (referralCode) {
+                if (user.isreferredUser) {
+
+                    return res.status(401).json({ message: "You already a reffered user" })
+                }
+                if (user.referralCode == referralCode) {
+                    return res.status(401).json({ message: "You cannot use your own code" })
+                } else {
+                    const refUser = await User.findOne({ referralCode });
+                    if (!refUser || refUser._id == user._id) {
+                        console.log("Ref user not found")
+                        return res.status(401).json({ message: "Ref user not found" });
+                    } else {
+                        const refWallet = await Wallet.findOne({ user: refUser._id })
+                        if (!refWallet)
+                            console.log("Failed to find refWallet");
+                        const refferedWallet = await Wallet.findOne({ user: user._id });
+                        if (!refferedWallet)
+                            console.log("Failed to find reffered wallet")
+                        const walletData = {
+                            amount: 200,
+                            description: "Referral Bonus",
+                            transactionId: `REF-${user._id}-${Date.now()}`
+                        }
+                        await Wallet.findOneAndUpdate({ user: refUser._id }, { $push: { transaction: walletData }, $inc: { totalAmount: parseFloat(200) } }, { upsert: true, new: true });
+
+                        await Wallet.findOneAndUpdate({ user: user._id }, { $push: { transaction: walletData }, $inc: { totalAmount: parseFloat(200) } }, { upsert: true, new: true });
+
+                        refUser.referredCount += 1
+                        await refUser.save()
+                        user.isreferredUser = true;
+                        user.save()
+                    }
+                }
+            }
             const isValidPassword = await bcrypt.compare(password, user.password);
             if (!isValidPassword) {
                 return res.status(400).json({ message: "Password is incorrect" });
@@ -265,15 +309,7 @@ exports.login = async (req, res) => {
                 return res.status(400).json({ message: "User were blocked " });
             }
             else {
-                const walletDoc = await Wallet.findOne({ user: user._id })
-                if (!walletDoc) {
-                    const wallet = new Wallet({
-                        user: user._id,
-                        totalAmount: 0,
-                        transaction: []
-                    })
-                    await wallet.save();
-                }
+
                 // jwt token sign
                 const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE, process.env.JWT_SECERETE, { expiresIn: '1h' })
                 res.cookie('userToken',
