@@ -30,6 +30,7 @@ const AccountOverview = () => {
   const [spinner, setSpinner] = useState(false);
   const [message, setMessage] = useState({});
   const [editMode, setEditMode] = useState(false);
+  const [referral, setRefferal] = useState();
   const dispatch = useDispatch();
 
   const formValidate = () => {
@@ -246,20 +247,33 @@ const AccountOverview = () => {
             )}
           </div>
           <div>
-            <label className="block mb-2">password</label>
-            <input
-              type="password"
-              className="w-full bg-gray-700 rounded-lg p-2"
-              defaultValue={"* * * * * * * *"}
-              disabled
-            />
-            {/* <Link
-              to={"/user/changePassword"}
-              className="text-orange-500 text-sm border-b-2 pb-1 border-orange-500"
-            >
-              Change Password
-            </Link> */}
+            <div>
+              <label className="block mb-2">password</label>
+              <input
+                type="password"
+                className="w-full bg-gray-700 rounded-lg p-2"
+                defaultValue={"* * * * * * * *"}
+                disabled
+              />
+            </div>
           </div>
+          {/* <div>
+            <label className="block mb-2">Referral Code</label>
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={""}
+                className="w-full bg-gray-700 rounded-lg p-2 text-white"
+                readOnly
+              />
+              <button
+                onClick={""}
+                className="bg-gray-700 text-white rounded p-2 ml-2"
+              >
+                {"Copy"}
+              </button>
+            </div>
+          </div> */}
         </div>
 
         <div>

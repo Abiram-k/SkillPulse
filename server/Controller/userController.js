@@ -107,6 +107,18 @@ exports.otp = async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
         else if (req.session.otp == otp) {
+            function generateReferralCode(length = 8) {
+                const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                let referralCode = "";
+
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * characters.length);
+                    referralCode += characters[randomIndex];
+                }
+                return referralCode;
+            }
+            user.referralCode = generateReferralCode();
+            await user.save();
             const user = await User.create(req.session.user)
             res.status(200).json({ message: "User Created Succesfully", user })
             req.session.otp = null;
@@ -240,7 +252,7 @@ exports.login = async (req, res) => {
         const user = await User.findOne({
             email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
         });
-        console.log(user);
+        // console.log(user);
         if (!user) {
             return res.status(400).json({ message: "User not found !" });
         }
@@ -304,7 +316,6 @@ exports.getProducts = async (req, res) => {
         const { brand, category, price, newArrivals, offer } = req.query;
         const query = {};
 
-        console.log(">>>>>>>>><<<<<<<<<<<", offer, ">>>>>>>>>>>>>>>>>>>?>>>>>>>>>>>>>")
         if (category) {
             const categoryDoc = await Category.findOne({ name: category });
             if (categoryDoc) query.category = categoryDoc._id.toString();
@@ -356,7 +367,7 @@ exports.getProducts = async (req, res) => {
             .populate('category')
             .populate('brand');
 
-            console.log(products)
+        // console.log(products)
         const categoryDoc = await Category.find();
         const brandDoc = await Brand.find();
 
@@ -399,7 +410,7 @@ exports.getBrandCategoryInfo = async (req, res) => {
         }
         const { category, brand } = productData;
 
-        console.log(category, brand)
+        // console.log(category, brand)
         const isCategoryAvailable = category && category.isListed && !category.isDeleted;
         const isBrandAvailable = brand && brand.isListed && !brand.isDeleted;
 

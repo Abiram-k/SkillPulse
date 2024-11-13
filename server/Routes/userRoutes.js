@@ -42,12 +42,38 @@ router.get('/auth/google/callback',
         { failureRedirect: 'http://localhost:5173/login' }),
     async (req, res) => {
         try {
+            console.log("hello")
             const state = JSON.parse(req.query.state || '{}');
             const method = state.method;
-            const email = req.user?.emails?.[0]?.value;
+            const email = req.user?.email;
 
+            function generateReferralCode(length = 8) {
+                const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                let referralCode = "";
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * characters.length);
+                    referralCode += characters[randomIndex];
+                }
+                return referralCode;
+            }
+            // console.log(req.user.email)
+            const existingUser = await User.findOne({ email });
+
+            console.log(existingUser);
+            if (!existingUser.referralCode) {
+                existingUser.referralCode = generateReferralCode();
+                await existingUser.save();
+            }
+            const walletDoc = await Wallet.findOne({ user: existingUser._id })
+            if (!walletDoc) {
+                const wallet = new Wallet({
+                    user: existingUser._id,
+                    totalAmount: 0,
+                    transaction: []
+                })
+                await wallet.save();
+            }
             if (method == 'signup') {
-                const existingUser = User.findOne(email);
                 if (existingUser) {
                     return res.redirect('http://localhost:5173/login?error=user_exists');
                 }
@@ -65,6 +91,11 @@ router.get('/auth/google/callback',
                 sameSite: 'Lax',
                 maxAge: 3600000
             });
+
+
+
+
+
 
             res.redirect('http://localhost:5173/googleRedirect')
         } catch (error) {
@@ -112,6 +143,7 @@ router.patch("/cartCouponRemove/:id", cartController.removeCoupon)
 
 router.post("/verify-payment", orderController.verifyPayment)
 const Razorpay = require("razorpay");
+const Wallet = require("../models/walletModel");
 
 router.post("/create-razorpay-order", async (req, res) => {
     const instance = new Razorpay({

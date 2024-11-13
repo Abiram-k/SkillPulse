@@ -83,42 +83,45 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Sales */}
         <div className="bg-white p-6 rounded-lg  shadow overflow-y-scroll">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Sales</h2>
           </div>
           <div className="space-y-4">
             {recentSales.length > 0 ? (
-              recentSales?.map((sale) => (
-                <div
-                  key={sale?._id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    {/* <div className="w-10 h-10 bg-gray-200 rounded-full" /> */}
-                    <img
-                      src={
-                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCuoop0MD3fNefnFp8SWPdfnsXdOzFBeAQg&s" ||
-                        sale.user.profileImage
-                      }
-                      alt=""
-                      className="w-10 h-10 bg-gray-200 rounded-full"
-                    />
-                    <div>
-                      <p className="font-medium text-black">
-                        {sale?.user?.firstName}
-                        {""}
-                        {sale?.user?.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500">{sale?.orderDate}</p>
+              recentSales
+                ?.reverse()
+                .slice(0, 5)
+                .map((sale) => (
+                  <div
+                    key={sale?._id}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={
+                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCuoop0MD3fNefnFp8SWPdfnsXdOzFBeAQg&s" ||
+                          sale.user.profileImage
+                        }
+                        alt=""
+                        className="w-10 h-10 bg-gray-200 rounded-full"
+                      />
+                      <div>
+                        <p className="font-medium text-black">
+                          {sale?.user?.firstName}
+                          {""}
+                          {sale?.user?.lastName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {sale?.orderDate}
+                        </p>
+                      </div>
                     </div>
+                    <span className="font-medium text-black">
+                      {sale?.totalDiscount}
+                    </span>
                   </div>
-                  <span className="font-medium text-black">
-                    {sale?.totalDiscount}
-                  </span>
-                </div>
-              ))
+                ))
             ) : (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

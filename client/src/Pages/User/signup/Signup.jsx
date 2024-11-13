@@ -58,7 +58,7 @@ const Signup = () => {
     return error;
   };
 
-  const notification = document.getElementById("errorNotification");
+  // const notification = document.getElementById("errorNotification");
   useEffect(() => {
     localStorage.removeItem("otpTimer");
   }, []);
@@ -110,15 +110,9 @@ const Signup = () => {
       console.log(error);
     }
   };
-
-
-  
-const handleGoogleAuth = () => {
-  window.location.href = `http://localhost:3000/auth/google?method=signup`;
-};
-
-
-
+  const handleGoogleAuth = () => {
+    window.location.href = `http://localhost:3000/auth/google?method=signup`;
+  };
   return (
     <div className="text-white text-center my-10">
       {/* popup notification */}
