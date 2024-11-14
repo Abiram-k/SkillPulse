@@ -2,20 +2,19 @@ import React from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 
-// Register chart components
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
 const PieChart = ({ orderStatusCount }) => {
   const chartData = {
-    labels: Object.keys(orderStatusCount), 
+    labels: Object.keys(orderStatusCount),
     datasets: [
       {
         label: "Order Status Distribution",
-        data: Object.values(orderStatusCount), 
+        data: Object.values(orderStatusCount),
         backgroundColor: [
-          "rgba(255, 99, 132, 0.6)", 
-          "rgba(54, 162, 235, 0.6)", 
-          "rgba(255, 205, 86, 0.6)", 
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(255, 205, 86, 0.6)",
           "rgba(75, 192, 192, 0.6)",
           "rgba(153, 102, 255, 0.6)",
         ],
@@ -46,11 +45,10 @@ const PieChart = ({ orderStatusCount }) => {
 
   return (
     <div className="mt-4">
-    <div className=" p-4 rounded shadow w-[200px] h-[200px]">
-      <Pie data={chartData} options={options} />
+      <div className=" p-4 rounded shadow w-[350px] h-[300px]">
+        <Pie data={chartData} options={options} />
+      </div>
     </div>
-  </div>
-  
   );
 };
 

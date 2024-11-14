@@ -268,7 +268,6 @@ exports.login = async (req, res) => {
             }
             if (referralCode) {
                 if (user.isreferredUser) {
-
                     return res.status(401).json({ message: "You already a reffered user" })
                 }
                 if (user.referralCode == referralCode) {

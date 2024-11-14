@@ -6,6 +6,7 @@ import { addUser, passwordReseted } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import axiosOrg from "axios";
 import { Toast } from "@/Components/Toast";
 function Login() {
   const [email, setEmail] = useState("");
@@ -25,8 +26,8 @@ function Login() {
     }
     if (!password.trim()) {
       error.password = "Password is required.";
-    } else if (password.length < 8) {
-      error.password = "Password is incorrect";
+      // } else if (password.length < 8) {
+      //   error.password = "Password is incorrect";
     }
     if (referralCode.trim() !== "" && referralCode.length != 8) {
       error.referralCode = "referralCode is incorrect";
@@ -49,8 +50,17 @@ function Login() {
       return;
     }
     try {
-      console.log(email, password,referralCode);
-      const response = await axios.post("/login", { email, password,referralCode });
+      console.log(email, password, referralCode);
+      const response = await axios.post("/login", {
+        email,
+        password,
+        referralCode,
+      });
+      // const response = await axiosOrg.post(
+      //   "https://www.knowledgemart.online/api/v1/user/login",
+      //   { email, password }
+      // );
+      alert("sucess");
       if (response.status === 200) {
         dispatch(addUser(response.data.user));
         setMessage({ response: response?.data?.message });
@@ -70,7 +80,6 @@ function Login() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const error = urlParams.get("error");
-
     if (error === "user_exists") {
       Toast.fire({
         icon: "error",

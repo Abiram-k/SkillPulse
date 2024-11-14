@@ -15,6 +15,8 @@ import { Toast } from "../../../Components/Toast";
 import { Link } from "react-router-dom";
 import { ChangePassword } from "@/Components/ChangePassword";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AccountOverview = () => {
   const user = useSelector((state) => state.users.user);
@@ -80,9 +82,30 @@ const AccountOverview = () => {
       });
     }
   };
-  // const handleImageToDb = (e) => {
-  //   const imageFile = e.target.files[0];
-  // };
+  const handleCopyReferralCode = (e) => {
+    e.preventDefault();
+    navigator.clipboard
+      .writeText(referral)
+      .then(() => {
+        toast.success("Text copied to clipboard!", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          style: { backgroundColor: "#008000", color: "#ffffff" },
+        });
+      })
+      .catch((error) => {
+        Toast.fire({
+          icon: "error",
+          title: "Error occured while copying",
+        });
+      });
+  };
 
   useEffect(() => {
     (async () => {
@@ -95,6 +118,7 @@ const AccountOverview = () => {
         setMobileNumber(response.data.userData.mobileNumber);
         setUserProfile(response.data.userData);
         setProfileImage(response.data.userData.profileImage);
+        setRefferal(response.data.userData.referralCode);
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());
@@ -257,23 +281,25 @@ const AccountOverview = () => {
               />
             </div>
           </div>
-          {/* <div>
+          <div>
             <label className="block mb-2">Referral Code</label>
             <div className="flex items-center">
               <input
                 type="text"
-                value={""}
+                value={referral}
                 className="w-full bg-gray-700 rounded-lg p-2 text-white"
-                readOnly
+                // readOnly
+                disabled
               />
               <button
-                onClick={""}
+                onClick={handleCopyReferralCode}
                 className="bg-gray-700 text-white rounded p-2 ml-2"
               >
                 {"Copy"}
               </button>
+              <ToastContainer />
             </div>
-          </div> */}
+          </div>
         </div>
 
         <div>
