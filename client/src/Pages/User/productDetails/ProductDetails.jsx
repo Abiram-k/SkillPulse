@@ -6,6 +6,7 @@ import axios from "@/axiosIntercepters/AxiosInstance";
 import { logoutUser, setProductDetails } from "../../../redux/userSlice";
 import { Toast } from "@/Components/Toast";
 import { Link, useOutletContext } from "react-router-dom";
+import { showToast } from "@/Components/ToastNotification";
 
 const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -130,23 +131,14 @@ const ProductDetails = () => {
         }
         return prev;
       });
-
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      showToast("success", `${response?.data.message}`);
     } catch (error) {
       if (error?.response.data.isBlocked) {
         dispatch(logoutUser());
       }
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data?.message}`,
-      });
+      showToast("error", `${error?.response?.data?.message}`);
       console.log(error);
     }
-    // } else {
-    // }
   };
 
   useEffect(() => {

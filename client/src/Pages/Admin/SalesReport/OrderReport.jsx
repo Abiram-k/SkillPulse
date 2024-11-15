@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { ArrowDown } from "lucide-react";
 import PieChart from "./PieChart";
+import * as XLSX from "xlsx";
 
 const OrderReport = () => {
   const [filter, setFilter] = useState("Daily");
@@ -14,6 +15,57 @@ const OrderReport = () => {
   const [totalCategoryDiscount, setTotalCategoryDiscount] = useState("");
   const [totalCouponDiscount, setTotalCouponDiscount] = useState("");
   const [totalProductDiscount, setTotalProductDiscount] = useState("");
+  const [salesData, setSalesData] = useState([
+    {
+      slNo: "",
+      orderNumber: "",
+      orderDate: "",
+      productName: "",
+      paymentMethod: "",
+      userName: "",
+      phoneNumber: "",
+    },
+  ]);
+  useEffect(() => {
+    if (filter !== "Custom") {
+      setStartDate("");
+      setEndDate("");
+    }
+    (async () => {
+      try {
+        const response = await axios(
+          `/admin/recentSales?filter=${filter}&startDate=${startDate}&endDate=${endDate}`
+        );
+        setOrders(response?.data?.orders);
+        console.log("hellooooo", response?.data?.orders || []);
+
+        const updatedSalesData = [];
+
+        response?.data?.orders.forEach((order) => {
+          order?.orderItems.forEach((item, index) => {
+            updatedSalesData.push({
+              slNo: index + 1,
+              orderNumber: order.orderId,
+              orderDate: order.orderDate,
+              orderStatus: item.productStatus,
+              productName: item.product.productName,
+              userName: order.user.firstName,
+              phoneNumber: order.user.mobileNumber,
+              paymentMethod: order.paymentMethod,
+              paymentStatus: order.paymentStatus,
+              grandTotal: item.totalPrice,
+              totalDiscount: item.price,
+              discountedAmount: item.totalPrice - item.price || 0,
+            });
+          });
+        });
+        setSalesData(updatedSalesData);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, [filter, startDate, endDate]);
+
   const reportRef = useRef();
 
   const paymentMethodCounts = orders.reduce((acc, order) => {
@@ -35,6 +87,14 @@ const OrderReport = () => {
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
 
     pdf.save(`${filter} Sales-report.pdf`);
+  };
+
+  const downloadExcel = () => {
+    console.log(salesData, "EXcell data");
+    const worksheet = XLSX.utils.json_to_sheet(salesData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${filter} Sales Report`);
+    XLSX.writeFile(workbook, "sales_report.xlsx");
   };
 
   const calculateTotalProductOffer = () => {
@@ -103,23 +163,6 @@ const OrderReport = () => {
     });
     return Object.keys(costumers).length;
   };
-  useEffect(() => {
-    if (filter !== "Custom") {
-      setStartDate("");
-      setEndDate("");
-    }
-    (async () => {
-      try {
-        const response = await axios(
-          `/admin/recentSales?filter=${filter}&startDate=${startDate}&endDate=${endDate}`
-        );
-        setOrders(response?.data?.orders);
-        console.log("hellooooo", response?.data?.orders);
-      } catch (error) {
-        console.log(error);
-      }
-    })();
-  }, [filter, startDate, endDate]);
 
   return (
     <div className="p-6 font-mono rounded ">
@@ -158,14 +201,22 @@ const OrderReport = () => {
             />
           </div>
         )}
-
-        <button
-          className="bg-green-500 rounded shadow-md font-bold px-4 h-10 flex items-center justify-center space-x-1"
-          onClick={downloadPDF}
-        >
-          <ArrowDown className="w-4 h-4" />
-          <span>Download</span>
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="bg-green-500 rounded shadow-md font-bold px-4 h-10 flex items-center justify-center space-x-1"
+            onClick={downloadPDF}
+          >
+            <ArrowDown className="w-4 h-4" />
+            <span>Download pdf</span>
+          </button>
+          <button
+            className="bg-green-500 rounded shadow-md font-bold px-4 h-10 flex items-center justify-center space-x-1"
+            onClick={downloadExcel}
+          >
+            <ArrowDown className="w-4 h-4" />
+            <span>Download Excel</span>
+          </button>
+        </div>
       </div>
       <div className="p-6 rounded-lg bg-white shadow-lg" ref={reportRef}>
         <h3 className="text-3xl font-extrabold mb-6 text-gray-900">
@@ -269,20 +320,19 @@ const OrderReport = () => {
 
         <div className="mt-6 bg-gray-50 p-6 rounded-lg shadow-md flex justify-between items-center">
           <div>
-
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Order Status
-          </h3>
-          {Object.keys(orderStatusCount).map((status) => (
-            <p key={status} className="text-lg text-gray-700">
-              {status}:{" "}
-              <span className="font-semibold text-gray-900">
-                {orderStatusCount[status]}
-              </span>
-            </p>
-          ))}
-          </div>      
-          <PieChart orderStatusCount={orderStatusCount}/>
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+              Order Status
+            </h3>
+            {Object.keys(orderStatusCount).map((status) => (
+              <p key={status} className="text-lg text-gray-700">
+                {status}:{" "}
+                <span className="font-semibold text-gray-900">
+                  {orderStatusCount[status]}
+                </span>
+              </p>
+            ))}
+          </div>
+          <PieChart orderStatusCount={orderStatusCount} />
         </div>
 
         <div className="overflow-x-auto mt-6 rounded-lg shadow-md">

@@ -310,7 +310,7 @@ exports.login = async (req, res) => {
             else {
 
                 // jwt token sign
-                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE, process.env.JWT_SECERETE, { expiresIn: '1h' })
+                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE, { expiresIn: '3d' })
                 res.cookie('userToken',
                     token,
                     {

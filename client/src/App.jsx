@@ -47,10 +47,14 @@ import CouponManagement from "./Pages/Admin/couponManagment/CouponManagement";
 import Coupon from "./Pages/User/coupon/Coupon";
 import { Toaster } from "./Components/ui/toaster";
 import ProtectCheckout from "./Protected/ProtectCheckout";
-import OrderReport from "./Pages/SalesReport/OrderReport";
+import OrderReport from "./Pages/Admin/SalesReport/OrderReport";
+import AddCoupon from "./Pages/Admin/couponManagment/AddCoupon";
+import ToastNotification from "./Components/ToastNotification";
+import BannerManagement from "./Pages/Admin/bannerManagement/BannerManagement";
 function App() {
   return (
     <>
+      <ToastNotification />
       <Router>
         <Breadcrumbs />
         <Routes>
@@ -313,18 +317,26 @@ function App() {
               }
             />
             <Route
-              path="customers"
-              element={
-                <ProtectedDashboardAdmin>
-                  <Customers />
-                </ProtectedDashboardAdmin>
-              }
-            />
-            <Route
               path="coupon"
               element={
                 <ProtectedDashboardAdmin>
                   <CouponManagement />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
+              path="coupon/add"
+              element={
+                <ProtectedDashboardAdmin>
+                  <AddCoupon />
+                </ProtectedDashboardAdmin>
+              }
+            />
+             <Route
+              path="bannerMangement"
+              element={
+                <ProtectedDashboardAdmin>
+                  <BannerManagement />
                 </ProtectedDashboardAdmin>
               }
             />

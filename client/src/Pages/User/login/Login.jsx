@@ -6,7 +6,6 @@ import { addUser, passwordReseted } from "../../../redux/userSlice";
 import { useDispatch } from "react-redux";
 import Notification from "../../../Components/Notification";
 import axios from "@/axiosIntercepters/AxiosInstance";
-import axiosOrg from "axios";
 import { Toast } from "@/Components/Toast";
 function Login() {
   const [email, setEmail] = useState("");
@@ -56,11 +55,6 @@ function Login() {
         password,
         referralCode,
       });
-      // const response = await axiosOrg.post(
-      //   "https://www.knowledgemart.online/api/v1/user/login",
-      //   { email, password }
-      // );
-      alert("sucess");
       if (response.status === 200) {
         dispatch(addUser(response.data.user));
         setMessage({ response: response?.data?.message });

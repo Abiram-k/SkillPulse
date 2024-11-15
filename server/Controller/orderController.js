@@ -32,13 +32,18 @@ const generateOrderDate = () => {
 exports.addOrder = async (req, res) => {
     try {
         const { paymentMethod, totalAmount, appliedCoupon } = req.query;
-        console.log(paymentMethod, totalAmount, appliedCoupon);
+        // console.log(paymentMethod, totalAmount, appliedCoupon);
 
         const checkoutItems = req.body.map(item => {
             const { authUser, ...rest } = item;
             return rest;
         });
-        // console.log(checkoutItems, ">>>>>>>>>>>>>>><<<<<<<<<<<<<<<");
+        const coupon = await Coupon.findById(appliedCoupon);
+        console.log(appliedCoupon)
+        console.log(coupon)
+        console.log(appliedCoupon && !coupon)
+        if (appliedCoupon && !coupon)
+            return res.status(400).json({ message: "Coupon is unavailable" })
 
         const { id } = req.params;
         const order = await Orders.findOne({ user: id });
@@ -47,14 +52,13 @@ exports.addOrder = async (req, res) => {
         if (!user.appliedCoupons) {
             user.appliedCoupons = [];
         }
-
         const deliveryAddressId = user.deliveryAddress;
         if (!deliveryAddressId)
             return res.status(400).json({ message: "Add a delivery Address" });
 
         const [address] = user.address.filter((addr) => addr._id.toString() === deliveryAddressId);
 
-        console.log(paymentMethod)
+        // console.log(paymentMethod)
         let orderItems = [];
         let totalQuantity = 0;
         let paymentStatus = "";
@@ -109,7 +113,6 @@ exports.addOrder = async (req, res) => {
             }
         }
         const totalDiscount = checkoutItems[0].totalDiscount;
-        // console.log(totalDiscount, "TOTALLLLL")
         const currentOrderData = {
             user: id,
             orderId: generateOrderId(),
@@ -123,9 +126,7 @@ exports.addOrder = async (req, res) => {
             paymentMethod,
             paymentStatus
         };
-
         const newOrder = new Orders(currentOrderData);
-
         if (appliedCoupon) {
             const coupon = await Coupon.findById(appliedCoupon);
             if (!coupon) {
@@ -141,11 +142,9 @@ exports.addOrder = async (req, res) => {
                     }
                     userCoupon.usedCount += 1;
                 }
-
                 if (coupon.totalLimit <= 0) {
                     return res.status(402).json({ message: "Coupon is no longer available" });
                 }
-
                 coupon.totalLimit -= 1;
                 await coupon.save();
             }
@@ -161,9 +160,7 @@ exports.addOrder = async (req, res) => {
                 }
             })
             .catch(error => console.error("Error saving order:", error));
-
         return res.status(200).json({ message: "Order placed successfully" });
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "An error occurred while placing the order" });

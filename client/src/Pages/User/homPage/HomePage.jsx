@@ -14,12 +14,20 @@ import {
 import { Heart } from "lucide-react";
 import { addToWishList } from "../wishlist/addRemoveWishlit";
 import { removeFromWishlist } from "../wishlist/addRemoveWishlit";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [isBlocked, setIsBlocked] = useState(false);
   const [addedToWishlist, setAddedToWishlist] = useState(false);
+  const [banners, setBanners] = useState([]);
 
   const [trigger, setTrigger] = useState(0);
   const dispatch = useDispatch();
@@ -110,6 +118,13 @@ const HomePage = () => {
         });
         console.log(error.message);
       }
+      try {
+        const response = await axios.get("admin/banner");
+        setBanners(response.data.banner);
+      } catch (error) {
+        alert(error.message);
+        console.log(error.message);
+      }
     })();
     fetchWishlist();
   }, [trigger]);
@@ -182,8 +197,31 @@ const HomePage = () => {
           </>
         )}
       </section>
+      <section className="w-screen flex justify-center p-4 h-auto ">
+        <Carousel className="relative h-full text-black">
+          <CarouselContent className="relative w-full h-full">
+            {banners.map((banner, index) => (
+              <CarouselItem
+                key={banner._id || index}
+                className="relative flex items-center justify-center"
+              >
+                <p className="absolute top-50 left-40 text-3xl w-1/2 font-semi-bold font-mono text-white mb-4 z-20">
+                  {banner.description}
+                </p>
+                <img
+                  src={banner.image || "https://placehold.co/300x300"}
+                  alt={`Banner ${banner._id || index}`}
+                  className="object-cover w-full h-[300px] sm:h-[400px]"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute top-1/2 left-4 -translate-y-1/2 bg-gray-600 text-green-400 z-10" />
+          <CarouselNext className="absolute top-1/2 right-10 -translate-y-1/2 bg-gray-600 text-white z-10" />
+        </Carousel>
+      </section>
 
-      <section
+      {/* <section
         className="py-8 bg-cover bg-center mb-10"
         style={{
           backgroundImage: `url(${
@@ -209,7 +247,7 @@ const HomePage = () => {
             <li>Warranty Cart</li>
           </ul>
         </div>
-      </section>
+      </section> */}
       <h2 className="text-md lg:text-xl  ps-8 font-bold ">New Arrivals</h2>
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black ">
         {products.length > 0 ? (

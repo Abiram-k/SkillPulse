@@ -7,9 +7,9 @@ import { Toast } from "@/Components/Toast";
 import { logoutUser } from "@/redux/userSlice";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import { CouponPopup } from "@/Components/CouponPopup";
-import { Axios } from "axios";
 import axiosInstance from "@/axiosIntercepters/AxiosInstance";
 import Razorpay from "../paymentComoponent/RazorPay";
+import { showToast } from "@/Components/ToastNotification";
 
 const Checkout = () => {
   const [quantity, setQuantity] = useState(1);
@@ -88,10 +88,6 @@ const Checkout = () => {
 
   const offerPrice = (couponAmount = 0, couponType) => {
     const totalPrice = Math.abs(cartItems[0]?.totalDiscount);
-    // const totalPrice = cartItems[0]?.products.reduce(
-    //   (acc, item) => acc + item.offeredPrice,
-    //   0
-    // );
     const gstRate = 18;
     const total =
       totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
@@ -140,7 +136,6 @@ const Checkout = () => {
       try {
         const response = await axios.get(`/cart/${user._id}`);
         setCartItems(response.data.cartItems);
-
         console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
         if (error?.response.data.isBlocked) {
@@ -200,10 +195,7 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     if (paymentMethod == "cod" && summary.checkoutTotal >= 100000) {
-      Toast.fire({
-        icon: "error",
-        title: `Cash on delivery is not applicable`,
-      });
+      showToast("error", "Cash on delivery is not applicable");
       return;
     }
     try {
@@ -217,20 +209,11 @@ const Checkout = () => {
       setCheckoutComplete((prev) => !prev);
       localStorage.removeItem(`cart_${user._id}`);
       localStorage.removeItem("checkoutItems");
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
-      console.log(response.data);
+      showToast("success", `${response?.data.message}`);
     } catch (error) {
-      console.log(error);
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data.message}`,
-      });
+      showToast("error", `${error?.response?.data.message}`);
     }
   };
-
   const handlePaymentMethod = (e) => {
     setPaymentMethod(e.target.value);
   };

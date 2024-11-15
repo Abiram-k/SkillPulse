@@ -27,6 +27,7 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postPerPage, setPostPerPage] = useState(8);
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [search, setSearch] = useState("");
   const [trigger, setTrigger] = useState(0);
   const user = useSelector((state) => state.users.user);
   const dispatch = useDispatch();
@@ -68,10 +69,12 @@ const Shop = () => {
       [name]: value,
     }));
   };
-  
+  const filteredProduct = products.filter((product, index) =>
+    product.productName.toLowerCase().includes(search.toLowerCase())
+  );
   const lastPostIndex = currentPage * postPerPage;
   const firstPostIndex = lastPostIndex - postPerPage;
-  const currentProduct = products.slice(firstPostIndex, lastPostIndex);
+  const currentProduct = filteredProduct.slice(firstPostIndex, lastPostIndex);
 
   const handleAddToWishList = async (product) => {
     setTrigger((prev) => prev + 1);
@@ -90,6 +93,7 @@ const Shop = () => {
       console.log(error);
     }
   };
+
   const fetchWishlist = async () => {
     try {
       const response = await axios.get(`/wishlist?user=${user._id}`);
@@ -114,10 +118,6 @@ const Shop = () => {
       if (error?.response?.data.isBlocked) {
         dispatch(logoutUser());
       }
-      // Toast.fire({
-      //   icon: "error",
-      //   title: `${error?.response?.data.message}`,
-      // });
     }
   };
   return (
@@ -141,7 +141,15 @@ const Shop = () => {
           </h1>
         </div>
       </div>
-
+      <div className="search-bar mb-6 flex justify-center">
+        <input
+          type="text"
+          placeholder="Search you product here..."
+          className="border-2 border-gray-600 rounded font-mono rounded-l-md p-2 w-2/3 bg-transparent outline-none focus:outline-none  "
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <div className="filters grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gray-950 rounded-lg shadow-lg border-b-2 border-t-2 border-gray-800 mb-10">
         <div>
           <p className="font-bold text-2xl mb-4">Category</p>
@@ -198,7 +206,6 @@ const Shop = () => {
               Select Price Range
             </option>
             <option value="">All products</option>
-
             <option value="Low-High">Low-High</option>
             <option value="High-Low">High-Low</option>
             <option value="below-5000">Below 5000₹</option>

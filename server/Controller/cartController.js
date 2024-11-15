@@ -136,47 +136,53 @@ exports.removeCartItem = async (req, res) => {
 
 // exports.applyCoupon = async (req, res) => {
 //     try {
-//         console.log("hey");
 //         const { id, couponId } = req.query;
-//         console.log(couponId);
-//         console.log(id);
-//         const cart = await Cart.findOneAndUpdate({ user: id },
-//             { appliedCoupon: couponId },
-//             { new: true })
-//         console.log(cart, "Cart after updation")
-//         if (cart) {
-//             const coupon = await Coupon.findOne({ _id: couponId })
-//             const cart = await Cart.findOne({ user: id }).populate("appliedCoupon")
-//             if (coupon.couponType === "Percentage") {
-//                 cart.products.forEach((product) => {
-//                     if (coupon.purchaseAmount < product.totalPrice) {
-//                         const discountAmount = Math.round(product.totalPrice * (coupon.couponAmount / 100));
-
-//                         let maxDiscountExceedPercentage = Math.round((cart.grandTotal / cart.appliedCoupon.maxDiscount) * 100)
-//                         let maxDiscountExceedAmount = Math.round(product.salesPrice * (maxDiscountExceedPercentage / 100));
-
-//                         product.offeredPrice = (discountAmount > cart.appliedCoupon.maxDiscount
-//                             ? product.totalPrice - cart.appliedCoupon.maxDiscount
-//                             : product.totalPrice - discountAmount);
-//                     } else {
-//                         product.offeredPrice = product.totalPrice;
-//                     }
-//                 });
-//             } else {
-//                 cart.products.forEach((product) => {
-//                     if (coupon.purchaseAmount < product.totalPrice) {
-//                         const proportionalDiscount = (product.totalPrice / cart.grandTotal) * coupon.couponAmount;
-//                         console.log(proportionalDiscount, product.product.salesPrice, cart.grandTotal, coupon.couponAmount)
-//                         product.offeredPrice = Math.ceil(Math.max(0, product.totalPrice - proportionalDiscount));
-//                     } else {
-//                         product.offeredPrice = product.totalPrice;
-//                     }
-//                 });
+//         // const cart = await Cart.findOneAndUpdate({ user: id },
+//         //     { appliedCoupon: couponId },
+//         //     { new: true });
+//         const coupon = await Coupon.findOne({ _id: couponId });
+//         const cart = await Coupon.findOne({ user: id });
+//         if (coupon && cart) {
+//             const cart = await Cart.findOne({ user: id }).populate("appliedCoupon");
+//             const coupon = await Coupon.findOne({ _id: couponId });
+//             if (cart.appliedCoupon) {
+//                 if (cart.appliedCoupon.couponType === "Percentage") {
+//                     cart.products.forEach((product) => {
+//                         if (coupon.purchaseAmount <= cart.grandTotal) {
+//                             const discountAmount =
+//                                 product.totalPrice * (coupon.couponAmount / 100)
+//                             const maxDiscountExceedPercentage = (cart.appliedCoupon.maxDiscount / cart.grandTotal) * 100;
+//                             const maxDiscountExceedAmount =
+//                                 product.totalPrice * (maxDiscountExceedPercentage / 100)
+//                             let appliedDiscount = cart.grandTotal * (coupon.couponAmount / 100)
+//                             console.log(appliedDiscount, coupon.maxDiscount)
+//                             if (appliedDiscount > coupon.maxDiscount) {
+//                                 console.log("working this...")
+//                                 product.offeredPrice = product.totalPrice - maxDiscountExceedAmount
+//                             } else {
+//                                 console.log("No working this")
+//                                 product.offeredPrice = product.totalPrice - discountAmount;
+//                             }
+//                         } else {
+//                             product.offeredPrice = product.totalPrice;
+//                         }
+//                     });
+//                 } else {
+//                     cart.products.forEach((product) => {
+//                         if (coupon.purchaseAmount <= product.totalPrice) {
+//                             const proportionalDiscount =
+//                                 (product.totalPrice / cart.grandTotal) * coupon.couponAmount
+//                             product.offeredPrice = Math.max(0, product.totalPrice - proportionalDiscount);
+//                         } else {
+//                             product.offeredPrice = product.totalPrice;
+//                         }
+//                     });
+//                 }
+//                 cart.totalDiscount = cart.products.reduce((acc, product) => acc + (product.offeredPrice), 0);
+//                 cart.grandTotal = cart.products.reduce((acc, product) => acc + product.totalPrice, 0)
+//                 await cart.save();
+//                 return res.status(200).json({ message: "Coupon applied successfully" });
 //             }
-//             cart.totalDiscount = cart.products.reduce((acc, product, index) => product.offeredPrice + acc, 0);
-
-//             await cart.save();
-//             return res.status(200).json({ message: "Coupon applied " });
 //         }
 //         return res.status(400).json({ message: "Coupon failed to apply" });
 //     } catch (error) {
@@ -186,36 +192,23 @@ exports.removeCartItem = async (req, res) => {
 // }
 exports.applyCoupon = async (req, res) => {
     try {
-        console.log("hey");
         const { id, couponId } = req.query;
-        console.log(couponId);
-        console.log(id);
         const cart = await Cart.findOneAndUpdate({ user: id },
             { appliedCoupon: couponId },
             { new: true })
-        console.log(cart, "Cart after updation")
-
         if (cart) {
             const cart = await Cart.findOne({ user: id }).populate("appliedCoupon");
-
             const coupon = await Coupon.findOne({ _id: couponId });
-
             if (cart.appliedCoupon) {
                 if (cart.appliedCoupon.couponType === "Percentage") {
                     cart.products.forEach((product) => {
-                        // if (coupon.purchaseAmount <= product.totalPrice) {
                         if (coupon.purchaseAmount <= cart.grandTotal) {
                             const discountAmount =
-                                //  Math.round(
                                 product.totalPrice * (coupon.couponAmount / 100)
-                            // );
-
                             const maxDiscountExceedPercentage = (cart.appliedCoupon.maxDiscount / cart.grandTotal) * 100;
                             const maxDiscountExceedAmount =
                                 product.totalPrice * (maxDiscountExceedPercentage / 100)
-
                             let appliedDiscount = cart.grandTotal * (coupon.couponAmount / 100)
-                            // .toFixed(2);
                             console.log(appliedDiscount, coupon.maxDiscount)
                             if (appliedDiscount > coupon.maxDiscount) {
                                 console.log("working this...")
@@ -232,20 +225,16 @@ exports.applyCoupon = async (req, res) => {
                     cart.products.forEach((product) => {
                         if (coupon.purchaseAmount <= product.totalPrice) {
                             const proportionalDiscount =
-                                //  Math.round(
                                 (product.totalPrice / cart.grandTotal) * coupon.couponAmount
-                            // );
                             product.offeredPrice = Math.max(0, product.totalPrice - proportionalDiscount);
                         } else {
                             product.offeredPrice = product.totalPrice;
                         }
                     });
                 }
-
                 cart.totalDiscount = cart.products.reduce((acc, product) => acc + (product.offeredPrice), 0);
                 cart.grandTotal = cart.products.reduce((acc, product) => acc + product.totalPrice, 0)
                 await cart.save();
-
                 return res.status(200).json({ message: "Coupon applied successfully" });
             }
         }

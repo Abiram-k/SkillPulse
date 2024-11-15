@@ -58,7 +58,7 @@ function AccountLayout() {
           <div
             className={`${
               isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } lg:translate-x-0 fixed lg:static top-0 left-0 w-64 bg-black h-full lg:h-auto lg:bg-transparent lg:flex flex-col p-4 transition-transform duration-300 ease-in-out  `}
+            } lg:translate-x-0 fixed lg:static top-0 left-0 w-64 bg-black h-full lg:h-auto lg:bg-transparent lg:flex flex-col p-4 transition-transform duration-300 ease-in-out z-10 `}
           >
             <div className="bg-black rounded-lg p-4 mb-4 lg:mt-5">
               <div className="flex items-center gap-3 mb-6">

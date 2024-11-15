@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require("../controller/adminController");
+const bannerController = require("../controller/bannerController");
 const { uploadImage } = require("../Middleware/multer")
 const { verifyAdmin } = require("../Middleware/adminAuth");
 
@@ -17,12 +18,17 @@ router.patch("/productListing/:id", verifyAdmin, adminController.handleProductLi
 router.patch("/productRestore/:id", verifyAdmin, adminController.restoreProduct);
 router.delete("/product/:id", verifyAdmin, adminController.deleteProduct);
 
-router.get("/category", adminController.getCategory)
+router.get("/category",verifyAdmin, adminController.getCategory)
 router.post("/category", uploadImage.single("file"), verifyAdmin, adminController.addCategory);
 router.put("/category", uploadImage.single("file"), verifyAdmin, adminController.editCategory);
 router.patch("/categoryRestore/:id", verifyAdmin, adminController.categoryRestore);
-router.patch("/categoryListing/:id", verifyAdmin, adminController.listCategory); 4
+router.patch("/categoryListing/:id", verifyAdmin, adminController.listCategory);
 router.delete("/category/:id", verifyAdmin, adminController.deleteCategory);
+
+router.get("/banner", bannerController.getBanner);
+router.post("/banner", uploadImage.single("file"), verifyAdmin, bannerController.addBanner);
+router.patch("/brandListing/:id", verifyAdmin, bannerController.listBanner);
+router.delete("/banner/:id", verifyAdmin, bannerController.deleteBanner);
 
 router.get("/brand", adminController.getBrand)
 router.post("/brand", uploadImage.single("file"), verifyAdmin, adminController.addBrand);
@@ -36,7 +42,7 @@ router.get("/order", adminController.getOrder)
 
 router.get("/coupon", adminController.getCoupons)
 router.post("/coupon", adminController.addCoupons)
-router.delete("/coupon/:id", adminController.deleteCoupon) 
+router.delete("/coupon/:id", adminController.deleteCoupon)
 
-router.get("/recentSales",adminController.getAllOrders)
+router.get("/recentSales", adminController.getAllOrders)
 module.exports = router; 
