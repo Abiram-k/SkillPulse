@@ -1,7 +1,7 @@
 import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 const API_ID = import.meta.env.VITE_RAZORPAY_ID;
-const Razorpay = ({ orderId, PayAmount, handlePlaceOrder }) => {
+const Razorpay = ({ name, orderId, PayAmount, handlePlaceOrder }) => {
   const [razorpayOrderId, setRazorpayOrderId] = useState(null);
 
   useEffect(() => {
@@ -47,12 +47,11 @@ const Razorpay = ({ orderId, PayAmount, handlePlaceOrder }) => {
               },
             }
           );
-          handlePlaceOrder();
+          handlePlaceOrder(false, orderId);
         } catch (error) {
           alert("Payment verification failed. Please try again.");
         }
       },
-      //   verifyPayment
       prefill: {
         name: "Abiram k",
         email: "Abiram@gmail.com",
@@ -62,13 +61,14 @@ const Razorpay = ({ orderId, PayAmount, handlePlaceOrder }) => {
         color: "red",
       },
     };
-
     const razorpayInstance = new window.Razorpay(options);
+    razorpayInstance.open();
+
     razorpayInstance.on("payment.failed", (response) => {
       console.log("Payment failed:", response.error);
-      alert("Payment failed. Please try again.");
+      // alert("Payment failed. Please try again.");
+      handlePlaceOrder(true, orderId);
     });
-    razorpayInstance.open();
   };
 
   return (
@@ -76,9 +76,13 @@ const Razorpay = ({ orderId, PayAmount, handlePlaceOrder }) => {
       <button
         onClick={handlePayment}
         disabled={!orderId}
-        className=" text-white px-8 py-3 rounded-md w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
+        className={`${
+          name
+            ? "bg-green-500 p-1 lg:p-2 rounded"
+            : "bg-red-600  text-white px-8 py-3 rounded-md w-full  mb-4 md:mb-0 cursor-pointer"
+        }`}
       >
-        Place order
+        {name || "Place order"}
       </button>
     </div>
   );

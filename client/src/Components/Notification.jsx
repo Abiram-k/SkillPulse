@@ -4,7 +4,7 @@ function Notification({ message }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(true)
+    setVisible(true);
     const timer = setTimeout(() => {
       setVisible(false);
     }, 3000);

@@ -132,7 +132,7 @@ router.delete("/wishlist", verifyUser, isBlocked, wishlistController.deleteWishl
 router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
 router.get("/order", verifyUser, isBlocked, orderController.getOrder);
 router.patch("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder);
-router.patch("/returnOrder", verifyUser, isBlocked, orderController.returnOrder);
+router.patch("/returnProduct", verifyUser, isBlocked, orderController.returnOrderRequest);
 
 router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet);
 
@@ -168,8 +168,8 @@ router.post("/create-razorpay-order", async (req, res) => {
         res.status(200).json({ success: true, orderId: order.id });
         console.log("hey", orderId, amount)
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
         console.log(error)
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

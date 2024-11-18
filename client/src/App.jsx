@@ -51,6 +51,8 @@ import OrderReport from "./Pages/Admin/SalesReport/OrderReport";
 import AddCoupon from "./Pages/Admin/couponManagment/AddCoupon";
 import ToastNotification from "./Components/ToastNotification";
 import BannerManagement from "./Pages/Admin/bannerManagement/BannerManagement";
+import RefundPage from "./Pages/User/refundPage/RefundPage";
+import ReturnRequests from "./Pages/Admin/returnRequests/ReturnRequests";
 function App() {
   return (
     <>
@@ -242,6 +244,14 @@ function App() {
                 }
               />
               <Route
+                path="Myorders/refund"
+                element={
+                  <ProtectUserHome>
+                    <RefundPage />
+                  </ProtectUserHome>
+                }
+              />
+              <Route
                 path="manageAddress"
                 element={
                   <ProtectUserHome>
@@ -301,6 +311,14 @@ function App() {
               }
             />
             <Route
+              path="notifications"
+              element={
+                <ProtectedDashboardAdmin>
+                  <ReturnRequests />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
               path="orderReport"
               element={
                 <ProtectedDashboardAdmin>
@@ -313,6 +331,14 @@ function App() {
               element={
                 <ProtectedDashboardAdmin>
                   <OrderManagement />
+                </ProtectedDashboardAdmin>
+              }
+            />
+            <Route
+              path="customers"
+              element={
+                <ProtectedDashboardAdmin>
+                  <Customers />
                 </ProtectedDashboardAdmin>
               }
             />
@@ -332,7 +358,7 @@ function App() {
                 </ProtectedDashboardAdmin>
               }
             />
-             <Route
+            <Route
               path="bannerMangement"
               element={
                 <ProtectedDashboardAdmin>

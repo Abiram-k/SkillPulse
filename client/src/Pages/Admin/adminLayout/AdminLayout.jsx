@@ -1,6 +1,5 @@
-import React from "react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   Menu,
   Bell,
@@ -19,6 +18,8 @@ import {
 import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logoutAdmin } from "../../../redux/adminSlice";
+import { Badge } from "@/Components/ui/badge";
+import axiosInstance from "@/axiosIntercepters/AxiosInstance";
 
 // Sample data for the chart
 const chartData = Array.from({ length: 12 }, (_, i) => ({
@@ -36,7 +37,34 @@ const recentSales = [
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  useEffect(() => {
+    const fetchReturnedProducts = async () => {
+      try {
+        const response = await axiosInstance.get(`admin/order`);
+        setNotificationCount(() => {
+          return response.data.orderData.reduce((acc, order) => {
+            const hasReturnDescription = order.orderItems.some(
+              (item) =>
+                item.returnDescription && item.productStatus == "delivered"
+            );
+            if (hasReturnDescription) {
+              return acc + order.orderItems.length;
+            }
+            return acc;
+          }, 0);
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching returned products:", error);
+        setLoading(false);
+      }
+    };
 
+    fetchReturnedProducts();
+  }, [notificationCount]);
+
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex bg-slate-200">
       <button
@@ -59,7 +87,6 @@ export default function Dashboard() {
         </svg>
       </button>
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0  w-64 bg-white text-black transition-transform transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -73,17 +100,16 @@ export default function Dashboard() {
               <NavItem
                 icon={Users}
                 text="Customers"
-                // active
                 redirect="customers"
               />
               <NavItem icon={Package} text="Products" redirect="products" />
               <NavItem icon={FileText} text="Orders" redirect="orders" />
               <NavItem icon={Image} text="Banner" redirect="bannerMangement" />
               <NavItem icon={Tag} text="Coupon" redirect="coupon" />
-              <NavItem icon={CreditCard} text="Payments" redirect="payments" />
+              <NavItem icon={CreditCard} text="Payments" redirect="dashboard" />
               <NavItem icon={ShoppingBag} text="Category" redirect="category" />
               <NavItem icon={Bandage} text="Brand" redirect="brand" />
-              {/* <NavItem icon={Percent} text="Offers" redirect="offers" /> */}
+              <NavItem icon={Bell} text="Notifications" redirect="notifications" />
             </div>
             <div>
               <NavItem icon={Settings} text="Settings" redirect="settings" />
@@ -93,15 +119,28 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 ml-0 md:ml-64 p-8 transition-all duration-300 ">
         <div className="flex justify-between items-center mb-8 ">
           <div className="flex-1" />
           <div className="flex items-center gap-4">
-            <Bell className="h-6 w-6  text-yellow-700" />
+            <div
+              className="relative cursor-pointer"
+              onClick={() => navigate("/admin/notifications")}
+            >
+              <Bell className="h-6 w-6 text-yellow-700" />
+              <div className="absolute -top-1 -right-1 font-mono flex items-center justify-center h-4 w-4 bg-red-600 text-white text-xs rounded-full">
+                {notificationCount || 0}
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 ">
               {/* <div className="w-8 h-8 bg-gray-300 text-black rounded-full" /> */}
-              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntF7sVICaZX72XQZ9FTjq_uRbZlN8t9uqwA&s" alt="admin logo"n className="w-8 h-8 bg-gray-500 text-black rounded-full " />
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntF7sVICaZX72XQZ9FTjq_uRbZlN8t9uqwA&s"
+                alt="admin logo"
+                n
+                className="w-8 h-8 bg-gray-500 text-black rounded-full "
+              />
               <span className="text-black">Abiram</span>
             </div>
           </div>

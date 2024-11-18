@@ -60,7 +60,7 @@ const BannerManagement = () => {
           alert(error?.response?.data.message);
         });
     })();
-  }, [message,banner]);
+  }, [message, banner]);
 
   console.log(banner);
   const handleAddBanner = async (e) => {
@@ -112,7 +112,6 @@ const BannerManagement = () => {
         showToast("info", "Banner Listed successfully");
       } else {
         showToast("info", "Banner Unlisted successfully");
-       
       }
       const updatedBanner = response.data.banner;
 

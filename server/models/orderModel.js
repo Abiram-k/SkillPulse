@@ -27,6 +27,15 @@ const OrderSchema = new mongoose.Schema({
                 type: String,
                 required: true
             },
+            returnDescription: {
+                type: String,
+                required: false,
+                default: ""
+            },
+            returnedAt: {
+                type: Date,
+                default: null
+            },
             price: {
                 type: Number,
                 required: false,
@@ -37,7 +46,7 @@ const OrderSchema = new mongoose.Schema({
                 enum: ['processing', 'shipped', 'delivered', 'cancelled', 'returned'],
                 default: 'processing'
             },
-           
+
             totalPrice: {
                 type: Number,
                 required: true,
@@ -65,6 +74,7 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+
     address: {
         firstName: {
             type: String,
@@ -101,8 +111,6 @@ const OrderSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-
-
     },
     status: {
         type: String,

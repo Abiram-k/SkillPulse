@@ -117,14 +117,13 @@ exports.otp = async (req, res) => {
                 }
                 return referralCode;
             }
-            user.referralCode = generateReferralCode();
-            await user.save();
+            req.session.user.referralCode = generateReferralCode();
             const user = await User.create(req.session.user)
             res.status(200).json({ message: "User Created Succesfully", user })
             req.session.otp = null;
         } else {
             return res.status(400).json({ message: "Incorrect Otp !" })
-        }
+        } 
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: error.message })

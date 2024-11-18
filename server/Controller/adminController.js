@@ -11,6 +11,7 @@ const Orders = require("../models/orderModel");
 const mongoose = require("mongoose")
 const { listenerCount } = require("process");
 const Coupon = require("../models/couponModel.");
+const Wallet = require("../models/walletModel");
 
 exports.login = async (req, res) => {
     try {
@@ -521,8 +522,16 @@ exports.editStatus = async (req, res) => {
         console.log("product Id: ", productId);
         console.log("order Id: ", orderId)
         const updatingOrder = await Orders.findOne({ orderId })
-        console.log(updatingOrder);
-
+        if (updatedStatus == "cancelled") {
+            const walletData = {
+                amount: updatingOrder.orderItems[0].price,
+                description: "Cancellation Refund",
+                transactionId: `REF-${orderId}-${Date.now()}`
+            }
+            const wallet = await Wallet.findOneAndUpdate({ user: updatingOrder.user }, { $push: { transaction: walletData }, $inc: { totalAmount: parseFloat(updatingOrder.orderItems[0].price) } }, { upsert: true, new: true });
+            if (!wallet)
+                return res.status(400).json({ message: "Wallet not found to refund money " });
+        }
         if (!updatingOrder) {
             console.log("Order not found");
             return res.status(404).json({ message: "Order not found" });
@@ -565,15 +574,15 @@ exports.getOrder = async (req, res) => {
             query.orderItems = { $elemMatch: { productStatus: filter } };
         }
 
-        // Fetch orders with filtered `productStatus`, populating `orderItems.product.category`
         const orderData = await Orders.find(query)
             .populate({
                 path: "orderItems.product",
                 populate: {
                     path: "category",
-                    model: "category"
-                }
-            });
+                    model: "category",
+                },
+            })
+            .populate("user");
 
         // Sort the results based on the `filter` value
         if (filter === "Recent") {
@@ -608,6 +617,32 @@ exports.getOrder = async (req, res) => {
     }
 };
 
+exports.returnOrder = async (req, res) => {
+    try {
+        const { id, itemId } = req.body;
+        const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
+        const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
+        if (orderIndex == -1)
+            console.log("Failed to find order")
+        order.orderItems[orderIndex].productStatus = "returned";
+        await order.save();
+        const refundPrice = order.orderItems[orderIndex]?.price;
+        const walletData = {
+            amount: refundPrice,
+            description: "Return Refund",
+            transactionId: `REF-${itemId}-${Date.now()}`
+        }
+        const wallet = await Wallet.findOneAndUpdate({ user: id }, { $push: { transaction: walletData }, $inc: { totalAmount: parseFloat(refundPrice) } }, { upsert: true, new: true });
+
+        if (!wallet)
+            return res.status(400).json({ message: "Wallet not found to refund money " });
+
+        return res.status(200).json({ message: "Order Returned successfully" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error occured while returning the order" })
+    }
+}
 
 exports.getCoupons = async (req, res) => {
     try {

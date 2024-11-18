@@ -193,14 +193,16 @@ const Checkout = () => {
     setSelectedAddressId(selectedAddress);
   };
 
-  const handlePlaceOrder = async () => {
-    if (paymentMethod == "cod" && summary.checkoutTotal >= 100000) {
+  const handlePlaceOrder = async (paymentFailed) => {
+    // alert(paymentFailed);
+    if (paymentMethod == "cod" && summary.checkoutTotal >= 100) {
       showToast("error", "Cash on delivery is not applicable");
       return;
     }
     try {
       const response = await axios.post(`/order/${user._id}`, cartItems, {
         params: {
+          paymentFailed,
           paymentMethod,
           totalAmount: cartItems[0]?.grandTotal,
           appliedCoupon: cartItems[0]?.appliedCoupon?._id || null,
