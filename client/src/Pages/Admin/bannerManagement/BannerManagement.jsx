@@ -60,7 +60,7 @@ const BannerManagement = () => {
           alert(error?.response?.data.message);
         });
     })();
-  }, [message, banner]);
+  }, [message]);
 
   console.log(banner);
   const handleAddBanner = async (e) => {
@@ -73,6 +73,7 @@ const BannerManagement = () => {
     const formData = new FormData();
     formData.append("description", description);
     formData.append("file", image);
+    console.log(image, "<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>");
     try {
       if (Object.keys(formError).length == 0) {
         setSpinner(true);
@@ -81,6 +82,8 @@ const BannerManagement = () => {
             "Content-Type": "multipart/form-data",
           },
         });
+        setDescription("");
+        setImage(null);
         setSpinner(false);
         showToast("success", `${response.data.message}`);
       }
@@ -88,7 +91,7 @@ const BannerManagement = () => {
       setSpinner(false);
       showToast("error", `${error.response?.data.message}`);
 
-      console.log(error);
+      console.error(error);
     }
   };
 

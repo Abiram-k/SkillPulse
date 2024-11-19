@@ -34,7 +34,7 @@ exports.addOrder = async (req, res) => {
 
     try {
 
-        const { paymentMethod, totalAmount, appliedCoupon, paymentFailed, isRetryPayment } = req.query;
+        const { paymentMethod, totalAmount, appliedCoupon, paymentFailed, isRetryPayment, deliveryCharge } = req.query;
         const { id } = req.params;
         console.log(paymentFailed, "<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
         if (isRetryPayment) {
@@ -144,7 +144,8 @@ exports.addOrder = async (req, res) => {
                 appliedCoupon,
                 totalDiscount,
                 paymentMethod,
-                paymentStatus
+                paymentStatus,
+                deliveryCharge
             };
             const newOrder = new Orders(currentOrderData);
             if (appliedCoupon) {

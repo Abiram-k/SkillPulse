@@ -13,6 +13,7 @@ exports.getBanner = async (req,res) => {
     }
 }
 exports.addBanner = async (req,res) => {
+    console.log("hey");
     try {
         let { description } = req.body;
         console.log(req.file)

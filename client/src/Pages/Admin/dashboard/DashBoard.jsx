@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import { Link } from "react-router-dom";
+import Chart from "./Chart";
 
 // Sample data for the chart
 const chartData = Array.from({ length: 12 }, (_, i) => ({
@@ -25,20 +26,21 @@ const chartData = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export default function Dashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [recentSales, setRecentSales] = useState([]);
-  const [totalSales, setTotalSales] = useState(0);
+  const [filter, setFilter] = useState("Monthly");
+
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get("/admin/recentSales");
+        const response = await axios.get(`/admin/recentSales?filter=${filter}`);
         console.log(response.data);
         setRecentSales(response.data.orders);
       } catch (error) {
         console.log(error?.response?.data?.message);
       }
     })();
-  }, []);
+  }, [filter]);
+
   return (
     <>
       {/* Stats Cards */}
@@ -69,9 +71,30 @@ export default function Dashboard() {
         />
       </div>
       {/* Chart Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full ">
         <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Sales Analytics</h2>
+          <div className="mb-4 flex space-x-4 font-mono">
+            {["Monthly", "Yearly"].map((option) => (
+              <button
+                key={option}
+                className={`px-4 py-2 rounded ${
+                  filter === option
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setFilter(option)}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <h2 className="text-gray-400 font-bold text-xl">Total Sales</h2>
+          <Chart orders={recentSales} />
+        </div>
+        {/* <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700 font-mono">
+            Sales Analytics
+          </h2>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
@@ -81,13 +104,13 @@ export default function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-white p-6 rounded-lg  shadow overflow-y-scroll">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Recent Sales</h2>
+            <h2 className="text-xl  text-gray-400 font-bold ">Recent Sales</h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 font-sans">
             {recentSales.length > 0 ? (
               recentSales
                 ?.reverse()
@@ -100,8 +123,8 @@ export default function Dashboard() {
                     <div className="flex items-center gap-3">
                       <img
                         src={
-                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCuoop0MD3fNefnFp8SWPdfnsXdOzFBeAQg&s" ||
-                          sale.user.profileImage
+                          sale.user.profileImage ||
+                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCuoop0MD3fNefnFp8SWPdfnsXdOzFBeAQg&s"
                         }
                         alt=""
                         className="w-10 h-10 bg-gray-200 rounded-full"
@@ -118,7 +141,10 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <span className="font-medium text-black">
-                      {sale?.totalDiscount}
+                      ₹{" "}
+                      {sale?.totalDiscount
+                        ? sale?.totalDiscount
+                        : sale?.totalAmount}
                     </span>
                   </div>
                 ))

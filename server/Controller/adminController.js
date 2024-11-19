@@ -552,9 +552,20 @@ exports.editStatus = async (req, res) => {
             }
             updatingOrder.orderItems[productIndex].productStatus = updatedStatus;
             console.log(updatingOrder);
+            const itemStatus = updatingOrder.orderItems.map(item => item.productStatus)
 
-            await updatingOrder.save();
-            console.log("saved")
+            if (itemStatus.every((status) => status == "delivered"))
+                updatingOrder.status = "delivered";
+            if (itemStatus.every((status) => status == "returned"))
+                updatingOrder.status = "returned";
+            if (itemStatus.every((status) => status == "shipped"))
+                updatingOrder.status = "shipped"
+            if (itemStatus.some((status) => status == "processing"))
+                updatingOrder.status = "processing";
+
+            await updatingOrder.save().then(() => console.log("saved")
+            ).catch((error) => console.log("Error while saving order,order not saved", error))
+
             return res.status(200).json({ message: "updated order status" })
         }
     } catch (error) {

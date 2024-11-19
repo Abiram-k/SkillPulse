@@ -122,7 +122,7 @@ router.put("/editAddress", verifyUser, isBlocked, uploadImage.none(), userContro
 router.post("/addToCart/:id", verifyUser, isBlocked, userController.addToCart);
 router.get("/cart/:id", verifyUser, isBlocked, cartController.getCart);
 router.post("/updateQuantity/:productId", verifyUser, isBlocked, cartController.updateQuantity);
-router.delete("/cartItem/:productId", verifyUser, isBlocked, cartController.removeCartItem);
+router.delete("/cartItem/:productId", verifyUser, isBlocked, cartController.removeCartItem); 
 
 // router.delete("/cartItem/:productId", wishlistController.removewishlistItme);
 router.get("/wishlist", verifyUser, isBlocked, wishlistController.getwishlist);

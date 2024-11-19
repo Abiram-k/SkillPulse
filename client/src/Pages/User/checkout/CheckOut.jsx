@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ChangeAddress } from "@/Components/ChangeAddress";
 import { Check, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Toast } from "@/Components/Toast";
 import { logoutUser } from "@/redux/userSlice";
 import axios from "@/axiosIntercepters/AxiosInstance";
@@ -12,6 +12,8 @@ import Razorpay from "../paymentComoponent/RazorPay";
 import { showToast } from "@/Components/ToastNotification";
 
 const Checkout = () => {
+  const navigate = useNavigate();
+
   const [quantity, setQuantity] = useState(1);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedAddress, setSelectedAddress] = useState({});
@@ -41,9 +43,10 @@ const Checkout = () => {
     );
   };
   const calculateDeliveryCharge = () => {
-    if (totalPrice() < 1000) return Math.round((2 / 100) * totalPrice());
+    if (totalPrice() < 14999) return Math.round((2 / 100) * totalPrice());
     else return 0;
   };
+
   const calculateGST = (gstRate) => {
     return Math.round(
       (gstRate / 100) *
@@ -194,7 +197,6 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async (paymentFailed) => {
-    // alert(paymentFailed);
     if (paymentMethod == "cod" && summary.checkoutTotal >= 100) {
       showToast("error", "Cash on delivery is not applicable");
       return;
@@ -206,12 +208,18 @@ const Checkout = () => {
           paymentMethod,
           totalAmount: cartItems[0]?.grandTotal,
           appliedCoupon: cartItems[0]?.appliedCoupon?._id || null,
+          deliveryCharge: calculateDeliveryCharge(),
         },
       });
       setCheckoutComplete((prev) => !prev);
       localStorage.removeItem(`cart_${user._id}`);
       localStorage.removeItem("checkoutItems");
-      showToast("success", `${response?.data.message}`);
+      if (paymentFailed) {
+        showToast("error", `Payment Failed`);
+        navigate("/user/profile/myOrders");
+      } else {
+        showToast("success", `${response?.data.message}`);
+      }
     } catch (error) {
       showToast("error", `${error?.response?.data.message}`);
     }
