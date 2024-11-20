@@ -36,7 +36,7 @@ exports.addOrder = async (req, res) => {
 
         const { paymentMethod, totalAmount, appliedCoupon, paymentFailed, isRetryPayment, deliveryCharge } = req.query;
         const { id } = req.params;
-        console.log(paymentFailed, "<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
+        // console.log(paymentFailed, "<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
         if (isRetryPayment) {
             const { checkoutItems } = req.body;
             console.log(req.body)

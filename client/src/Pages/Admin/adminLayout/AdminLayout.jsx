@@ -54,10 +54,10 @@ export default function Dashboard() {
             return acc;
           }, 0);
         });
-        setLoading(false);
+        // setLoading(false);
       } catch (error) {
         console.error("Error fetching returned products:", error);
-        setLoading(false);
+        // setLoading(false);
       }
     };
 

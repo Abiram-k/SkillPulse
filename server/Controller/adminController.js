@@ -777,6 +777,9 @@ exports.getAllOrders = async (req, res) => {
                 to = formatDateToDDMMYYYY(new Date(endDate));
                 break;
             }
+            // case "Yearly":{
+
+            // }
             default: {
                 console.log("No filter option was found");
 
@@ -789,9 +792,13 @@ exports.getAllOrders = async (req, res) => {
         if (from && to) {
             query.orderDate = { $gte: from, $lte: to };
         }
-        const orders = await Orders.find(query)
-
-            .populate([{ path: "user" }, { path: "orderItems.product" }]);
+        const orders = await Orders.find(query).populate([{ path: "user" }, { path: "orderItems.product" }, {
+            path: "orderItems.product",
+            populate: { path: "category" },
+        }, {
+            path: "orderItems.product",
+            populate: { path: "brand" },
+        },]);
 
         if (!orders)
             return res.status(400).json({ message: "No orders were found" });

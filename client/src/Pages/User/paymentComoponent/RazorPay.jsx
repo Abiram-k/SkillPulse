@@ -66,7 +66,6 @@ const Razorpay = ({ name, orderId, PayAmount, handlePlaceOrder }) => {
 
     razorpayInstance.on("payment.failed", (response) => {
       console.log("Payment failed:", response.error);
-      // alert("Payment failed. Please try again.");
       handlePlaceOrder(true, orderId);
     });
   };

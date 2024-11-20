@@ -1,39 +1,18 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import {
-  Menu,
-  Bell,
-  Settings,
-  LogOut,
-  Users,
-  Package,
-  FileText,
-  Image,
-  Tag,
-  CreditCard,
-  ShoppingBag,
-  Percent,
-} from "lucide-react";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import { Link } from "react-router-dom";
 import Chart from "./Chart";
 
-// Sample data for the chart
-const chartData = Array.from({ length: 12 }, (_, i) => ({
-  month: i + 1,
-  sales: Math.floor(Math.random() * 7000) + 1000,
-}));
-
 export default function Dashboard() {
   const [recentSales, setRecentSales] = useState([]);
-  const [filter, setFilter] = useState("Monthly");
+  const [filter, setFilter] = useState("Yearly");
 
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(`/admin/recentSales?filter=${filter}`);
-        console.log(response.data);
+        // console.log(filter, response.data.orders);
         setRecentSales(response.data.orders);
       } catch (error) {
         console.log(error?.response?.data?.message);
@@ -41,9 +20,85 @@ export default function Dashboard() {
     })();
   }, [filter]);
 
+  const topTenSellingProducts = () => {
+    let topSellingProducts = {};
+
+    recentSales.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        let productName = item.product.productName;
+        if (topSellingProducts[productName]) {
+          topSellingProducts[productName][1] += item.quantity;
+        } else {
+          topSellingProducts[productName] = [
+            ...item.product.productImage[0],
+            item.quantity,
+          ];
+        }
+      });
+    });
+    const topSellingProductsArray = Object.entries(topSellingProducts)
+      .map(([productName, [productImage, quantity]]) => ({
+        productName,
+        productImage,
+        quantity,
+      }))
+      .sort((a, b) => b.quantity - a.quantity);
+
+    return topSellingProductsArray;
+  };
+
+  const topTenSellingCategory = () => {
+    let topSellingCategory = {};
+
+    recentSales.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        let categoryName = item.product.category.name;
+        if (topSellingCategory[categoryName]) {
+          topSellingCategory[categoryName][1] += 1;
+        } else {
+          topSellingCategory[categoryName] = [item.product.category.image, 1];
+        }
+      });
+    });
+    const topTenSellingCategoryArray = Object.entries(topSellingCategory)
+      .map(([categoryName, [categoryImage, quantity]]) => ({
+        categoryName,
+        categoryImage,
+        quantity,
+      }))
+      .sort((a, b) => b.quantity - a.quantity);
+
+    return topTenSellingCategoryArray;
+  };
+
+  const topTenSellingBrand = () => {
+    let topSellingBrand = {};
+
+    recentSales.forEach((order) => {
+      order.orderItems.forEach((item) => {
+        let brandName = item.product.brand.name;
+        if (topSellingBrand[brandName]) {
+          topSellingBrand[brandName][1] += 1;
+        } else {
+          topSellingBrand[brandName] = [item.product.brand.image, 1];
+        }
+      });
+    });
+
+    const topTenSellingBrandArray = Object.entries(topSellingBrand)
+      .map(([brandName, [brandImage, quantity]]) => ({
+        brandName,
+        brandImage,
+        quantity,
+      }))
+      .sort((a, b) => b.quantity - a.quantity);
+
+      console.log(recentSales)
+    return topTenSellingBrandArray;
+  };
+
   return (
     <>
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard
           title="Total Sales"
@@ -58,7 +113,6 @@ export default function Dashboard() {
           )}
           bgColor="bg-gray-800"
         />
-        {/* <StatsCard title="Visitors" value="2,500" bgColor="bg-green-100" /> */}
         <StatsCard
           title="Total Orders"
           value={recentSales.length}
@@ -70,7 +124,7 @@ export default function Dashboard() {
           bgColor="bg-gray-800"
         />
       </div>
-      {/* Chart Section */}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full ">
         <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
           <div className="mb-4 flex space-x-4 font-mono">
@@ -88,25 +142,9 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
-          <h2 className="text-gray-400 font-bold text-xl">Total Sales</h2>
-          <Chart orders={recentSales} />
+          <Chart orders={recentSales} filter={filter} />
         </div>
-        {/* <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700 font-mono">
-            Sales Analytics
-          </h2>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Bar dataKey="sales" fill="#2563eb" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div> */}
-
-        <div className="bg-white p-6 rounded-lg  shadow overflow-y-scroll">
+        <div className="bg-white p-6 rounded-lg  shadow h-auto ">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl  text-gray-400 font-bold ">Recent Sales</h2>
           </div>
@@ -114,7 +152,7 @@ export default function Dashboard() {
             {recentSales.length > 0 ? (
               recentSales
                 ?.reverse()
-                .slice(0, 5)
+                .slice(0, 8)
                 .map((sale) => (
                   <div
                     key={sale?._id}
@@ -163,10 +201,163 @@ export default function Dashboard() {
         <div>
           <Link
             to={"/admin/orderReport"}
-            className="bg-gray-300 p-3 rounded font-bold text-orange-600 shadow-lg hover:scale-105 duration-150"
+            className="bg-gray-300 p-3 rounded font-bold text-orange-600  shadow-lg hover:scale-105 duration-300"
           >
             Download Sales Report
           </Link>
+        </div>
+      </div>
+      <div className="flex flex-col lg:flex-row mt-10 gap-6">
+        <div className="bg-white p-6 rounded-lg  shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg sm:text-xl text-gray-400 font-bold">
+              Top 10 Products
+            </h2>
+          </div>
+          <div className="space-y-4 font-sans">
+            {topTenSellingProducts().length > 0 ? (
+              topTenSellingProducts()
+                .slice(0, 5)
+                .map((product, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-12"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={
+                          product.productImage ||
+                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCuoop0MD3fNefnFp8SWPdfnsXdOzFBeAQg&s"
+                        }
+                        alt=""
+                        className="w-10 h-10 bg-gray-200 rounded-full"
+                      />
+                      <div>
+                        <p className="font-medium text-black">
+                          {product?.productName}
+                        </p>
+                        <p className="text-sm text-gray-500"></p>
+                      </div>
+                    </div>
+                    <span className="font-medium text-black">
+                      {product.quantity}
+                      <span className="text-gray-600 text-sm ms-2">pcs</span>
+                    </span>
+                  </div>
+                ))
+            ) : (
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                  <div>
+                    <p className="text-sm text-gray-500">No Products Yet!</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-lg  shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg sm:text-xl text-gray-400 font-bold">
+              Top 10 Category
+            </h2>
+          </div>
+          <div className="space-y-4 font-sans">
+            {topTenSellingCategory().length > 0 ? (
+              topTenSellingCategory()
+                .slice(0, 5)
+                .map((cat, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-12"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={
+                          cat.categoryImage ||
+                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCuoop0MD3fNefnFp8SWPdfnsXdOzFBeAQg&s"
+                        }
+                        alt=""
+                        className="w-10 h-10 bg-gray-200 rounded-full"
+                      />
+                      <div>
+                        <p className="font-medium text-black">
+                          {cat.categoryName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {/* {sale?.orderDate} */}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-medium text-black">
+                      {cat.quantity}{" "}
+                      <span className="text-gray-600">Cat. sold</span>
+                    </span>
+                  </div>
+                ))
+            ) : (
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                  <div>
+                    <p className="text-sm text-gray-500">No Order Yet!</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3 ">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg sm:text-xl text-gray-400 font-bold">
+              Top 10 Brands
+            </h2>
+          </div>
+          <div className="space-y-4 font-sans">
+            {topTenSellingBrand()?.length > 0 ? (
+              topTenSellingBrand()
+                .slice(0, 10)
+                .map((brand, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-12"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={
+                          brand?.brandImage || "https://via.placeholder.com/40"
+                        }
+                        alt={brand?.brandName}
+                        className="w-10 h-10 bg-gray-200 rounded-full"
+                      />
+                      <div>
+                        <p className="font-medium text-black">
+                          {brand?.brandName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {/* {brand?.quantity} Brand sold */}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-medium text-black">
+                      {/* ₹ {brand?.quantity * 100}{" "} */}
+                      {/* Assuming ₹100 per item sold */}
+                      {brand?.quantity} Brand sold
+                    </span>
+                  </div>
+                ))
+            ) : (
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                  <div>
+                    <p className="text-sm text-gray-500">No Sales Yet!</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

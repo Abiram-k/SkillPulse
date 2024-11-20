@@ -127,9 +127,10 @@ const OrderReport = () => {
     return acc;
   }, {});
 
-  const topSellingProduct = () => {
-    const productQuantities = {};
 
+  const topSellingProduct = () => {
+    
+    const productQuantities = {};
     orders.forEach((order) => {
       order.orderItems.forEach((item) => {
         if (productQuantities[item.product.productName]) {
@@ -139,7 +140,6 @@ const OrderReport = () => {
         }
       });
     });
-
     let topSellingProduct = null;
     let maxQuantity = 0;
 
@@ -150,6 +150,7 @@ const OrderReport = () => {
       }
     }
     return { topSellingProduct, maxQuantity };
+
   };
 
   const costumers = {};
