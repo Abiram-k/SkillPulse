@@ -90,13 +90,15 @@ const Checkout = () => {
   };
 
   const offerPrice = (couponAmount = 0, couponType) => {
-    const totalPrice = Math.abs(cartItems[0]?.totalDiscount);
+    const totalPrice = Math.abs(
+      cartItems[0]?.totalDiscount || cartItems[0]?.grandTotal
+    );
+
     const gstRate = 18;
     const total =
       totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
     return total;
   };
-
   const handleCouponDelete = async () => {
     try {
       const response = await axiosInstance.patch(

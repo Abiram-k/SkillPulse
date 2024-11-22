@@ -123,7 +123,7 @@ exports.otp = async (req, res) => {
             req.session.otp = null;
         } else {
             return res.status(400).json({ message: "Incorrect Otp !" })
-        } 
+        }
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: error.message })
@@ -462,13 +462,20 @@ exports.getBrandCategoryInfo = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     try {
-        const { firstName, lastName, password, mobileNumber, dateOfBirth } = req.body;
+        const { firstName, lastName, mobileNumber, dateOfBirth } = req.body;
         const { id } = req.query;
         const profileImage = req.file?.path;
+
+        const validDateOfBirth = dateOfBirth && !isNaN(Date.parse(dateOfBirth))
+            ? new Date(dateOfBirth)
+            : null;
+
         const userData = {
-            firstName, lastName, password, mobileNumber, profileImage, dateOfBirth
-        }
-        console.log("User Data", userData)
+            firstName, lastName, mobileNumber, profileImage, dateOfBirth: validDateOfBirth
+        };
+
+        // console.log("User Data", userData);
+        
         const updatedUser = await User.findByIdAndUpdate(id, { $set: userData }, { new: true, upsert: true });
         if (updatedUser)
             return res.status(200).json({ message: "Profile successfully updated", updatedUser });
@@ -558,6 +565,7 @@ exports.getAddress = async (req, res) => {
 
 exports.getEditAddress = async (req, res) => {
     try {
+        // console.log("hey");
         const { id } = req.query;
         // console.log(id);
         const [addressObj] = await User.find({ "address._id": id }, { "address.$": 1 })
@@ -572,6 +580,7 @@ exports.getEditAddress = async (req, res) => {
 
 exports.editAddress = async (req, res) => {
     console.log("working....");
+
     try {
         const {
             firstName,
@@ -598,7 +607,7 @@ exports.editAddress = async (req, res) => {
         const { id } = req.query;
 
         const user = await User.findOne({ "address._id": id });
-        // console.log(user);
+        console.log(user);
 
         if (!user) {
             return res.status(404).json({ message: "User not found." });

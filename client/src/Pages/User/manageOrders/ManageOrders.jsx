@@ -200,7 +200,7 @@ const ManageOrders = () => {
 
     doc.setFont("Helvetica", "normal");
     const footerData = [
-      ["Delivery Charge:", `Rs. ${order.totalAmount > 1000 ? "0" : "100"}`],
+      ["Delivery Charge:", `Rs. ${order.deliveryCharge ? deliveryCharge : 0}`],
       ["Tax:", `Rs. ${"100.00"}`],
       ["Total Amount:", `Rs. ${order.totalAmount.toFixed(2)}`],
       [

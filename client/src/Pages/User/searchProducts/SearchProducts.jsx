@@ -72,7 +72,9 @@ const SearchProducts = () => {
           filteredProducts.map(
             (product, index) =>
               product.isListed &&
-              !product.isDeleted && (
+              !product.isDeleted &&
+              product.category.isListed &&
+              !product.category.isDeleted && (
                 <div
                   className="product-card border-gray-100 rounded-lg p-2 shadow-md hover:shadow-slate-800 hover:scale-105 transition-all duration-100  h-full"
                   key={index}

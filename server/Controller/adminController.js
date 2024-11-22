@@ -785,8 +785,7 @@ exports.getAllOrders = async (req, res) => {
 
             }
         }
-
-
+        
         const query = {};
 
         if (from && to) {

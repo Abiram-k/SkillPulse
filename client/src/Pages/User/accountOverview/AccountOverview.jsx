@@ -27,7 +27,7 @@ const AccountOverview = () => {
   const [firstName, setFirstName] = useState("");
   const [secondName, setSecondName] = useState("");
   const [email, setEmail] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState(null);
   const [mobileNumber, setMobileNumber] = useState("");
   const [spinner, setSpinner] = useState(false);
   const [message, setMessage] = useState({});
@@ -197,6 +197,7 @@ const AccountOverview = () => {
             )}
           </label>
           <input
+            disabled={!editMode}
             id="fileInput"
             type="file"
             accept="image/*"

@@ -119,7 +119,7 @@ function Otp() {
         style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}
       >
         <h2 className="text-2xl font-bold mb-2">OTP Verification</h2>
-        <p className="mb-6">Enter the OTP to confirm</p>
+        <p className="mb-6">Enter the OTP to confirm(email)</p>
 
         <div className="flex items-center justify-end space-x-3 mb-4 text-white">
           <OtpInput

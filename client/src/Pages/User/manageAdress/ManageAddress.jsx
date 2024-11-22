@@ -57,7 +57,7 @@ const ManageAddress = () => {
             <i className="fas fa-plus mr-2"></i> Add New Address
           </Link>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           {addresses.length > 0 ? (
             addresses.map((address, index) => (
               <div
@@ -97,10 +97,11 @@ const ManageAddress = () => {
             ))
           ) : (
             <>
+              {/* <SkeletonDemo />
               <SkeletonDemo />
               <SkeletonDemo />
-              <SkeletonDemo />
-              <SkeletonDemo />
+              <SkeletonDemo /> */}
+              <p className="text-gray-400">No Address were added yet !</p>
             </>
           )}
         </div>

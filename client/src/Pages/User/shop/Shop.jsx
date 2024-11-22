@@ -186,6 +186,7 @@ const Shop = () => {
             <option value="" disabled>
               Select a Offer
             </option>
+            <option value="">All products</option>
             <option value="10-20">10% - 20%</option>
             <option value="20-30">20% - 30%</option>
             <option value="above-50">Up to 50%</option>
@@ -240,7 +241,10 @@ const Shop = () => {
       <div className="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-mono">
         {currentProduct.length > 0 ? (
           currentProduct.map((product, index) =>
-            product.isListed && !product.isDeleted ? (
+            product?.isListed &&
+            !product?.isDeleted &&
+            product?.category?.isListed &&
+            !product?.category?.isDeleted ? (
               <div
                 className="relative bg-gray-800 p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
                 key={product._id}
@@ -318,7 +322,7 @@ const Shop = () => {
                 className="product-card p-4 rounded-lg shadow-lg relative w-screen"
               >
                 <p className="text-center font-bold">
-                  NO Product Were Founded{" "}
+                  {/* NO Product Were Founded{" "} */}
                 </p>
               </div>
             )

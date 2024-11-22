@@ -76,7 +76,7 @@ exports.addOrder = async (req, res) => {
                 return res.status(400).json({ message: "Add a delivery Address" });
 
             const [address] = user.address.filter((addr) => addr._id.toString() === deliveryAddressId);
-
+            if (!address) return res.status(404).json({ message: "Select an address" })
             let orderItems = [];
             let totalQuantity = 0;
             let paymentStatus = "";

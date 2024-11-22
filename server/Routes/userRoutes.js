@@ -114,10 +114,10 @@ router.get("/user/:id", verifyUser, isBlocked, userController.getUser);
 router.post("/address", verifyUser, isBlocked, uploadImage.none(), userController.addAddress);
 router.patch("/password/:id", verifyUser, isBlocked, userController.changePassword);
 
-router.get("/address", verifyUser, isBlocked, userController.getAddress);
+router.get("/address", verifyUser, isBlocked, userController.getAddress); 
 router.delete("/address", verifyUser, isBlocked, userController.deleteAddress);
 router.get("/editAddress", verifyUser, isBlocked, userController.getEditAddress);
-router.put("/editAddress", verifyUser, isBlocked, uploadImage.none(), userController.editAddress);
+router.put("/address", verifyUser, isBlocked, uploadImage.none(), userController.editAddress);
 
 router.post("/addToCart/:id", verifyUser, isBlocked, userController.addToCart);
 router.get("/cart/:id", verifyUser, isBlocked, cartController.getCart);

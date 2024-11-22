@@ -122,6 +122,7 @@ const EditAddress = () => {
         icon: "error",
         title: `${error?.response?.data.message}`,
       });
+      console.log(error,"<<<<<<<<<<<<<>>>>>>>>>>>>>>")
     }
   };
 

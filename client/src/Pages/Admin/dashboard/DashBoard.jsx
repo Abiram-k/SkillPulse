@@ -93,7 +93,7 @@ export default function Dashboard() {
       }))
       .sort((a, b) => b.quantity - a.quantity);
 
-      console.log(recentSales)
+    console.log(recentSales);
     return topTenSellingBrandArray;
   };
 
@@ -217,7 +217,7 @@ export default function Dashboard() {
           <div className="space-y-4 font-sans">
             {topTenSellingProducts().length > 0 ? (
               topTenSellingProducts()
-                .slice(0, 5)
+                .slice(0, 10)
                 .map((product, index) => (
                   <div
                     key={index}
@@ -266,7 +266,7 @@ export default function Dashboard() {
           <div className="space-y-4 font-sans">
             {topTenSellingCategory().length > 0 ? (
               topTenSellingCategory()
-                .slice(0, 5)
+                .slice(0, 10)
                 .map((cat, index) => (
                   <div
                     key={index}
