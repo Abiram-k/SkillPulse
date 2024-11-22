@@ -68,7 +68,7 @@ export function ReturnProduct({ item }) {
           </AlertDialogTitle>
           <Textarea
             type="text"
-            className="text-black"
+            className="text-black bg-white"
             placeholder="Reson for Return"
             value={returnDescription}
             onChange={(e) => setReturnDescription(e.target.value)}

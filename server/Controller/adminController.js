@@ -47,7 +47,6 @@ exports.login = async (req, res) => {
 exports.customers = async (req, res) => {
     try {
         const { filter } = req.query;
-        // console.log("<<<<<<<<<<<<", filter, "<<<<<<<<<<<<")
 
         const users = await User.find();
 
@@ -58,7 +57,6 @@ exports.customers = async (req, res) => {
         else if (filter === "Recently added") {
             users = users.sort((a, b) => b.createdAt - a.createdAt);
         }
-        // console.log(users);
 
         return res.status(200).json({ message: "success", users });
     } catch (error) {
@@ -69,7 +67,6 @@ exports.customers = async (req, res) => {
 exports.blockUser = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(id);
         const user = await User.findById({ _id: id });
         user.isBlocked = !user.isBlocked
         await user.save();
@@ -83,9 +80,7 @@ exports.blockUser = async (req, res) => {
 exports.addCategory = async (req, res) => {
     try {
         let { name, description } = req.body;
-        console.log(req.file)
         const image = req.file?.path;
-        console.log(name, description);
         if (!description) {
             description = undefined;
         }
@@ -114,9 +109,7 @@ exports.addCategory = async (req, res) => {
 exports.addBrand = async (req, res) => {
     try {
         let { name, description } = req.body;
-        console.log(req.file)
         const image = req.file?.path;
-        console.log(name, description);
         if (!description) {
             description = undefined;
         }
@@ -168,12 +161,9 @@ exports.getBrand = async (req, res) => {
 
 exports.deleteBrand = async (req, res) => {
     try {
-        console.log(await Brand.find());
         let { id } = req.params;
-        console.log("brand id is:", id);
         const deletedBrand = await Brand.
             findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
-        console.log(deletedBrand)
         if (deletedBrand)
             return res.status(200).json({ message: "Brand successfully deleted" });
     } catch (error) {
@@ -185,7 +175,6 @@ exports.deleteBrand = async (req, res) => {
 exports.brandRestore = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log("brand id is:", id);
         const RestoredBrand = await Brand.
             findByIdAndUpdate({ _id: id }, { isDeleted: false, deletedAt: null });
 
@@ -227,7 +216,6 @@ exports.listBrand = async (req, res) => {
 
         const { id } = req.params;
         const brand = await Brand.findById(id);
-        console.log(brand);
         brand.isListed = !brand?.isListed
         brand.save();
         return res.status(200).json({ message: "success", brand })
@@ -240,13 +228,9 @@ exports.listBrand = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
     try {
-        console.log(await Category.find());
         let { id } = req.params;
-        // id =new mongoose.Types.ObjectId(id)
-        console.log("category id is:", id);
         const deletedCategory = await Category.
             findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
-        console.log(deletedCategory)
         if (deletedCategory)
             return res.status(200).json({ message: "Category successfully deleted" });
     } catch (error) {
@@ -259,7 +243,6 @@ exports.deleteCategory = async (req, res) => {
 exports.categoryRestore = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log("category id is:", id);
         const RestoredCategory = await Category.
             findByIdAndUpdate({ _id: id }, { isDeleted: false, deletedAt: null });
 
@@ -274,7 +257,6 @@ exports.categoryRestore = async (req, res) => {
 exports.editCategory = async (req, res) => {
     try {
         let { id, name, description, offer, maxDiscount } = req.body;
-        console.log(offer)
         if (!description) {
             description = undefined;
         }
@@ -320,7 +302,6 @@ exports.listCategory = async (req, res) => {
 
         const { id } = req.params;
         const category = await Category.findById(id);
-        // console.log(category);
         category.isListed = !category?.isListed
         category.save();
         return res.status(200).json({ message: "success", category })
@@ -334,7 +315,6 @@ exports.listCategory = async (req, res) => {
 exports.getProduct = async (req, res) => {
     try {
         const { filter } = req.query;
-        console.log(filter)
         const products = await Product.find().populate([
             { path: "category" },
             { path: "brand" }
@@ -370,7 +350,6 @@ exports.addProduct = async (req, res) => {
         } = req.body;
         let salesPrice;
         const productImage = req.files.map((file) => file.path)
-        console.log(productImage)
         const existProduct = await Product.findOne({ productName });
 
         if (!existProduct) {
@@ -397,7 +376,6 @@ exports.addProduct = async (req, res) => {
                 brand: brandDoc,
                 productImage
             });
-            console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
             return res.status(200).json({ message: "product added successully" })
         }
     } catch (error) {
@@ -459,7 +437,6 @@ exports.editProduct = async (req, res) => {
                 productImage,
                 offer
             });
-            // console.log("req got !!!!!!!!!!!!!!!!!!!!!!!!!")
             return res.status(200).json({ message: "product edited successully" })
         }
     } catch (error) {
@@ -471,10 +448,8 @@ exports.editProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
     try {
         let { id } = req.params;
-        console.log("product id is:", id);
         const deletedProduct = await Product.
             findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: Date.now() });
-        console.log(deletedProduct)
         if (deletedProduct)
             return res.status(200).json({ message: "Product successfully deleted" });
     } catch (error) {
@@ -486,7 +461,6 @@ exports.deleteProduct = async (req, res) => {
 exports.restoreProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log("product id is:", id);
         const RestoredProduct = await Product.
             findByIdAndUpdate({ _id: id }, { isDeleted: false, deletedAt: null });
 
@@ -515,12 +489,9 @@ exports.handleProductListing = async (req, res) => {
 }
 exports.editStatus = async (req, res) => {
     try {
-        console.log("hey")
         const { id } = req.query;
         const { orderId, productId, updatedStatus } = req.body;
-
-        console.log("product Id: ", productId);
-        console.log("order Id: ", orderId)
+       
         const updatingOrder = await Orders.findOne({ orderId })
         if (updatedStatus == "cancelled") {
             const walletData = {
@@ -551,7 +522,6 @@ exports.editStatus = async (req, res) => {
                 updatingOrder.paymentStatus = "Success";
             }
             updatingOrder.orderItems[productIndex].productStatus = updatedStatus;
-            console.log(updatingOrder);
             const itemStatus = updatingOrder.orderItems.map(item => item.productStatus)
 
             if (itemStatus.every((status) => status == "delivered"))
@@ -657,7 +627,6 @@ exports.returnOrder = async (req, res) => {
 
 exports.getCoupons = async (req, res) => {
     try {
-        console.log("getted coupon");
         const coupons = await Coupon.find();
         if (coupons)
             return res.status(200).json(coupons);
@@ -668,7 +637,6 @@ exports.getCoupons = async (req, res) => {
 }
 exports.addCoupons = async (req, res) => {
     try {
-        console.log("added coupon");
         const { couponCode,
             couponType,
             couponAmount,
@@ -678,20 +646,9 @@ exports.addCoupons = async (req, res) => {
             purchaseAmount,
             expiryDate,
             maxDiscount } = req.body;
-        console.log(
-            couponCode,
-            couponType,
-            couponAmount,
-            description,
-            totalLimit,
-            perUserLimit,
-            purchaseAmount,
-            expiryDate,
-            maxDiscount)
+
         const expirationDate = new Date(expiryDate + 'T00:00:00Z');
-        console.log(expirationDate)
         const coupon = await Coupon.findOne({ couponCode });
-        console.log(coupon)
         if (coupon)
             return res.status(400).json({ message: "Coupon code already added" })
         const newCouponData = new Coupon({
@@ -715,9 +672,7 @@ exports.addCoupons = async (req, res) => {
 
 exports.deleteCoupon = async (req, res) => {
     try {
-        console.log("hey")
         const { id } = req.params;
-        console.log(id, "delete coupon id")
         const coupon = await Coupon.findOneAndDelete({ _id: id }, { new: true });
         if (coupon)
             return res.status(200).json({ message: "Coupon deleted successfully" });
@@ -741,7 +696,6 @@ exports.getAllOrders = async (req, res) => {
             const year = date.getFullYear();
             return `${day}/${month}/${year}`;
         }
-        console.log(filter, startDate, endDate);
         let from;
         let to;
 
@@ -777,12 +731,8 @@ exports.getAllOrders = async (req, res) => {
                 to = formatDateToDDMMYYYY(new Date(endDate));
                 break;
             }
-            // case "Yearly":{
-
-            // }
             default: {
                 console.log("No filter option was found");
-
             }
         }
         

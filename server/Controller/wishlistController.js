@@ -5,7 +5,6 @@ exports.getwishlist = async (req, res) => {
     try {
         const { user } = req.query;
         const wishlist = await Wishlist.find({ user }).populate('products.product');
-        console.log(wishlist);
         return res.status(200).json({ message: "Successfully fetched all the wishlist items", wishlist });
     } catch (error) {
         console.log(error);
@@ -16,7 +15,6 @@ exports.getwishlist = async (req, res) => {
 exports.addToWishlist = async (req, res) => {
     try {
         const { user, product } = req.body;
-        console.log(user, product);
 
         const wishlist = await Wishlist.findOneAndUpdate(
             { user },

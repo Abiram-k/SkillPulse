@@ -13,12 +13,9 @@ exports.getBanner = async (req,res) => {
     }
 }
 exports.addBanner = async (req,res) => {
-    console.log("hey");
     try {
         let { description } = req.body;
-        console.log(req.file)
         const image = req.file?.path;
-        console.log(description);
         if (!description) {
             description = undefined;
         }
@@ -59,15 +56,12 @@ exports.listBanner = async (req,res) => {
 }
 exports.deleteBanner = async (req,res) => {
     try {
-        console.log(await Banner.find());
         let { id } = req.params;
-        console.log("category id is:", id);
         if (!id) {
             return res.status(400).json({ message: "Banner ID is required" });
         }
         const deletedBanner = await Banner.
             findByIdAndDelete(id);
-        console.log(deletedBanner)
         if (deletedBanner)
             return res.status(200).json({ message: "Banner successfully deleted" });
     } catch (error) {

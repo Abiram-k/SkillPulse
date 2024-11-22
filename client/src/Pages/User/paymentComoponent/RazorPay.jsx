@@ -1,7 +1,13 @@
 import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 const API_ID = import.meta.env.VITE_RAZORPAY_ID;
-const Razorpay = ({ name, orderId, PayAmount, handlePlaceOrder }) => {
+const Razorpay = ({
+  name,
+  orderId,
+  PayAmount,
+  handlePlaceOrder,
+  isAddressSelected = null,
+}) => {
   const [razorpayOrderId, setRazorpayOrderId] = useState(null);
 
   useEffect(() => {
@@ -62,9 +68,9 @@ const Razorpay = ({ name, orderId, PayAmount, handlePlaceOrder }) => {
       },
     };
     const razorpayInstance = new window.Razorpay(options);
-    razorpayInstance.open();
+    if (Object(isAddressSelected)["firstName"]) razorpayInstance.open();
 
-    razorpayInstance.on("payment.failed", (response) => {
+    razorpayInstance.on("payment failed", (response) => {
       console.log("Payment failed:", response.error);
       handlePlaceOrder(true, orderId);
     });

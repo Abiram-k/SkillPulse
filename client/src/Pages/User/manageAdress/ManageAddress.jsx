@@ -70,7 +70,7 @@ const ManageAddress = () => {
                   </span>
                   <div className="space-x-4">
                     <Link
-                      to={`/user/profile/editAddress/${address._id}`} // Pass index or address ID for editing
+                      to={`/user/profile/editAddress/${address._id}`} 
                       className="text-gray-400 hover:text-white transition duration-200"
                     >
                       Edit
@@ -79,9 +79,6 @@ const ManageAddress = () => {
                       name="delete"
                       onClick={() => handleDeleteAddress(address._id)}
                     />
-                    {/* <button className="text-gray-400 hover:text-red-500 transition duration-200">
-                  Delete
-                </button> */}
                   </div>
                 </div>
                 <p className="text-xs sm:text-sm leading-6 text-gray-300">

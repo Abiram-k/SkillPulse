@@ -19,7 +19,6 @@ const Checkout = () => {
   const [selectedAddress, setSelectedAddress] = useState({});
   const [checkoutComplete, setCheckoutComplete] = useState(false);
   const checkoutItems = useSelector((state) => state.users.checkoutItems);
-  console.log(checkoutItems, "Check OUt Items");
   const dispatch = useDispatch();
   const user = useSelector((state) => state.users.user);
   const [addresses, setAddresses] = useState([]);
@@ -141,7 +140,6 @@ const Checkout = () => {
       try {
         const response = await axios.get(`/cart/${user._id}`);
         setCartItems(response.data.cartItems);
-        console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());
@@ -158,7 +156,6 @@ const Checkout = () => {
       try {
         const response = await axios.get(`/wallet/${user._id}`);
         setWalletData(response.data.wallet);
-        console.log("Wallet data : ", response.data.wallet);
       } catch (error) {
         console.error(error);
       }
@@ -199,8 +196,11 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async (paymentFailed) => {
-    if (paymentMethod == "cod" && summary.checkoutTotal >= 100) {
+    if (paymentMethod == "cod" && summary.checkoutTotal >= 100000) {
       showToast("error", "Cash on delivery is not applicable");
+      return;
+    } else if (!selectedAddress) {
+      showToast("error", "Add an address");
       return;
     }
     try {
@@ -216,7 +216,7 @@ const Checkout = () => {
       setCheckoutComplete((prev) => !prev);
       localStorage.removeItem(`cart_${user._id}`);
       localStorage.removeItem("checkoutItems");
-      if (paymentFailed) {
+      if (paymentFailed && paymentMethod == "Razorpay") {
         showToast("error", `Payment Failed`);
         navigate("/user/profile/myOrders");
       } else {
@@ -332,6 +332,11 @@ const Checkout = () => {
                   >
                     Add Address
                   </Link>
+                  {Object.keys(selectedAddress || {}).length === 0 && (
+                    <p className="text-orange-500 mt-3 lg:mt-5">
+                      {"Add address before proceeding to place order !"}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="bg-gray-900 p-4 rounded">
@@ -436,6 +441,7 @@ const Checkout = () => {
                   Place order
                 </button>
               )}
+              {/* <p className="text-green-500 font-bold">{selectedAddress}</p> */}
               {paymentMethod == "Razorpay" && (
                 <div className="w-full">
                   <Razorpay
@@ -447,6 +453,7 @@ const Checkout = () => {
                       )
                     )}
                     handlePlaceOrder={handlePlaceOrder}
+                    isAddressSelected={selectedAddress}
                   />
                 </div>
               )}

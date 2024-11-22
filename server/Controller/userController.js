@@ -4,7 +4,6 @@ const path = require("path");
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { error } = require('console');
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const Brand = require('../models/brandModel');
@@ -35,7 +34,6 @@ const transporter = nodeMailer.createTransport({
 
 const sendOTPEmail = async (email, otp, name) => {
     console.log("OTP IS:", otp);
-    console.log("EMAIL:", email);
     try {
         const mailCredentials = {
             from: "abiramk0107@gmail.com",
@@ -64,10 +62,8 @@ const sendOTPEmail = async (email, otp, name) => {
 
 
 exports.signUp = async (req, res) => {
-    console.log("hello signup clicked from backend")
     const { firstName, email } = req.body;
 
-    // const existingUser = await User.findOne({ email });
     const existingUser = await User.findOne({
         email:
             { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
@@ -78,7 +74,6 @@ exports.signUp = async (req, res) => {
     } else {
         const otp = generateOTP();
         const otpSent = await sendOTPEmail(email, otp, firstName);
-        console.log(email)
 
         if (!otpSent) {
             return res.status(500).json({ message: "Failed to send OTP" });
@@ -96,9 +91,7 @@ exports.signUp = async (req, res) => {
 
 exports.otp = async (req, res) => {
     const { otp } = req.body;
-    console.log(otp, req.session.otp);
     const newUser = req.session.user;
-    console.log("new User", newUser);
     try {
         if (!req.session.otp) {
             return res.status(400).json({ message: "Otp expired !" })
@@ -163,7 +156,6 @@ exports.resendOtp = async (req, res) => {
 }
 const passResetEmail = async (email, otp, name) => {
     console.log("OTP IS:", otp);
-    console.log("EMAIL:", email);
     try {
         const mailCredentials = {
 
@@ -194,13 +186,10 @@ exports.verifyEmail = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
-        // console.log(user)
         if (!user)
             return res.status(401).json({ message: "Email id not found" })
         const otp = generateOTP()
         req.session.resetPassOtp = otp;
-        console.log(req.session)
-
         const otpSuccess = await passResetEmail(email, otp, user.firstName)
         if (!otpSuccess)
             console.log("Otp verification Failed")
@@ -213,9 +202,7 @@ exports.verifyEmail = async (req, res) => {
 exports.verifyResetOtp = async (req, res) => {
     try {
         const { otp } = req.body;
-        console.log(otp, "from fronted")
         const validOtp = req.session.resetPassOtp;
-        console.log(validOtp, "from session fronted");
         if (otp && otp != validOtp)
             return res.status(400).json({ message: "Otp is incorrect" });
         else
@@ -227,9 +214,7 @@ exports.verifyResetOtp = async (req, res) => {
 }
 exports.forgotPassword = async (req, res) => {
     try {
-        console.log("hey");
         const { email, newPassword } = req.body;
-        console.log(email);
         const user = await User.findOne({ email });
         if (!user)
             return res.status(404).json({ message: "User not found" })
@@ -246,11 +231,9 @@ exports.forgotPassword = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password, referralCode } = req.body;
-        console.log(email, password, referralCode);
         const user = await User.findOne({
             email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
         });
-        // console.log(user);
         if (!user) {
             return res.status(400).json({ message: "User not found !" });
         }
@@ -400,7 +383,6 @@ exports.getProducts = async (req, res) => {
             .populate('category')
             .populate('brand');
 
-        // console.log(products)
         const categoryDoc = await Category.find();
         const brandDoc = await Brand.find();
 
@@ -443,7 +425,6 @@ exports.getBrandCategoryInfo = async (req, res) => {
         }
         const { category, brand } = productData;
 
-        // console.log(category, brand)
         const isCategoryAvailable = category && category.isListed && !category.isDeleted;
         const isBrandAvailable = brand && brand.isListed && !brand.isDeleted;
 
@@ -473,7 +454,6 @@ exports.updateUser = async (req, res) => {
             firstName, lastName, mobileNumber, profileImage, dateOfBirth: validDateOfBirth
         };
 
-        // console.log("User Data", userData);
 
         const updatedUser = await User.findByIdAndUpdate(id, { $set: userData }, { new: true, upsert: true });
         if (updatedUser)
@@ -487,10 +467,8 @@ exports.updateUser = async (req, res) => {
 exports.getUser = async (req, res) => {
     try {
         const { id } = req.params;
-        // console.log(id);
         const userData = await User.findById(id);
-        // console.log(userData)
-        // if (userData)
+    
         return res.status(200).json({ message: "User successfully fetched", userData });
     } catch (error) {
         console.log(error.message);
@@ -500,11 +478,9 @@ exports.getUser = async (req, res) => {
 
 exports.addAddress = async (req, res) => {
     try {
-        console.log("working...");
         const { firstName, secondName, mobileNumber, alternativeMobile, city, state, address, pincode, type } = req.body;
         const { id } = req.query;
         const user = await User.findById(id);
-        // console.log(user.address);
         if (!user.address) {
             user.address = [];
         } else {
@@ -534,7 +510,6 @@ exports.getAddress = async (req, res) => {
         let selectedAddress;
         if (addrId) {
             selectedAddress = addresses.find((addr) => addr._id.toString() === addrId);
-            console.log(selectedAddress)
             if (!selectedAddress) {
                 return res.status(404).json({ message: "Address not found" });
             }
@@ -564,12 +539,9 @@ exports.getAddress = async (req, res) => {
 
 exports.getEditAddress = async (req, res) => {
     try {
-        // console.log("hey");
         const { id } = req.query;
-        // console.log(id);
         const [addressObj] = await User.find({ "address._id": id }, { "address.$": 1 })
         const [address] = addressObj.address
-        // console.log(address);
         return res.status(200).json({ message: "Successfully fetched edit address details", address })
     } catch (error) {
         console.log(error.message);
@@ -606,14 +578,12 @@ exports.editAddress = async (req, res) => {
         const { id } = req.query;
 
         const user = await User.findOne({ "address._id": id });
-        console.log(user);
 
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
 
         const addressIndex = user.address.findIndex(addr => addr._id.toString() === id);
-        // console.log(addressIndex);
 
         if (addressIndex === -1) {
             return res.status(404).json({ message: "Address not found." });
@@ -643,7 +613,6 @@ exports.editAddress = async (req, res) => {
 exports.deleteAddress = async (req, res) => {
     try {
         const { id } = req.query;
-        // console.log(id);
 
         const user = await User.findOne({ "address._id": id });
         const addressIndex = user.address.findIndex((addr, index) => addr._id.toString() == id);
@@ -664,11 +633,8 @@ exports.changePassword = async (req, res) => {
         const { id } = req.params;
         const { currentPassword, newPassword } = req.body;
 
-        console.log("Current Password:", currentPassword);
-        console.log("New Password:", newPassword);
-        console.log("User ID:", id);
+        
 
-        // Find user by ID
         const user = await User.findById(id);
         if (!user) {
             console.log("User not found");
@@ -685,7 +651,6 @@ exports.changePassword = async (req, res) => {
 
         console.log("Current password is correct, hashing new password...");
 
-        // const hashedNewPassword = await bcrypt.hash(newPassword, 10);
         user.password = newPassword;
 
         console.log("Saving new password...");
@@ -700,98 +665,18 @@ exports.changePassword = async (req, res) => {
     }
 };
 
-// exports.addToCart = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         console.log("productid :", id)
-//         const { userId } = req.query;
-//         console.log("userId :", userId);
-//         const product = await Product.findById(id);
-//         if (!product) {
-//             return res.status(404).json({ message: 'Product not found' });
-//         }
-//         let cart = await Cart.findOne({ user: userId }).populate("appliedCoupon")
-
-//         console.log(cart);
-//         if (cart) {
-//             const productIndex = cart.products.findIndex((p) => p.product.toString() == id);
-//             if (productIndex != -1) {
-//                 cart.products[productIndex].quantity += 1;
-//             }
-//             else {
-//                 let offeredPrice;
-//                 if (cart.appliedCoupon) {
-//                     if (cart.appliedCoupon.couponType == "Percentage") {
-//                         let discountAmount = Math.round(product.salesPrice * (cart.appliedCoupon.couponAmount / 100));
-//                         offeredPrice = discountAmount < cart.appliedCoupon.maxDiscount ?
-//                             offeredPrice = product.salesPrice - discountAmount :
-//                             offeredPrice = product.salesPrice - cart.appliedCoupon.maxDiscount
-//                     } else {
-//                         offeredPrice = Math.round((product.salesPrice / cart.grandTotal) * 100)
-//                     }
-//                 }
-//                 else {
-//                     offeredPrice = product.salesPrice
-//                 }
-//                 cart.products.push({ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice });
-//                 cart.grandTotal = cart.products.reduce((acc, product, index) => product.totalPrice + acc, 0);
-//                 cart.totalDiscount = cart.products.reduce((acc, product) => product.offeredPrice + acc, 0);
-//             }
-//         } else {
-//             cart = new Cart({
-//                 products: [{ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice: product.salesPrice }],
-//                 user: userId,
-//                 grandTotal: product.salesPrice,
-//                 totalDiscount: product.salesPrice
-//             })
-//         }
-//         await cart.save();
-//         return res.status(200).json({ message: "Product added to cart", cart })
-//     } catch (error) {
-//         console.log(error)
-//         return res.status(500).json({ message: 'Server error' });
-//     }
-// }
-
 exports.addToCart = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log("productid :", id)
         const { userId } = req.query;
-        console.log("userId :", userId);
         const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
         let cart = await Cart.findOne({ user: userId }).populate("appliedCoupon")
 
-        console.log(cart);
         if (cart) {
-            // const productIndex = cart.products.findIndex((p) => p.product.toString() == id);
-            // if (productIndex != -1) {
-            //     cart.products[productIndex].quantity += 1;
-            // }
-            // else {
-            // let offeredPrice;
-            // if (cart.appliedCoupon) {
-            //     if (cart.appliedCoupon.couponType == "Percentage") {
-            //         let discountAmount = Math.round(product.salesPrice * (cart.appliedCoupon.couponAmount / 100));
-
-            //         let maxDiscountExceedPercentage = Math.round((cart.grandTotal / cart.appliedCoupon.maxDiscount) * 100)
-            //         let maxDiscountExceedAmount = Math.round(product.salesPrice * (maxDiscountExceedPercentage / 100));
-
-            //         offeredPrice = discountAmount < cart.appliedCoupon.maxDiscount ?
-            //             offeredPrice = product.salesPrice - discountAmount :
-            //             offeredPrice = product.salesPrice - cart.appliedCoupon.maxDiscount
-
-            //     } else {
-            //         offeredPrice = Math.round((product.salesPrice / cart.grandTotal) * 100)
-            //     }
-            // }
-            // else {
-            // offeredPrice = product.salesPrice
-
-            cart.products.push({ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice: product.salesPrice });
+   cart.products.push({ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice: product.salesPrice });
             cart.grandTotal = cart.products.reduce((acc, product, index) => product.totalPrice + acc, 0);
             cart.totalDiscount = 0;
             cart.appliedCoupon = null

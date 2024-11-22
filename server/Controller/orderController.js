@@ -36,13 +36,10 @@ exports.addOrder = async (req, res) => {
 
         const { paymentMethod, totalAmount, appliedCoupon, paymentFailed, isRetryPayment, deliveryCharge } = req.query;
         const { id } = req.params;
-        // console.log(paymentFailed, "<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
         if (isRetryPayment) {
             const { checkoutItems } = req.body;
-            console.log(req.body)
             const order = await Orders.findOne({ user: id, _id: checkoutItems[0]._id })
             try {
-                console.log(paymentFailed, "<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>")
                 if (paymentFailed === "true") {
                     return res.status(400).json({ message: "Payment Failed" });
                 } else {
@@ -59,9 +56,7 @@ exports.addOrder = async (req, res) => {
                 return rest;
             });
             const coupon = await Coupon.findById(appliedCoupon);
-            console.log(appliedCoupon)
-            console.log(coupon)
-            console.log(appliedCoupon && !coupon)
+
             if (appliedCoupon && !coupon)
                 return res.status(400).json({ message: "Coupon is unavailable" })
 
@@ -72,11 +67,18 @@ exports.addOrder = async (req, res) => {
                 user.appliedCoupons = [];
             }
             const deliveryAddressId = user.deliveryAddress;
-            if (!deliveryAddressId)
+           
+            if (!deliveryAddressId && user.address.length == 0)
                 return res.status(400).json({ message: "Add a delivery Address" });
 
-            const [address] = user.address.filter((addr) => addr._id.toString() === deliveryAddressId);
-            if (!address) return res.status(404).json({ message: "Select an address" })
+            let [address] = user.address.filter((addr) => addr._id.toString() === deliveryAddressId);
+
+            if (!user.address[0])
+                return res.status(404).json({ message: "Add an address" });
+
+            if (!address)
+                address = user.address[0];
+
             let orderItems = [];
             let totalQuantity = 0;
             let paymentStatus = "";
@@ -91,7 +93,6 @@ exports.addOrder = async (req, res) => {
             else if (paymentMethod == "Razorpay" && paymentFailed == "false") {
                 paymentStatus = "Success"
             }
-            console.log(paymentStatus);
 
             for (const item of checkoutItems[0].products) {
                 try {
@@ -208,108 +209,6 @@ exports.getOrder = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch orders" });
     }
 }
-
-// exports.cancelOrder = async (req, res) => {
-//     try {
-//         const { id, itemId } = req.query;
-
-//         const order = await Orders.findOne({
-//             user: id,
-//             orderItems: { $elemMatch: { _id: itemId } },
-//         }).populate("orderItems.product");
-
-//         if (!order) {
-//             console.error("Order not found");
-//             return res.status(400).json({ message: "Order not found" });
-//         }
-
-//         const orderIndex = order.orderItems.findIndex(
-//             (item) => item._id.toString() === itemId
-//         );
-
-//         if (orderIndex === -1) {
-//             console.error("Failed to find order item");
-//             return res.status(400).json({ message: "Order item not found" });
-//         }
-
-//         order.orderItems[orderIndex].productStatus = "cancelled";
-//         let refundPrice = 0;
-//         if (order.appliedCoupon) {
-//             const remainingOrderValue =
-//                 order.totalAmount - order.orderItems[orderIndex].price;
-
-//             if (remainingOrderValue < order.appliedCoupon.purchaseAmount) {
-//                 refundPrice =
-//                     order.orderItems[orderIndex].totalPrice -
-//                     (order.totalAmount - order.totalDiscount);
-//                 order.appliedCoupon = null;
-
-//                 order.orderItems
-//                     .filter((item) => item._id.toString() !== itemId)
-//                     .forEach((item) => {
-//                         item.price = item.totalPrice;
-//                         item.offeredPrice = item.totalPrice;
-//                     });
-//             } else {
-
-//                 order.orderItems
-//                     .filter((item) => item._id.toString() !== itemId)
-//                     .forEach((item) => {
-//                         const discountAmount =
-//                             item.totalPrice * (order.appliedCoupon.couponAmount / 100);
-//                         const maxDiscount =
-//                             Math.min(
-//                                 order.appliedCoupon.maxDiscount,
-//                                 order.totalDiscount
-//                             ) / order.totalDiscount;
-//                         const maxDiscountAmount = item.totalPrice * maxDiscount;
-
-//                         item.offeredPrice =
-//                             discountAmount > maxDiscountAmount
-//                                 ? item.totalPrice - maxDiscountAmount
-//                                 : item.totalPrice - discountAmount;
-//                     });
-
-//                 refundPrice = order.orderItems[orderIndex].totalPrice - Math.abs(order.orderItems[orderIndex].price - (order.totalAmount - (order.totalDiscount - order.orderItems[orderIndex].price)))
-//             }
-//         } else {
-//             refundPrice = order.orderItems[orderIndex].price;
-//         }
-
-//         const updatedOrder = await order.save();
-//         if (updatedOrder.paymentStatus === "Success") {
-//             const walletData = {
-//                 amount: refundPrice,
-//                 description: "Cancellation Refund",
-//                 transactionId: `REF-${itemId}-${Date.now()}`,
-//             };
-
-//             const wallet = await Wallet.findOneAndUpdate(
-//                 { user: id },
-//                 {
-//                     $push: { transaction: walletData },
-//                     $inc: { totalAmount: parseFloat(refundPrice) },
-//                 },
-//                 { upsert: true, new: true }
-//             );
-
-//             if (!wallet) {
-//                 return res
-//                     .status(400)
-//                     .json({ message: "Wallet not found to refund money" });
-//             }
-//         }
-
-//         return res.status(200).json({ message: "Order cancelled successfully" });
-//     } catch (error) {
-//         console.error("Error cancelling order:", error);
-//         return res.status(500).json({
-//             message: "Error occurred while cancelling the order",
-//         });
-//     }
-// };
-
-
 exports.cancelOrder = async (req, res) => {
     try {
         const { id, itemId } = req.query;
@@ -339,17 +238,14 @@ exports.cancelOrder = async (req, res) => {
     }
 }
 exports.returnOrderRequest = async (req, res) => {
-    console.log("req")
     const { returnDescription } = req.body;
     try {
         const { id, itemId } = req.query;
         const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
 
-        console.log(order);
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
         if (orderIndex == -1)
-            console.log("Failed to find order")
-        order.orderItems[orderIndex].returnDescription = returnDescription;
+            order.orderItems[orderIndex].returnDescription = returnDescription;
         order.orderItems[orderIndex].returnedAt = new Date();
         await order.save();
         return res.status(200).json({ message: "Return request sended successfully" });
@@ -367,15 +263,12 @@ exports.verifyPayment = async (req, res) => {
 
     const { paymentId, orderId, signature, actuallOrder } = req.body;
     try {
-        console.log(paymentId, orderId, signature, actuallOrder)
         const body = orderId + "|" + paymentId;
         const expectedSignature = crypto
             .createHmac("sha256", process.env.RAZORPAY_KEY)
             .update(body.toString())
             .digest("hex");
-        console.log(expectedSignature)
-        console.log(orderId)
-        console.log(expectedSignature == orderId)
+
         const order = await Cart.findById(actuallOrder);
         if (!order)
             console.log("Order not found")

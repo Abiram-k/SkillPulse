@@ -25,13 +25,11 @@ const ManageOrders = () => {
 
   const user = useSelector((state) => state.users.user);
 
-  // console.log(user);
 
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(`/order?id=${user._id}`);
-        // console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
       } catch (error) {
         if (error?.response.data.isBlocked) {
@@ -60,7 +58,6 @@ const ManageOrders = () => {
     }
   };
 
-  // console.log("From fronend", orders);
 
   const getStatusColor = (status) => {
     if (status == "processing") return "text-yellow-500";
@@ -106,7 +103,6 @@ const ManageOrders = () => {
     const orderForRetry = orders?.filter(
       (order, index) => order?._id.toString() == orderId
     );
-    // console.log(orderForRetry, "RETRY ORDER>>>>>");
     try {
       const response = await axiosInstance.post(
         `/order/${user._id}`,

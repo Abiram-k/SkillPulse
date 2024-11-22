@@ -304,14 +304,14 @@ const ShoppingCartPage = () => {
             )}
             <div className="flex lg:gap-3 gap-1">
               <button
-                className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
+                className="mt-8 inline-block bg-green-600 text-white px-8 py-3 rounded hover:bg-green-700"
                 onClick={handleCheckout}
               >
                 Checkout
               </button>
               <Link
                 to={"/user/shop"}
-                className="mt-8 inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-red-700"
+                className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded hover:bg-red-700"
               >
                 Continue shopping
               </Link>

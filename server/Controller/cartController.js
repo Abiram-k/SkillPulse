@@ -79,8 +79,6 @@ exports.updateQuantity = async (req, res) => {
                 cart.totalDiscount = totalDiscount;
             } else {
                 cart.totalDiscount = cart.grandTotal - appliedCoupon.maxDiscount;
-                console.log(cart.grandTotal, cart.totalDiscount)
-                console.log(cart.grandTotal - appliedCoupon.maxDiscount);
             }
         } else {
             cart.totalDiscount = cart.products.reduce((acc, p) => acc + (p.offeredPrice), 0);
@@ -98,9 +96,7 @@ exports.removeCartItem = async (req, res) => {
     try {
         const { productId } = req.params;
         const { userId } = req.query;
-        console.log(userId, productId)
         const cart = await Cart.findOne({ user: userId }).populate("appliedCoupon")
-        console.log(cart)
         if (cart) {
             const productIndex = cart.products.findIndex((item) => item.product.toString() === productId);
             if (productIndex === -1)
@@ -134,62 +130,6 @@ exports.removeCartItem = async (req, res) => {
     }
 }
 
-// exports.applyCoupon = async (req, res) => {
-//     try {
-//         const { id, couponId } = req.query;
-//         // const cart = await Cart.findOneAndUpdate({ user: id },
-//         //     { appliedCoupon: couponId },
-//         //     { new: true });
-//         const coupon = await Coupon.findOne({ _id: couponId });
-//         const cart = await Coupon.findOne({ user: id });
-//         if (coupon && cart) {
-//             const cart = await Cart.findOne({ user: id }).populate("appliedCoupon");
-//             const coupon = await Coupon.findOne({ _id: couponId });
-//             if (cart.appliedCoupon) {
-//                 if (cart.appliedCoupon.couponType === "Percentage") {
-//                     cart.products.forEach((product) => {
-//                         if (coupon.purchaseAmount <= cart.grandTotal) {
-//                             const discountAmount =
-//                                 product.totalPrice * (coupon.couponAmount / 100)
-//                             const maxDiscountExceedPercentage = (cart.appliedCoupon.maxDiscount / cart.grandTotal) * 100;
-//                             const maxDiscountExceedAmount =
-//                                 product.totalPrice * (maxDiscountExceedPercentage / 100)
-//                             let appliedDiscount = cart.grandTotal * (coupon.couponAmount / 100)
-//                             console.log(appliedDiscount, coupon.maxDiscount)
-//                             if (appliedDiscount > coupon.maxDiscount) {
-//                                 console.log("working this...")
-//                                 product.offeredPrice = product.totalPrice - maxDiscountExceedAmount
-//                             } else {
-//                                 console.log("No working this")
-//                                 product.offeredPrice = product.totalPrice - discountAmount;
-//                             }
-//                         } else {
-//                             product.offeredPrice = product.totalPrice;
-//                         }
-//                     });
-//                 } else {
-//                     cart.products.forEach((product) => {
-//                         if (coupon.purchaseAmount <= product.totalPrice) {
-//                             const proportionalDiscount =
-//                                 (product.totalPrice / cart.grandTotal) * coupon.couponAmount
-//                             product.offeredPrice = Math.max(0, product.totalPrice - proportionalDiscount);
-//                         } else {
-//                             product.offeredPrice = product.totalPrice;
-//                         }
-//                     });
-//                 }
-//                 cart.totalDiscount = cart.products.reduce((acc, product) => acc + (product.offeredPrice), 0);
-//                 cart.grandTotal = cart.products.reduce((acc, product) => acc + product.totalPrice, 0)
-//                 await cart.save();
-//                 return res.status(200).json({ message: "Coupon applied successfully" });
-//             }
-//         }
-//         return res.status(400).json({ message: "Coupon failed to apply" });
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({ message: "Error occured while applying coupon" })
-//     }
-// }
 exports.applyCoupon = async (req, res) => {
     try {
         const { id, couponId } = req.query;
@@ -209,12 +149,9 @@ exports.applyCoupon = async (req, res) => {
                             const maxDiscountExceedAmount =
                                 product.totalPrice * (maxDiscountExceedPercentage / 100)
                             let appliedDiscount = cart.grandTotal * (coupon.couponAmount / 100)
-                            console.log(appliedDiscount, coupon.maxDiscount)
                             if (appliedDiscount > coupon.maxDiscount) {
-                                console.log("working this...")
                                 product.offeredPrice = product.totalPrice - maxDiscountExceedAmount
                             } else {
-                                console.log("No working this")
                                 product.offeredPrice = product.totalPrice - discountAmount;
                             }
                         } else {

@@ -27,11 +27,11 @@ export default function Dashboard() {
       order.orderItems.forEach((item) => {
         let productName = item.product.productName;
         if (topSellingProducts[productName]) {
-          topSellingProducts[productName][1] += item.quantity;
+          topSellingProducts[productName][1] += parseInt(item.quantity);
         } else {
           topSellingProducts[productName] = [
             ...item.product.productImage[0],
-            item.quantity,
+            parseInt(item.quantity),
           ];
         }
       });

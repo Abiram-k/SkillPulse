@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 const EditAddress = () => {
+  
   const [currentAddress, setCurrentAddress] = useState({});
   const [firstName, setFirstName] = useState("");
   const [secondName, setSecondName] = useState("");
@@ -104,11 +105,9 @@ const EditAddress = () => {
     formData.append("pincode", pincode);
     formData.append("type", type);
     formData.append("address", addressDetails);
-    // console.log(currentAddress._id);
     try {
       if (Object.keys(formErrors).length == 0) {
         const response = await axios.put(
-          // changed some routes from post to put
           `/address?id=${currentAddress._id}`,
           formData,
           {
@@ -123,7 +122,6 @@ const EditAddress = () => {
         navigate("/user/profile/manageAddress");
       }
     } catch (error) {
-      // alert(error.message);
       Toast.fire({
         icon: "error",
         title: `${error?.response?.data.message}`,
@@ -136,7 +134,6 @@ const EditAddress = () => {
     <div className="content w-3/4 mx-auto p-6 text-sm">
       <h2 className="text-center mb-8 text-2xl font-semibold">Edit Address</h2>
       <form className="max-w-lg mx-auto space-y-6 font-mono">
-        {/* First Name and Last Name */}
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 flex flex-col space-y-2">
             <input
@@ -164,7 +161,6 @@ const EditAddress = () => {
           </div>
         </div>
 
-        {/* Mobile Number and Alternate Number */}
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 flex flex-col space-y-2">
             <input
@@ -194,7 +190,6 @@ const EditAddress = () => {
           </div>
         </div>
 
-        {/* City and State */}
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 flex flex-col space-y-2">
             <input
@@ -222,7 +217,6 @@ const EditAddress = () => {
           </div>
         </div>
 
-        {/* Address and Pincode */}
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 flex flex-col space-y-2">
             <textarea
@@ -249,7 +243,6 @@ const EditAddress = () => {
           </div>
         </div>
 
-        {/* Address Type Selection */}
         <div className="flex flex-col space-y-2">
           <select
             name="type"
