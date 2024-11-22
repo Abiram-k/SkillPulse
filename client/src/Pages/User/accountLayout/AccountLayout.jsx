@@ -68,9 +68,11 @@ function AccountLayout() {
                 >
                   {profileImage ? (
                     <img
+                    aria-disabled
                       src={profileImage}
                       alt="Profile"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-default"
+                      
                     />
                   ) : (
                     <User className="w-6 h-6 text-gray-800" />
@@ -114,7 +116,7 @@ function AccountLayout() {
               </nav>
 
               <button
-                className="w-full mt-6 bg-red-600 text-white py-2 rounded-lg flex items-center  justify-center gap-2"
+                className="w-full mt-6 bg-red-600 text-white py-2 rounded-xl flex items-center  justify-center gap-2"
                 onClick={handleLogout}
               >
                 <LogOut className="w-5 h-5" />

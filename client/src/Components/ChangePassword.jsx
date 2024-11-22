@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+
+import './component.css'
 import {
   Dialog,
   DialogContent,
@@ -97,7 +99,7 @@ export function ChangePassword({ id }) {
             <Input
               id="name"
               placeholder="Current Password"
-              className="col-span-3 text-black"
+              className="col-span-3 text-black bg-white rounded"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
             />
@@ -112,7 +114,7 @@ export function ChangePassword({ id }) {
             <Input
               id="username"
               placeholder="Password"
-              className="col-span-3 text-black"
+              className="col-span-3 text-black bg-white rounded"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
@@ -128,7 +130,7 @@ export function ChangePassword({ id }) {
             <Input
               id="username"
               placeholder=" Confirm Password"
-              className="col-span-3 text-black"
+              className="col-span-3 text-black bg-white rounded"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -140,7 +142,7 @@ export function ChangePassword({ id }) {
         <DialogFooter className={" font-mono font-bold"}>
           <Button
             type="submit"
-            className={"bg-blue-500 font-bold"}
+            className={"bg-blue-500 font-bold rounded"}
             onClick={handleChangePassword}
           >
             Confirm

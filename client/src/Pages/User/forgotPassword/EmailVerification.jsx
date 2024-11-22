@@ -60,7 +60,6 @@ const EmailVerification = () => {
         email,
         otp,
       });
-      alert(email);
       dispatch(forgotEmailVerified(email));
       Toast.fire({
         icon: "success",

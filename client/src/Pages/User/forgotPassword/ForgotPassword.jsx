@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const email = useSelector((state) => state.users.forgotEmailVerified);
-
+  console.log("EMAILLLLLLL",email);
   const validateForm = () => {
     let error = {};
     if (newPassword.trim() == "") error.newPassword = "Field Cant be empty *";

@@ -36,15 +36,23 @@ const EditAddress = () => {
       error.secondName = "Last name must start with a character *";
     }
 
-    if (!mobileNumber.trim())
+    if (!mobileNumber.trim()) {
       error.mobileNumber = "Mobile number is required *";
-    else if (mobileNumber.length !== 10) {
-      error.mobileNumber = "Please enter  10-digit mobile number *";
+    } else if (!/^\d+$/.test(mobileNumber)) {
+      error.mobileNumber = "Mobile number should contain only numbers *";
+    } else if (mobileNumber.length !== 10) {
+      error.mobileNumber = "Please enter a 10-digit mobile number *";
     }
 
-    if (alternativeMobile.length > 0 && alternativeMobile.length < 10)
-      error.alternativeMobile = "Please enter  10-digit mobile number *";
-
+    if (alternativeMobile.length > 0) {
+      if (!/^\d+$/.test(alternativeMobile)) {
+        error.alternativeMobile =
+          "Alternative mobile number should contain only numbers *";
+      } else if (alternativeMobile.length !== 10) {
+        error.alternativeMobile =
+          "Please enter a 10-digit alternative mobile number *";
+      }
+    }
     if (city.trim() === "") error.city = "City is required *";
     if (state.trim() === "") error.state = "State is required *";
 
@@ -62,9 +70,7 @@ const EditAddress = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(
-          `/editAddress?id=${address}`,
-        );
+        const response = await axios.get(`/editAddress?id=${address}`);
         setCurrentAddress(response.data.address);
         setFirstName(response.data.address.firstName);
         setSecondName(response.data.address.secondName);
@@ -122,7 +128,7 @@ const EditAddress = () => {
         icon: "error",
         title: `${error?.response?.data.message}`,
       });
-      console.log(error,"<<<<<<<<<<<<<>>>>>>>>>>>>>>")
+      console.log(error, "<<<<<<<<<<<<<>>>>>>>>>>>>>>");
     }
   };
 

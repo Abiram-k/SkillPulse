@@ -233,7 +233,7 @@ const ProductDetails = () => {
                     ₹{product.regularPrice}
                   </span>
                   <span className="text-green-500 text-sm">
-                    {product.discount || 99}% off
+                    {product.offer ? product.offer + " % off" : ""}
                   </span>
                 </div>
                 <h6 className="text-orange-500 text-sm font-sans">

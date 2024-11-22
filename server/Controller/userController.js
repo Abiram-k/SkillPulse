@@ -247,7 +247,6 @@ exports.login = async (req, res) => {
     try {
         const { email, password, referralCode } = req.body;
         console.log(email, password, referralCode);
-        // const user = await User.findOne({ email });
         const user = await User.findOne({
             email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
         });
@@ -475,7 +474,7 @@ exports.updateUser = async (req, res) => {
         };
 
         // console.log("User Data", userData);
-        
+
         const updatedUser = await User.findByIdAndUpdate(id, { $set: userData }, { new: true, upsert: true });
         if (updatedUser)
             return res.status(200).json({ message: "Profile successfully updated", updatedUser });
