@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 
 const orderComplete = () => {
   return (
-    <main className="flex-grow flex flex-col items-center justify-center text-center p-4">
+    <main className="flex-grow flex flex-col items-center justify-center text-center p-4"style={{  fontfamily: "Montserrat"
+    }}>
       <div className="bg-gray-800 rounded-full px-6 py-2 mb-4">
         <span className="text-xl font-bold">Order Completed</span>
         <span className="block text-green-500">Arriving By Wed, Apr 2024</span>

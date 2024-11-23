@@ -18,6 +18,7 @@ exports.getCart = async (req, res) => {
         return res.status(500).json({ message: "failed to fetch cart items" })
     }
 }
+
 exports.updateQuantity = async (req, res) => {
     try {
         const { productId } = req.params;
@@ -50,21 +51,7 @@ exports.updateQuantity = async (req, res) => {
         product.totalPrice = product.product.salesPrice * newQuantity;
         const { appliedCoupon } = cart;
 
-        // if (appliedCoupon) {
-        //     if (appliedCoupon.couponType === "Percentage") {
-        //         const discountAmount = Math.round(product.totalPrice * (appliedCoupon.couponAmount / 100));
-        //         product.offeredPrice = (cart.totalDiscount - cart.grandTotal) <= appliedCoupon.maxDiscount
-        //             ? product.totalPrice - discountAmount
-        //             : product.totalPrice - appliedCoupon.maxDiscount;//if offer price exceed maxDiscount the offered price should be like total - maxdiscout
-        //     } else {
-        //         const discountAmount = appliedCoupon.couponAmount;
-        //         product.offeredPrice = product.totalPrice - discountAmount < appliedCoupon.maxDiscount
-        //             ? Math.max(0, product.totalPrice - discountAmount)
-        //             : product.totalPrice - appliedCoupon.maxDiscount;
-        //     }
-        // } else {
         product.offeredPrice = product.totalPrice;
-        // }
 
         cart.appliedCoupon = null;
         totalDiscoutApplied = cart.grandTotal - cart.totalDiscount

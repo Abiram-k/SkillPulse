@@ -491,7 +491,6 @@ exports.addAddress = async (req, res) => {
         }
         user.address.push({ firstName, secondName, mobileNumber, alternativeMobile, city, state, address, pincode, type });
         await user.save();
-        console.log("Added successfully")
         return res.status(200).json({ message: "Address added successfully" })
     } catch (error) {
         console.log(error.message);
@@ -550,7 +549,6 @@ exports.getEditAddress = async (req, res) => {
 }
 
 exports.editAddress = async (req, res) => {
-    console.log("working....");
 
     try {
         const {
@@ -565,16 +563,7 @@ exports.editAddress = async (req, res) => {
             address
         } = req.body;
 
-        console.log(
-            firstName,
-            secondName,
-            mobileNumber,
-            alternativeMobile,
-            city,
-            state,
-            address,
-            pincode,
-            type)
+       
         const { id } = req.query;
 
         const user = await User.findOne({ "address._id": id });

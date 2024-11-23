@@ -139,7 +139,7 @@ const Checkout = () => {
     (async () => {
       try {
         const response = await axios.get(`/cart/${user._id}`);
-        setCartItems(response.data.cartItems);
+        setCartItems(response.data.cartItems); 
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());
@@ -196,7 +196,7 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async (paymentFailed) => {
-    if (paymentMethod == "cod" && summary.checkoutTotal >= 100000) {
+    if (paymentMethod == "cod" && summary.checkoutTotal >= 5000) {
       showToast("error", "Cash on delivery is not applicable");
       return;
     } else if (!selectedAddress) {
@@ -341,7 +341,7 @@ const Checkout = () => {
               ) : (
                 <div className="bg-gray-900 p-4 rounded">
                   <div className="mb-4">
-                    <p className="font-semibold bg-gray-300 rounded-full px-3 py-1 text-black inline-block text-center">
+                    <p className="font-semibold bg-gray-300 rounded px-3 py-1 text-black inline-block text-center">
                       {selectedAddress?.type}
                     </p>
                   </div>
@@ -430,7 +430,7 @@ const Checkout = () => {
               {paymentMethod != "Razorpay" && (
                 <button
                   className={
-                    " text-white px-8 py-3 rounded-md w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
+                    " text-white px-8 py-3 rounded w-full bg-red-600 mb-4 md:mb-0 cursor-pointer"
                   }
                   onClick={handlePlaceOrder}
                   disabled={
@@ -460,10 +460,10 @@ const Checkout = () => {
             </div>
           </div>
           <div className="w-full md:w-80 ">
-            <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
+            <div className="bg-red-600 text-center text-white p-4 rounded mb-4">
               Checkout Details
             </div>
-            <div className="bg-pink-50 text-black p-6 rounded-lg">
+            <div className="bg-pink-50 text-black p-6 rounded">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
               <div className="space-y-3">
                 <div className="flex justify-between">
@@ -488,10 +488,7 @@ const Checkout = () => {
                   <span>GST Amount (18%)</span>
                   <span>{calculateGST(18)} ₹</span>
                 </div>
-                {/* <div className="flex justify-between">
-                  <span>Discount 0%</span>
-                  <span>0 ₹</span>
-                </div> */}
+               
                 {cartItems[0]?.appliedCoupon && (
                   <div className="flex justify-between">
                     <div className="flex gap-2 items-center">
@@ -517,11 +514,6 @@ const Checkout = () => {
                       <span className="text-green-500">
                         -
                         {
-                          // cartTotalPrice() -
-                          //   offerPrice(
-                          //     cartItems[0]?.appliedCoupon?.couponAmount,
-                          //     cartItems[0]?.appliedCoupon?.couponType
-                          //   )
                           Math.round(
                             parseFloat(
                               cartItems[0]?.grandTotal -
@@ -550,7 +542,7 @@ const Checkout = () => {
               </div>
               {cartItems[0]?.appliedCoupon ? (
                 <>
-                  <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded-lg mt-6  flex items-center justify-around cursor-default">
+                  <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded mt-6  flex items-center justify-around cursor-default">
                     <div className="flex lg:gap-1">
                       Coupon Applied
                       <Check className="text-xs" />{" "}
@@ -563,7 +555,7 @@ const Checkout = () => {
                 </>
               ) : (
                 <button
-                  className="w-full bg-red-600 text-white py-2 rounded-lg mt-6 hover:bg-red-700"
+                  className="w-full bg-red-600 text-white py-2 rounded mt-6 hover:bg-red-700"
                   onClick={openPopup}
                 >
                   APPLY Coupon
@@ -587,13 +579,13 @@ const Checkout = () => {
     </div>
   ) : (
     <main className="flex-grow flex flex-col items-center  text-center p-4 h-screen space-y-3.5 lg:mt-28">
-      <div className="bg-gray-800 rounded-full px-6 py-2 mb-4">
+      <div className="bg-gray-800 rounded px-6 py-2 mb-4">
         <span className="text-xl font-bold">Order Completed</span>
         <span className="block text-green-500 ">Arriving By Wed, Apr 2024</span>
       </div>
       <Link
         to="/user/profile/myOrders"
-        className="bg-gray-200 text-black rounded-full px-6 py-2 mb-8"
+        className="bg-gray-200 text-black rounded px-6 py-2 mb-8"
       >
         View order
       </Link>
@@ -607,7 +599,7 @@ const Checkout = () => {
       </p>
       <Link
         to={"/user/profile/shop"}
-        className="bg-red-600 text-white rounded-full px-6 py-2"
+        className="bg-red-600 text-white rounded px-6 py-2"
       >
         Continue Shopping
       </Link>

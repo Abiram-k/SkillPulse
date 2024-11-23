@@ -16,7 +16,7 @@ function UserLayout() {
 
         <button
           id="menu-btn"
-          className="absolute right-4 block lg:hidden text-white text-end focus:outline-none"
+          className="absolute right-4  block lg:hidden text-white text-end focus:outline-none"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <svg
@@ -72,7 +72,7 @@ function UserLayout() {
           </a>
         </div>
 
-        <div className="flex gap-4 text-lg justify-center lg:justify-end w-full lg:w-auto">
+        <div className="flex gap-4 text-lg justify-center lg:justify-end w-full lg:w-auto me-6">
           <Link to="search">
             <i className="fas fa-search lg:text-xl"></i>
           </Link>
@@ -91,7 +91,7 @@ function UserLayout() {
         </div>
       </div>
       <Outlet context={{ setCartCount }} />
-      <footer className="bg-black text-gray-400 py-8 flex flex-col space-y-11 border-t-2 border-gray-700">
+      <footer style={{fontfamily: "Montserrat"}} className="bg-black text-gray-400 py-8 flex flex-col space-y-11 border-t-2 border-gray-700">
         <div className="flex flex-wrap justify-around gap-8">
           {/* Shipping Section */}
           <div className="text-center flex flex-col items-center w-1/3 md:w-auto">

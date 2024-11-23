@@ -89,50 +89,48 @@ function Login() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen ps-10 sm:ps-0  ms-80 sm:ms-auto">
-      <h1 className="text-white sm:text-6xl sm:mb-10 mb-5 text-[24px]">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 lg:ps-10 ">
+      <h1 className="text-white text-3xl lg:text-6xl mb-6 lg:mb-10">
         SKILL PULSE
       </h1>
       {message.response && <Notification message={message.response} />}
       <div
-        className="bg-[#1C1C1C] rounded-lg shadow-lg sm:flex sm:items-center p-8 sm:flex-row "
-        style={{ width: "600px", boxShadow: "0 0 20px rgba(255, 0, 0, 0.5)" }}
+        className="bg-[#1C1C1C] rounded shadow-lg w-full max-w-md lg:max-w-none lg:w-[600px] p-6 lg:p-8 lg:flex lg:items-center lg:flex-row "
+        style={{ boxShadow: "0 0 20px rgba(255, 0, 0, 0.5)" }}
       >
-        <div className="flex justify-center mr-10">
+        <div className="flex justify-center mb-6 lg:mb-0 lg:mr-10">
           <img
             src={loginImage}
             alt="A person with headphones in a red and black theme"
-            className="rounded-full w-48 h-32"
+            className="rounded-full w-32 h-32 lg:w-48 lg:h-32 object-cover"
           />
         </div>
-        <div className="flex flex-col font-mono">
-          <h2 className="text-white text-2xl text-center mb-6 text-large font-bold tracking-wide">
+        <div className="flex flex-col font-mono lg:flex-1">
+          <h2 className="text-white text-2xl text-center mb-6 font-bold tracking-wide">
             LOGIN
           </h2>
-          <form className="space-y-4" onSubmit={handleLogin}>
+          <form className="space-y-4" onSubmit={handleLogin} style={{fontFamily:"Montserrat"}}>
             <div>
               <input
                 type="email"
                 placeholder="Enter email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className=" p-2 mx-28 sm:mx-0 rounded w-3/4 sm:w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
+                className="p-2 rounded w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
               />
-              {message.email && <p className="error">{message.email}</p>}
+              {message.email && <p className="error text-red-500 text-sm mt-1">{message.email}</p>}
             </div>
             <div>
-              <div>
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="rounded p-2 mx-28 sm:mx-0 w-3/4 sm:w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
-                />
-                {message.password && (
-                  <p className="error">{message.password}</p>
-                )}
-              </div>
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="rounded p-2 w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
+              />
+              {message.password && (
+                <p className="error text-red-500 text-sm mt-1">{message.password}</p>
+              )}
             </div>
             <div>
               <input
@@ -140,87 +138,71 @@ function Login() {
                 placeholder="Referral Code"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
-                className="rounded p-2 mx-28 sm:mx-0 w-3/4 sm:w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
+                className="rounded p-2 w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none"
               />
               {message.referralCode && (
-                <p className="error">{message.referralCode}</p>
+                <p className="error text-red-500 text-sm mt-1">{message.referralCode}</p>
               )}
             </div>
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="bg-red-600 text-white py-2 px-6 rounded-full hover:bg-red-700"
+                className="bg-red-600 text-white py-2 px-6 rounded-full hover:bg-red-700 transition duration-300"
               >
                 Login
               </button>
             </div>
           </form>
-          <div></div>
-          {/* {!isReferral && (
-                <div className="text-center mt-4">
-                  <button
-                    onClick={toggleReferral}
-                    className="text-gray-400 text-sm hover:underline"
-                  >
-                    Referral Code ?
-                  </button>
-                </div>
-              )} */}
-          <div className="text-center mt-4">
+          <div className="text-center mt-4"  style={{fontFamily:"Montserrat"}}>
             <Link
               to="/verifyEmail"
-              className="text-gray-400 text-sm hover:underline"
+              className="text-gray-400 text-sm hover:underline block mb-2"
             >
               Forgot Password?
             </Link>
-          </div>
-          <div className="text-center mt-2">
             <Link
               to="/signup"
-              className="text-gray-400 text-sm hover:underline"
+              className="text-gray-400 text-sm hover:underline block "
             >
               Don't have an account?
-              <span className="text-white">
-                Create an <br /> account
+              <span className="text-white block lg:inline lg:ms-1">
+                Create an account
               </span>
             </Link>
           </div>
         </div>
       </div>
-      <p className="mt-6">CONTINUE WITH</p>
-      <a
+      <p className="mt-6 text-white">CONTINUE WITH</p>
+      <button
         onClick={handleGoogleAuth}
-        className="mt-2 flex items-center justify-center cursor-pointer"
+        className="mt-2 flex items-center justify-center cursor-pointer bg-transparent"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          x="0px"
-          y="0px"
-          width="100"
-          height="100"
           viewBox="0 0 48 48"
-          className="w-24 h-10"
+          className="w-12 h-12 lg:w-24 lg:h-10"
         >
           <path
             fill="#FFC107"
             d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
-          ></path>
+          />
           <path
             fill="#FF3D00"
             d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
-          ></path>
+          />
           <path
             fill="#4CAF50"
             d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-          ></path>
+          />
           <path
             fill="#1976D2"
             d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
-          ></path>
+          />
         </svg>
-      </a>
+      </button>
     </div>
   );
 }
 
 export default Login;
+

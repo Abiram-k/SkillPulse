@@ -29,6 +29,7 @@ const ShoppingCartPage = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [isDelete, setIsDelete] = useState(false);
+  console.log(user);
   useEffect(() => {
     setCouponMessage("");
     (async () => {
@@ -36,6 +37,7 @@ const ShoppingCartPage = () => {
         const response = await axios.get(`/cart/${user._id}`);
         setCartItems(response.data.cartItems);
 
+        console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());
@@ -48,25 +50,6 @@ const ShoppingCartPage = () => {
       }
     })();
   }, [trigger]);
-
-  // useEffect(() => {
-  //   const productsInfo = [];
-  //   if (cartItems.length > 0 && cartItems[0]?.products) {
-  //     cartItems[0]?.products.forEach((product) => {
-  //       const quantity = product?.quantity || 0;
-  //       productsInfo.push({
-  //         product: product.product?._id,
-  //         quantity,
-  //       });
-  //     });
-  //   }
-  //   if (productsInfo.length > 0) {
-  //     dispatch(setCartProductQty(productsInfo));
-  //   } else {
-  //     console.warn("No valid products found in cartItems.");
-  //   }
-  // }, [cartItems, dispatch]);
-
   const removeItem = async (id) => {
     try {
       const response = await axios.delete(`/cartItem/${id}`, {
@@ -145,6 +128,7 @@ const ShoppingCartPage = () => {
       navigate("/user/checkout");
     }
   };
+
   const totalPrice = () => {
     return cartItems[0]?.products.reduce(
       (acc, item) => acc + item.product?.salesPrice * item.quantity,
@@ -205,192 +189,353 @@ const ShoppingCartPage = () => {
     }
   };
   return (
+    // <div className="min-h-screen bg-black text-white font-mono">
+    //   <main className="container mx-auto px-4 py-8">
+    //     <div className="flex flex-wrap gap-8 justify-center align-middle">
+    //       <div className="flex-grow max-w-4xl">
+    //         <h1 className="text-4xl font-bold mb-6 mt-3">YOUR CART</h1>
+    //         <p className="mb-8">
+    //           Total {cartItems[0]?.products.length} Items In Your Cart
+    //         </p>
+    //         <div className="space-y-6">
+    //           {cartItems[0]?.products.map((item) => (
+    //             <div
+    //               key={item?.product?._id}
+    //               className="flex items-center bg-gray-900 rounded-lg p-4 space-x-4"
+    //             >
+    //               <img
+    //                 src={item?.product?.productImage[0] || ""}
+    //                 alt={item?.product?.name}
+    //                 className="w-28 h-28 object-cover rounded"
+    //               />
+    //               <div className="flex-grow">
+    //                 <h3 className="text-lg">{item?.product?.productName}</h3>
+    //                 <p className="text-md mt-2">
+    //                   {item?.product?.productDescription}
+    //                 </p>
+
+    //                 <p className="text-md mt-2 text-orange-600">
+    //                   {item?.product?.units < 0 && "Out of stock"}{" "}
+    //                 </p>
+    //                 <div className="flex gap-2">
+    //                   <p className="text-xl mt-2">
+    //                     ₹ {item.offeredPrice.toFixed(0)}
+    //                   </p>
+    //                   {cartItems[0].appliedCoupon &&
+    //                     parseFloat(item.totalPrice - item.offeredPrice) > 0 && (
+    //                       <>
+    //                         <p className="text-xl mt-2 line-through text-gray-400">
+    //                           ₹{item?.product?.salesPrice * item?.quantity}
+    //                         </p>
+    //                       </>
+    //                     )}
+    //                 </div>
+    //               </div>
+    //               <div className="flex items-center space-x-4">
+    //                 <div className="flex items-center space-x-2">
+    //                   <button
+    //                     onClick={() => updateQuantity(item?.product._id, -1)}
+    //                     className={`bg-gray-800 px-3 py-1 rounded  ${
+    //                       item.quantity == 1 && "text-red-600"
+    //                     }`}
+    //                     disabled={item.quantity == 1}
+    //                   >
+    //                     -
+    //                   </button>
+    //                   <span>{item?.quantity}</span>
+    //                   <button
+    //                     onClick={() => updateQuantity(item?.product._id, 1)}
+    //                     className={`bg-gray-800 px-3 py-1 rounded  ${
+    //                       item.quantity == 5 && "text-red-600"
+    //                     }`}
+    //                     disabled={item.quantity == 5}
+    //                   >
+    //                     +
+    //                   </button>
+    //                 </div>
+    //                 <div className="bg-red-600 p-1 rounded flex space-x-1 justify-center align-middle">
+    //                   <Trash2 className="w-5 h-5" />
+    //                   <AlertDialogueButton
+    //                     name="Delete"
+    //                     onClick={() => removeItem(item?.product._id)}
+    //                   />
+    //                 </div>
+    //               </div>
+    //             </div>
+    //           ))}
+    //         </div>
+    //         {couponMessage && (
+    //           <p className="text-orange-600">{couponMessage}</p>
+    //         )}
+    //         <div className="flex lg:gap-3 gap-1">
+    //           <button
+    //             className="mt-8 inline-block bg-green-600 text-white px-8 py-3 rounded hover:bg-green-700"
+    //             onClick={handleCheckout}
+    //           >
+    //             Checkout
+    //           </button>
+    //           <Link
+    //             to={"/user/shop"}
+    //             className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded hover:bg-red-700"
+    //           >
+    //             Continue shopping
+    //           </Link>
+    //         </div>
+    //       </div>
+
+    //       <div className="w-full md:w-80 ">
+    //         <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
+    //           Checkout Details
+    //         </div>
+    //         <div className="bg-pink-50 text-black p-6 rounded-lg">
+    //           <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+    //           <div className="space-y-3">
+    //             <div className="flex justify-between">
+    //               <span>
+    //                 {cartItems[0]?.products.reduce(
+    //                   (acc, item) => item.quantity + acc,
+    //                   0
+    //                 )}{" "}
+    //                 Items
+    //               </span>
+    //               <span>{totalPrice() || 0} ₹</span>
+    //             </div>
+    //             <div className="flex justify-between">
+    //               <span>Delivery Charges</span>
+    //               <span className="text-green-600">
+    //                 {totalPrice() > 1000
+    //                   ? "Free"
+    //                   : calculateDeliveryCharge() + " ₹"}
+    //               </span>
+    //             </div>
+    //             <div className="flex justify-between">
+    //               <span>GST Amount (18%)</span>
+    //               <span>{calculateGST(18)} ₹</span>
+    //             </div>
+    //             {cartItems[0]?.appliedCoupon && (
+    //               <div className="flex justify-between">
+    //                 <div className="flex gap-2 items-center">
+    //                   <span>
+    //                     {cartItems[0].appliedCoupon.couponCode} -(Coupon)
+    //                   </span>
+    //                 </div>
+    //                 <span className="text-green-600">
+    //                   {cartItems[0].appliedCoupon.couponType == "Amount"
+    //                     ? "-" + cartItems[0]?.appliedCoupon.couponAmount
+    //                     : cartItems[0].appliedCoupon.couponAmount + "%"}
+    //                 </span>
+    //               </div>
+    //             )}
+    //             {cartItems[0]?.appliedCoupon ? (
+    //               <>
+    //                 <div className="flex justify-between font-bold border-gray-200">
+    //                   <span>Sub Total</span>
+    //                   <span>{cartTotalPrice().toFixed(2)}</span>
+    //                 </div>
+    //                 <div className="flex justify-between">
+    //                   <span className="text-sm font-mono">Saved Amount </span>{" "}
+    //                   <span className="text-green-500">
+    //                     -
+    //                     {cartTotalPrice() -
+    //                       offerPrice(
+    //                         cartItems[0]?.appliedCoupon?.couponAmount,
+    //                         cartItems[0]?.appliedCoupon?.couponType
+    //                       ).toFixed()}
+    //                   </span>
+    //                 </div>
+    //                 <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+    //                   <span>Payable Amount</span>
+    //                   <span>
+    //                     {offerPrice(
+    //                       cartItems[0]?.appliedCoupon?.couponAmount,
+    //                       cartItems[0]?.appliedCoupon?.couponType
+    //                     ).toFixed(2)}
+    //                   </span>
+    //                 </div>
+    //               </>
+    //             ) : (
+    //               <div className="flex justify-between font-bold border-gray-200">
+    //                 <span>Payable Amount</span>
+    //                 <span>{cartTotalPrice() || 0} ₹</span>
+    //               </div>
+    //             )}
+    //           </div>
+    //           {cartItems[0]?.appliedCoupon && (
+    //             <>
+    //               <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded-lg mt-6  flex items-center justify-around cursor-default">
+    //                 <div className="flex lg:gap-1">
+    //                   Coupon Applied
+    //                   <Check className="text-xs" />{" "}
+    //                 </div>
+    //               </button>
+    //             </>
+    //           )}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </main>
+    // </div>
     <div className="min-h-screen bg-black text-white font-mono">
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex flex-wrap gap-8 justify-center align-middle">
-          <div className="flex-grow max-w-4xl">
-            <h1 className="text-4xl font-bold mb-6 mt-3">YOUR CART</h1>
-            <p className="mb-8">
-              Total {cartItems[0]?.products.length} Items In Your Cart
-            </p>
-            <div className="space-y-6">
-              {cartItems[0]?.products.map((item) => (
-                <div
-                  key={item?.product?._id}
-                  className="flex items-center bg-gray-900 rounded-lg p-4 space-x-4"
-                >
-                  <img
-                    src={item?.product?.productImage[0] || ""}
-                    alt={item?.product?.name}
-                    className="w-28 h-28 object-cover rounded"
-                  />
-                  <div className="flex-grow">
-                    <h3 className="text-lg">{item?.product?.productName}</h3>
-                    <p className="text-md mt-2">
-                      {item?.product?.productDescription}
-                    </p>
-
-                    <p className="text-md mt-2 text-orange-600">
-                      {item?.product?.units < 0 && "Out of stock"}{" "}
-                    </p>
-                    <div className="flex gap-2">
-                      <p className="text-xl mt-2">
-                        ₹ {item.offeredPrice.toFixed(0)}
+  <main className="container mx-auto px-4 py-8">
+    <div className="flex flex-col lg:flex-row lg:gap-8 gap-4 justify-center">
+      <div className="flex-grow max-w-4xl">
+        <h1 className="text-3xl lg:text-4xl font-bold mb-4">YOUR CART</h1>
+        <p className="mb-6 text-sm lg:text-base">
+          Total {cartItems[0]?.products.length} Items In Your Cart
+        </p>
+        <div className="space-y-4">
+          {cartItems[0]?.products.map((item) => (
+            <div
+              key={item?.product?._id}
+              className="flex flex-col sm:flex-row items-center bg-gray-900 rounded p-4 space-y-4 sm:space-y-0 sm:space-x-4"
+            >
+              <img
+                src={item?.product?.productImage[0] || ""}
+                alt={item?.product?.name}
+                className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded"
+              />
+              <div className="flex-grow">
+                <h3 className="text-lg">{item?.product?.productName}</h3>
+                <p className="text-sm mt-2">{item?.product?.productDescription}</p>
+                <p className="text-md mt-2 text-orange-600">
+                  {item?.product?.units < 0 && "Out of stock"}
+                </p>
+                <div className="flex gap-2 mt-2">
+                  <p className="text-xl">
+                    ₹ {item.offeredPrice.toFixed(0)}
+                  </p>
+                  {cartItems[0].appliedCoupon &&
+                    parseFloat(item.totalPrice - item.offeredPrice) > 0 && (
+                      <p className="text-md line-through text-gray-400">
+                        ₹{item?.product?.salesPrice * item?.quantity}
                       </p>
-                      {cartItems[0].appliedCoupon &&
-                        parseFloat(item.totalPrice - item.offeredPrice) > 0 && (
-                          <>
-                            <p className="text-xl mt-2 line-through text-gray-400">
-                              ₹{item?.product?.salesPrice * item?.quantity}
-                            </p>
-                          </>
-                        )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => updateQuantity(item?.product._id, -1)}
-                        className={`bg-gray-800 px-3 py-1 rounded  ${
-                          item.quantity == 1 && "text-red-600"
-                        }`}
-                        disabled={item.quantity == 1}
-                      >
-                        -
-                      </button>
-                      <span>{item?.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item?.product._id, 1)}
-                        className={`bg-gray-800 px-3 py-1 rounded  ${
-                          item.quantity == 5 && "text-red-600"
-                        }`}
-                        disabled={item.quantity == 5}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div className="bg-red-600 p-1 rounded flex space-x-1 justify-center align-middle">
-                      <Trash2 className="w-5 h-5" />
-                      <AlertDialogueButton
-                        name="Delete"
-                        onClick={() => removeItem(item?.product._id)}
-                      />
-                    </div>
-                  </div>
+                    )}
                 </div>
-              ))}
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => updateQuantity(item?.product._id, -1)}
+                    className={`bg-gray-800 px-3 py-1 rounded ${
+                      item.quantity == 1 && "text-red-600"
+                    }`}
+                    disabled={item.quantity == 1}
+                  >
+                    -
+                  </button>
+                  <span>{item?.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item?.product._id, 1)}
+                    className={`bg-gray-800 px-3 py-1 rounded ${
+                      item.quantity == 5 && "text-red-600"
+                    }`}
+                    disabled={item.quantity == 5}
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="bg-red-600 p-1 rounded flex space-x-1 justify-center">
+                  <Trash2 className="w-5 h-5" />
+                  <AlertDialogueButton
+                    name="Delete"
+                    onClick={() => removeItem(item?.product._id)}
+                  />
+                </div>
+              </div>
             </div>
-            {couponMessage && (
-              <p className="text-orange-600">{couponMessage}</p>
-            )}
-            <div className="flex lg:gap-3 gap-1">
-              <button
-                className="mt-8 inline-block bg-green-600 text-white px-8 py-3 rounded hover:bg-green-700"
-                onClick={handleCheckout}
-              >
-                Checkout
-              </button>
-              <Link
-                to={"/user/shop"}
-                className="mt-8 inline-block bg-red-600 text-white px-8 py-3 rounded hover:bg-red-700"
-              >
-                Continue shopping
-              </Link>
-            </div>
-          </div>
+          ))}
+        </div>
+        {couponMessage && (
+          <p className="text-orange-600 mt-4">{couponMessage}</p>
+        )}
+        <div className="flex flex-col lg:flex-row lg:gap-3 gap-2 mt-6">
+          <button
+            className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+            onClick={handleCheckout}
+          >
+            Checkout
+          </button>
+          <Link
+            to={"/user/shop"}
+            className="inline-block bg-red-600 text-white text-center px-6 py-2 rounded hover:bg-red-700"
+          >
+            Continue shopping
+          </Link>
+        </div>
+      </div>
 
-          <div className="w-full md:w-80 ">
-            <div className="bg-red-600 text-white p-4 rounded-lg mb-4">
-              Checkout Details
+      <div className="w-full lg:w-80">
+        <div className="bg-red-600 text-white p-4 rounded mb-2 lg:mb-4">
+          Checkout Details
+        </div>
+        <div className="bg-pink-50 text-black p-6 rounded">
+          <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span>
+                {cartItems[0]?.products.reduce(
+                  (acc, item) => item.quantity + acc,
+                  0
+                )}{" "}
+                Items
+              </span>
+              <span>{totalPrice() || 0} ₹</span>
             </div>
-            <div className="bg-pink-50 text-black p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              <div className="space-y-3">
+            <div className="flex justify-between">
+              <span>Delivery Charges</span>
+              <span className="text-green-600">
+                {totalPrice() > 1000
+                  ? "Free"
+                  : calculateDeliveryCharge() + " ₹"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>GST Amount (18%)</span>
+              <span>{calculateGST(18)} ₹</span>
+            </div>
+            {cartItems[0]?.appliedCoupon && (
+              <>
                 <div className="flex justify-between">
                   <span>
-                    {cartItems[0]?.products.reduce(
-                      (acc, item) => item.quantity + acc,
-                      0
-                    )}{" "}
-                    Items
+                    {cartItems[0].appliedCoupon.couponCode} -(Coupon)
                   </span>
-                  <span>{totalPrice() || 0} ₹</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Delivery Charges</span>
                   <span className="text-green-600">
-                    {totalPrice() > 1000
-                      ? "Free"
-                      : calculateDeliveryCharge() + " ₹"}
+                    {cartItems[0].appliedCoupon.couponType === "Amount"
+                      ? "-" + cartItems[0]?.appliedCoupon.couponAmount
+                      : cartItems[0].appliedCoupon.couponAmount + "%"}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>GST Amount (18%)</span>
-                  <span>{calculateGST(18)} ₹</span>
+                <div className="flex justify-between font-bold">
+                  <span>Sub Total</span>
+                  <span>{cartTotalPrice().toFixed(2)}</span>
                 </div>
-                {cartItems[0]?.appliedCoupon && (
-                  <div className="flex justify-between">
-                    <div className="flex gap-2 items-center">
-                      <span>
-                        {cartItems[0].appliedCoupon.couponCode} -(Coupon)
-                      </span>
-                    </div>
-                    <span className="text-green-600">
-                      {cartItems[0].appliedCoupon.couponType == "Amount"
-                        ? "-" + cartItems[0]?.appliedCoupon.couponAmount
-                        : cartItems[0].appliedCoupon.couponAmount + "%"}
-                    </span>
-                  </div>
-                )}
-                {cartItems[0]?.appliedCoupon ? (
-                  <>
-                    <div className="flex justify-between font-bold border-gray-200">
-                      <span>Sub Total</span>
-                      <span>{cartTotalPrice().toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm font-mono">Saved Amount </span>{" "}
-                      <span className="text-green-500">
-                        -
-                        {cartTotalPrice() -
-                          offerPrice(
-                            cartItems[0]?.appliedCoupon?.couponAmount,
-                            cartItems[0]?.appliedCoupon?.couponType
-                          ).toFixed()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
-                      <span>Payable Amount</span>
-                      <span>
-                        {offerPrice(
-                          cartItems[0]?.appliedCoupon?.couponAmount,
-                          cartItems[0]?.appliedCoupon?.couponType
-                        ).toFixed(2)}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex justify-between font-bold border-gray-200">
-                    <span>Payable Amount</span>
-                    <span>{cartTotalPrice() || 0} ₹</span>
-                  </div>
-                )}
-              </div>
-              {cartItems[0]?.appliedCoupon && (
-                <>
-                  <button className="w-full bg-red-200 font-bold  text-green-600 py-2 rounded-lg mt-6  flex items-center justify-around cursor-default">
-                    <div className="flex lg:gap-1">
-                      Coupon Applied
-                      <Check className="text-xs" />{" "}
-                    </div>
-                  </button>
-                </>
-              )}
-            </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Saved Amount</span>
+                  <span className="text-green-500">
+                    -{cartTotalPrice() - offerPrice(
+                      cartItems[0]?.appliedCoupon?.couponAmount,
+                      cartItems[0]?.appliedCoupon?.couponType
+                    ).toFixed()}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+                  <span>Payable Amount</span>
+                  <span>
+                    {offerPrice(
+                      cartItems[0]?.appliedCoupon?.couponAmount,
+                      cartItems[0]?.appliedCoupon?.couponType
+                    ).toFixed(2)}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
+  </main>
+</div>
+
   );
 };
 

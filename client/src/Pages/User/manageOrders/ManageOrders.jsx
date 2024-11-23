@@ -226,7 +226,7 @@ const ManageOrders = () => {
       <h1 className="text-xl lg:text-3xl uppercase font-bold mb-4 lg:mb-14">
         Manage your orders
       </h1>
-      <div className="flex flex-col lg:flex-row mb-4 lg:mb-10 transition-all duration-75 gap-2">
+      <div className="flex flex-col lg:flex-row mb-4 lg:mb-10 transition-all duration-75 gap-2"style={{fontfamily: "Montserrat"}}>
         <input
           type="text"
           className="flex-grow p-2 rounded bg-transparent border-2 lg:border-4 text-white border-gray-600 focus:outline-none"
@@ -234,7 +234,7 @@ const ManageOrders = () => {
           value={search}
           onChange={(e) => {
             const inputValue = e.target.value;
-            if (inputValue.length <= 50) {
+            if (inputValue.length <= 10) {
               setSearch(inputValue);
             }
           }}
@@ -242,165 +242,157 @@ const ManageOrders = () => {
       </div>
 
       <div className="space-y-6">
-        {orders.length > 0 ? (
-          filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <div className="border-y border-gray-500 p-6 rounded-lg shadow-md space-y-6">
-                <div className="flex flex-col lg:flex-row justify-between items-center text-sm lg:text-base gap-6">
-                  <div className="font-medium">
-                    <strong>Order Date:</strong> {order.orderDate}
+  {orders.length > 0 ? (
+    filteredOrders.length > 0 ? (
+      filteredOrders.map((order) => (
+        <div className="border-y border-gray-500 p-4 lg:p-6 rounded-lg shadow-md space-y-4 lg:space-y-6 bg-light-red">
+
+          <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row justify-between items-start lg:items-center text-xs lg:text-base gap-4">
+            <div className="font-medium">
+              <strong>Order Date:</strong> {order.orderDate}
+            </div>
+            <div
+              className={`font-semibold ${
+                order.paymentStatus !== "Failed"
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              <strong>Status:</strong>{" "}
+              {order.paymentStatus !== "Failed" ? "Paid" : "Payment Failed"}
+            </div>
+            {order.paymentStatus === "Failed" && (
+              <div className="w-full lg:w-fit">
+                <Razorpay
+                  name="Retry"
+                  orderId={order?._id}
+                  PayAmount={
+                    order.totalDiscount
+                      ? parseInt(order.totalDiscount)
+                      : parseInt(order.totalAmount)
+                  }
+                  handlePlaceOrder={handlePlaceOrder}
+                  retry={true}
+                />
+              </div>
+            )}
+            <div>
+              <strong>Order Number:</strong> {order.orderId}
+            </div>
+            <div>
+              <strong>Ship To:</strong> {order.address.firstName}
+            </div>
+            <div className="font-semibold">
+              <strong>Total:</strong> ₹{" "}
+              {order.totalDiscount > 0
+                ? order.totalDiscount.toFixed(0)
+                : order.totalAmount.toFixed(0)}
+            </div>
+          </div>
+
+          <div className="space-y-4 lg:space-y-6">
+            {order.orderItems.map((item) => (
+              <div className="bg-gray-800 p-4 lg:p-6 rounded-lg shadow-inner">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
+                  <img
+                    src={
+                      item.product.productImage[0] ||
+                      "https://placehold.co/100x100"
+                    }
+                    alt="Product"
+                    className="w-16 h-16 lg:w-24 lg:h-24 object-cover rounded-md"
+                  />
+                  <div className="space-y-2">
+                    <div className="text-xs lg:text-base">
+                      <strong>Category:</strong> {item.product.category.name}
+                    </div>
+                    <div className="text-xs lg:text-base">
+                      <strong>Total Price:</strong> ₹ {item.totalPrice}{" "}
+                      <span className="text-xs">inc GST</span>
+                    </div>
+                    {order.appliedCoupon && (
+                      <div className="text-xs lg:text-base">
+                        <strong>Coupon Discount:</strong>{" "}
+                        <span className="text-green-500">
+                          ₹{(item.totalPrice - item.price).toFixed(0)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-xs lg:text-base">
+                      <strong>Qty:</strong> {item.quantity}
+                    </div>
+                    <div className="text-sm lg:text-lg font-semibold">
+                      {item.product.productName}
+                    </div>
                   </div>
-                  <div
-                    className={`font-semibold ${
-                      order.paymentStatus !== "Failed"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
+                </div>
+
+                <div className="flex flex-col lg:flex-row justify-between gap-4 items-start lg:items-center">
+                  <div className="text-xs lg:text-base">
                     <strong>Status:</strong>{" "}
-                    {order.paymentStatus !== "Failed"
-                      ? "Paid"
-                      : "Payment Failed"}
+                    <span className={`${getStatusColor(item.productStatus)}`}>
+                      {item.productStatus}
+                    </span>
                   </div>
-                  {order.paymentStatus === "Failed" && (
-                    <div className="w-fit max-w-xs mx-auto">
-                      <Razorpay
-                        name="Retry"
-                        orderId={order?._id}
-                        PayAmount={
-                          order.totalDiscount
-                            ? parseInt(order.totalDiscount)
-                            : parseInt(order.totalAmount)
-                        }
-                        handlePlaceOrder={handlePlaceOrder}
-                      />
-                    </div>
-                  )}
-                  <div>
-                    <strong>Order Number:</strong> {order.orderId}
+                  <div className="text-xs lg:text-base">
+                    <strong>Date:</strong> {order.orderDate}
                   </div>
-                  <div>
-                    <strong>Ship To:</strong> {order.address.firstName}
-                  </div>
-                  <div className="font-semibold">
-                    <strong>Total:</strong> ₹{" "}
-                    {order.totalDiscount > 0
-                      ? order.totalDiscount.toFixed(0)
-                      : order.totalAmount.toFixed(0)}
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  {order.orderItems.map((item) => (
-                    <div className="bg-gray-800 p-6 rounded-lg shadow-inner">
-                      <div className="flex flex-col lg:flex-row items-center gap-6">
-                        <img
-                          src={
-                            item.product.productImage[0] ||
-                            "https://placehold.co/100x100"
-                          }
-                          alt="Product"
-                          className="w-full lg:w-24 lg:h-24 object-cover rounded-md"
+                  {item.productStatus !== "shipped" &&
+                    item.productStatus !== "delivered" &&
+                    item.productStatus !== "cancelled" &&
+                    item.productStatus !== "returned" &&
+                    order.paymentStatus !== "Failed" && (
+                      <div className="bg-red-500 text-white p-2 rounded">
+                        <AlertDialogueButton
+                          name="Cancel"
+                          onClick={() => handleCancelOrder(item)}
                         />
-                        <div className="space-y-2">
-                          <div className="text-sm lg:text-base">
-                            <strong>Category:</strong>{" "}
-                            {item.product.category.name}
-                          </div>
-                          <div className="text-sm lg:text-base">
-                            <strong>Total Price:</strong> ₹ {item.totalPrice}{" "}
-                            <span className="text-xs">inc GST</span>
-                          </div>
-                          {order.appliedCoupon && (
-                            <div className="text-sm lg:text-base">
-                              <strong>Coupon Discount:</strong>{" "}
-                              <span className="text-green-500">
-                                ₹{(item.totalPrice - item.price).toFixed(0)}
-                              </span>
-                            </div>
-                          )}
-                          <div className="text-sm lg:text-base">
-                            <strong>Qty:</strong> {item.quantity}
-                          </div>
-                          <div className="text-lg lg:text-xl font-semibold">
-                            {item.product.productName}
-                          </div>
-                        </div>
                       </div>
-                      <div className="flex flex-col lg:flex-row justify-between gap-4 items-center">
-                        <div className="text-sm lg:text-base">
-                          <strong>Status:</strong>{" "}
-                          <span
-                            className={`${getStatusColor(item.productStatus)}`}
-                          >
-                            {item.productStatus}
-                          </span>
-                        </div>
-                        <div className="text-sm lg:text-base">
-                          <strong>Date:</strong> {order.orderDate}
-                        </div>
-                        {item.productStatus !== "shipped" &&
-                          item.productStatus !== "delivered" &&
-                          item.productStatus !== "cancelled" &&
-                          item.productStatus !== "returned" &&
-                          order.paymentStatus !== "Failed" && (
-                            <div className="bg-red-500 text-white p-2 rounded-md">
-                              <AlertDialogueButton
-                                name="Cancel"
-                                onClick={() => handleCancelOrder(item)}
-                              />
-                            </div>
-                          )}
-                        {item.productStatus === "delivered" &&
-                          item.returnDescription === "" && (
-                            <div className="bg-red-500 text-white p-2 rounded-md">
-                              <ReturnProduct item={item} />
-                            </div>
-                          )}
-                        {item.productStatus !== "returned" &&
-                          item.returnDescription && (
-                            <p className="text-orange-600">
-                              Return in progress...
-                            </p>
-                          )}
+                    )}
+                  {item.productStatus === "delivered" &&
+                    item.returnDescription === "" && (
+                      <div className="bg-red-500 text-white p-2 rounded-md">
+                        <ReturnProduct item={item} />
                       </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-end flex justify-center lg:justify-end">
-                  {order.status === "delivered" && (
-                    <button
-                      className="border border-gray-500 text-gray-300 hover:bg-gray-700 p-3 rounded-md hover:scale-105 duration-150 flex items-center gap-2"
-                      onClick={(e) => handleDownloadInvoice(order._id)}
-                    >
-                      <ArrowDown />
-                      Download Invoice
-                    </button>
-                    // <button
-                    //   className="bg-blue-700 text-white p-3 rounded-md hover:scale-105 duration-150 flex items-center gap-2"
-                    //   onClick={(e) => handleDownloadInvoice(order._id)}
-                    // >
-                    //   <ArrowDown />
-                    //   Download Invoice
-                    // </button>
-                  )}
+                    )}
+                  {item.productStatus !== "returned" &&
+                    item.returnDescription && (
+                      <p className="text-orange-600">Return in progress...</p>
+                    )}
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="bg-gray-800 p-6 rounded-lg text-center">
-              <h2 className="text-sm lg:text-base">
-                No results found for "{search}"
-              </h2>
-            </div>
-          )
-        ) : (
-          <div className="bg-gray-800 p-6 rounded-lg text-center">
-            <h2 className="text-sm lg:text-base">No orders found</h2>
+            ))}
           </div>
-        )}
 
+          <div className="text-center lg:text-end flex justify-center lg:justify-end">
+            {order.status === "delivered" && (
+              <button
+                className="border border-gray-500 text-gray-300 hover:bg-gray-700 p-2 lg:p-3 rounded-md hover:scale-105 duration-150 flex items-center gap-2"
+                onClick={(e) => handleDownloadInvoice(order._id)}
+              >
+                <ArrowDown />
+                Download Invoice
+              </button>
+            )}
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="bg-gray-800 p-4 lg:p-6 rounded-lg text-center">
+        <h2 className="text-sm lg:text-base">
+          No results found for "{search}"
+        </h2>
       </div>
+    )
+  ) : (
+    <div className="bg-gray-800 p-4 lg:p-6 rounded-lg text-center">
+      <h2 className="text-sm lg:text-base">No orders found</h2>
+    </div>
+  )}
+</div>
+
     </main>
+
     // </div>
   );
 };

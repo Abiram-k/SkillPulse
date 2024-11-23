@@ -31,7 +31,7 @@ function AccountLayout() {
     })();
   }, []);
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen text-white ">
       <div className="container mx-auto p-4">
         <button
           onClick={toggleSidebar}
@@ -58,9 +58,9 @@ function AccountLayout() {
           <div
             className={`${
               isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } lg:translate-x-0 fixed lg:static top-0 left-0 w-64 bg-black h-full lg:h-auto lg:bg-transparent lg:flex flex-col p-4 transition-transform duration-300 ease-in-out z-10 `}
+            } lg:translate-x-0 fixed lg:static top-0 left-0 w-64 bg-black h-full lg:h-auto lg:bg-transparent lg:flex flex-col p-4 transition-transform duration-300 ease-in-out z-50 lg:z-0 `}
           >
-            <div className="bg-black rounded-lg p-4 mb-4 lg:mt-5">
+            <div className="bg-black rounded-lg p-4 mb-4 lg:mt-5 z-50 ">
               <div className="flex items-center gap-3 mb-6">
                 <label
                   htmlFor="fileInput"
@@ -125,7 +125,6 @@ function AccountLayout() {
             </div>
           </div>
 
-          {/* Overlay for small screens when sidebar is open */}
           {isSidebarOpen && (
             <div
               className="fixed inset-0 bg-black opacity-50 lg:hidden"
@@ -133,7 +132,6 @@ function AccountLayout() {
             ></div>
           )}
 
-          {/* Main Content */}
           <div className="flex-1">
             <Outlet />
           </div>

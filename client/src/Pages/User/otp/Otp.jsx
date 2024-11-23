@@ -82,7 +82,7 @@ function Otp() {
   }, [message]);
 
   return (
-    <div className="text-center flex items-center flex-col justify-center h-screen px-4 transition-transform duration-300">
+    <div className="text-center flex items-center flex-col justify-center h-screen px-4 transition-transform duration-300" >
       {message.serverError && (
         <div
           id="notification"
@@ -115,13 +115,13 @@ function Otp() {
         SKILL PULSE
       </h1>
       <div
-        className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3"
-        style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" }}
+        className="bg-gray-900 text-gray-200 p-10 rounded-lg w-full sm:w-2/3 md:w-1/2 lg:w-1/3 "
+        style={{ boxShadow: "0 0 5px 5px rgba(255, 0, 0, 0.1)" ,fontFamily: "Montserrat" }}
       >
         <h2 className="text-2xl font-bold mb-2">OTP Verification</h2>
-        <p className="mb-6">Enter the OTP to confirm(email)</p>
+        <p className="mb-6">Enter the OTP to confirm [Email]</p>
 
-        <div className="flex items-center justify-end space-x-3 mb-4 text-white">
+        <div className="flex items-center justify-end space-x-3 mb-4 text-white lg:ms-5">
           <OtpInput
             length={6}
             handleOtpChange={handleOtpChange}

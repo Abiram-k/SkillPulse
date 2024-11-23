@@ -1,4 +1,5 @@
 import { Toast } from "@/Components/Toast";
+import { showToast } from "@/Components/ToastNotification";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -115,10 +116,7 @@ const EditAddress = () => {
           }
         );
         console.log(response.data);
-        Toast.fire({
-          icon: "success",
-          title: `${response.data.message}`,
-        });
+        showToast("success",response.data.message)
         navigate("/user/profile/manageAddress");
       }
     } catch (error) {
@@ -131,11 +129,11 @@ const EditAddress = () => {
   };
 
   return (
-    <div className="content w-3/4 mx-auto p-6 text-sm">
-      <h2 className="text-center mb-8 text-2xl font-semibold">Edit Address</h2>
-      <form className="max-w-lg mx-auto space-y-6 font-mono">
+    <div className="content w-full lg:w-3/4 mx-auto p-4 sm:p-6 text-sm">
+      <h2 className="text-center mb-6 lg:mb-8 text-xl lg:text-2xl font-semibold">Edit Address</h2>
+      <form className="max-w-lg mx-auto space-y-4 sm:space-y-6 font-mono">
         <div className="flex flex-wrap gap-4">
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="First Name"
@@ -147,7 +145,7 @@ const EditAddress = () => {
               <p className="text-red-500 text-xs">{message.firstName}</p>
             )}
           </div>
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Last Name"
@@ -160,9 +158,9 @@ const EditAddress = () => {
             )}
           </div>
         </div>
-
+  
         <div className="flex flex-wrap gap-4">
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Mobile Number"
@@ -174,7 +172,7 @@ const EditAddress = () => {
               <p className="text-red-500 text-xs">{message.mobileNumber}</p>
             )}
           </div>
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Alternate Number (Optional)"
@@ -189,9 +187,9 @@ const EditAddress = () => {
             )}
           </div>
         </div>
-
+  
         <div className="flex flex-wrap gap-4">
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="City / District / Town"
@@ -203,7 +201,7 @@ const EditAddress = () => {
               <p className="text-red-500 text-xs">{message.city}</p>
             )}
           </div>
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="State"
@@ -216,9 +214,9 @@ const EditAddress = () => {
             )}
           </div>
         </div>
-
+  
         <div className="flex flex-wrap gap-4">
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <textarea
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Address"
@@ -229,7 +227,7 @@ const EditAddress = () => {
               <p className="text-red-500 text-xs">{message.addressDetails}</p>
             )}
           </div>
-          <div className="flex-1 flex flex-col space-y-2">
+          <div className="w-full sm:w-[48%] flex flex-col space-y-2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Pin Code"
@@ -242,7 +240,7 @@ const EditAddress = () => {
             )}
           </div>
         </div>
-
+  
         <div className="flex flex-col space-y-2">
           <select
             name="type"
@@ -258,7 +256,7 @@ const EditAddress = () => {
             <p className="text-red-500 text-xs">{message.type}</p>
           )}
         </div>
-
+  
         <button
           type="submit"
           className="block bg-blue-600 text-white py-2 px-4 rounded mx-auto hover:bg-blue-500 transition duration-200"
@@ -269,6 +267,7 @@ const EditAddress = () => {
       </form>
     </div>
   );
+  
 };
 
 export default EditAddress;

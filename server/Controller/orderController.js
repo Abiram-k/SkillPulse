@@ -13,7 +13,7 @@ const Order = require('../models/orderModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
-let orderCounter = 0;
+let orderCounter = 0; 
 
 const generateOrderId = () => {
     orderCounter += 1;

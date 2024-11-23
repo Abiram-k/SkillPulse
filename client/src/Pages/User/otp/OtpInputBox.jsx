@@ -32,21 +32,23 @@ const OtpInput = ({ length, handleOtpChange, disable }) => {
   };
 
   return (
-    <div className="otp-input">
-      {otp.map((data, index) => (
-        <input
-          key={index}
-          type="text"
-          maxLength="1"
-          value={data}
-          onChange={(e) => handleChange(e.target, index)}
-          onKeyDown={(e) => handleKeyDown(e, index)}
-          onFocus={(e) => e.target.select()}
-          className="otp-field bg-transparent border-2 border-gray-500 rounded text-white"
-          disabled={disable}
-        />
-      ))}
-    </div>
+    <div className="otp-input flex justify-center gap-2 md:gap-3">
+    {otp.map((data, index) => (
+      <input
+        key={index}
+        type="text"
+        maxLength="1"
+        value={data}
+        onChange={(e) => handleChange(e.target, index)}
+        onKeyDown={(e) => handleKeyDown(e, index)}
+        onFocus={(e) => e.target.select()}
+        className="otp-field bg-transparent border-2 border-gray-500 rounded text-white text-center
+                   w-8 h-8 text-lg sm:w-10 sm:h-10 sm:text-xl md:w-12 md:h-12 md:text-2xl
+                   focus:border-blue-500 focus:outline-none transition-all duration-200 "
+        disabled={disable}
+      />
+    ))}
+  </div>
   );
 };
 

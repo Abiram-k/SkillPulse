@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
+import { showToast } from "@/Components/ToastNotification";
 
 const AddAddress = () => {
   const [firstName, setFirstName] = useState("");
@@ -77,10 +78,8 @@ const AddAddress = () => {
       });
       console.log(response.data);
 
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      showToast("success",response.data.message)
+     
       navigate("/user/profile/manageAddress");
     } catch (error) {
       console.log(error.message);
@@ -93,14 +92,14 @@ const AddAddress = () => {
   };
 
   return (
-    <div className="content w-3/4 mx-auto p-6 text-sm">
+    <div className="content w-full lg:w-3/4 mx-auto p-6 text-sm">
       <h2 className="text-center mb-8 text-2xl font-semibold">Add Address</h2>
       <form
         className="max-w-lg mx-auto space-y-6 font-mono"
         onSubmit={handleAddAddress}
       >
-        <div className="flex space-x-4">
-          <div className="w-1/2">
+        <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-4 lg:space-y-0">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="First Name"
@@ -112,7 +111,7 @@ const AddAddress = () => {
               <p className="text-red-500 text-xs">{message.firstName}</p>
             )}
           </div>
-          <div className="w-1/2">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Last Name"
@@ -125,9 +124,10 @@ const AddAddress = () => {
             )}
           </div>
         </div>
-
-        <div className="flex space-x-4">
-          <div className="w-1/2">
+  
+        {/* Mobile and Alternate Mobile Numbers */}
+        <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-4 lg:space-y-0">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Mobile Number"
@@ -139,7 +139,7 @@ const AddAddress = () => {
               <p className="text-red-500 text-xs">{message.mobileNumber}</p>
             )}
           </div>
-          <div className="w-1/2">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Alternate Number (Optional)"
@@ -148,15 +148,14 @@ const AddAddress = () => {
               onChange={(e) => setAlternativeMobile(e.target.value)}
             />
             {message.alternativeMobile && (
-              <p className="text-red-500 text-xs">
-                {message.alternativeMobile}
-              </p>
+              <p className="text-red-500 text-xs">{message.alternativeMobile}</p>
             )}
           </div>
         </div>
-
-        <div className="flex space-x-4">
-          <div className="w-1/2">
+  
+        {/* City and State */}
+        <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-4 lg:space-y-0">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="City / District / Town"
@@ -168,7 +167,7 @@ const AddAddress = () => {
               <p className="text-red-500 text-xs">{message.city}</p>
             )}
           </div>
-          <div className="w-1/2">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="State"
@@ -181,7 +180,8 @@ const AddAddress = () => {
             )}
           </div>
         </div>
-
+  
+        {/* Address */}
         <div>
           <textarea
             className="w-full py-2 px-3 border border-gray-300 rounded mb-4 text-black"
@@ -193,9 +193,10 @@ const AddAddress = () => {
             <p className="text-red-500 text-xs">{message.address}</p>
           )}
         </div>
-
-        <div className="flex space-x-4">
-          <div className="w-1/2">
+  
+        {/* Pin Code and Address Type */}
+        <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-4 lg:space-y-0">
+          <div className="w-full lg:w-1/2">
             <input
               className="w-full py-2 px-3 border border-gray-300 rounded text-black"
               placeholder="Pin Code"
@@ -207,7 +208,7 @@ const AddAddress = () => {
               <p className="text-red-500 text-xs">{message.pincode}</p>
             )}
           </div>
-          <div className="w-1/2">
+          <div className="w-full lg:w-1/2">
             <select
               name="type"
               id="type"
@@ -220,7 +221,8 @@ const AddAddress = () => {
             </select>
           </div>
         </div>
-
+  
+        {/* Submit Button */}
         <button
           type="submit"
           className="block bg-blue-600 text-white py-2 px-4 rounded mx-auto hover:bg-blue-500 transition duration-200"
@@ -230,6 +232,7 @@ const AddAddress = () => {
       </form>
     </div>
   );
+  
 };
 
 export default AddAddress;

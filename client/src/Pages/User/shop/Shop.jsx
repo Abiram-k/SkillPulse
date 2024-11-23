@@ -141,15 +141,7 @@ const Shop = () => {
           </h1>
         </div>
       </div>
-      <div className="search-bar mb-6 flex justify-center">
-        <input
-          type="text"
-          placeholder="Search you product here..."
-          className="border-2 border-gray-600 rounded font-mono rounded-l-md p-2 w-2/3 bg-transparent outline-none focus:outline-none  "
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+     
       <div className="filters grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gray-950 rounded-lg shadow-lg border-b-2 border-t-2 border-gray-800 mb-10">
         <div>
           <p className="font-bold text-2xl mb-4">Category</p>
@@ -237,7 +229,15 @@ const Shop = () => {
           </select>
         </div>
       </div>
-
+      <div className="search-bar mb-6 flex justify-center">
+        <input
+          type="text"
+          placeholder="Search you product here..."
+          className="border-2 border-gray-600 rounded font-mono rounded-l-md p-2 w-2/3 bg-transparent outline-none focus:outline-none  "
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <div className="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 font-mono">
         {currentProduct.length > 0 ? (
           currentProduct.map((product, index) =>
@@ -246,7 +246,7 @@ const Shop = () => {
             product?.category?.isListed &&
             !product?.category?.isDeleted ? (
               <div
-                className="relative bg-gray-800 p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
+                className="relative bg-gray-800 p-4 rounded shadow-lg transform hover:scale-105 transition-transform duration-300"
                 key={product._id}
               >
                 <img
