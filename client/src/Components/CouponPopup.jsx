@@ -25,7 +25,6 @@ export const CouponPopup = ({ onClose, getCoupons, totalAmount }) => {
     const fetchCoupons = async () => {
       try {
         const response = await axios.get("/coupon");
-        console.log(response?.data, "Coupons for management");
         setCoupons(response?.data);
       } catch (error) {
         console.log(error);

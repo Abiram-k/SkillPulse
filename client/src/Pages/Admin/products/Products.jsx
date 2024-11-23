@@ -26,7 +26,6 @@ function Products() {
 
   //to send data to edit product page
   const sendDataToEdit = (product) => {
-    console.log("from product:", product);
     setData(product);
   };
   useEffect(() => {
@@ -35,7 +34,6 @@ function Products() {
         const response = await axios.get(
           `/admin/product?filter=${filterProduct}`
         );
-        console.log(response.data.products);
         setProducts(response.data.products);
       } catch (error) {
         if (
@@ -56,7 +54,6 @@ function Products() {
   const handleListing = async (id) => {
     try {
       const response = await axios.patch(`/admin/productListing/${id}`);
-      console.log(response.data);
       if (response.data.product.isListed) {
         Swal.fire({
           title: "Unlisted",

@@ -20,7 +20,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 const AccountOverview = () => {
   const user = useSelector((state) => state.users.user);
-  // console.log(user, "from profile page");
   const [profileImage, setProfileImage] = useState(null);
   const [dbImage, setDbImage] = useState(null);
   const [userProfile, setUserProfile] = useState([]);
@@ -136,7 +135,6 @@ const AccountOverview = () => {
       setMessage(formError);
       return;
     }
-    console.log(formError);
     try {
       const formData = new FormData();
       formData.append("firstName", firstName);
@@ -153,7 +151,6 @@ const AccountOverview = () => {
         },
       });
       setSpinner(false);
-      console.log(response.data.updatedUser);
       setProfileImage(response.data.updatedUser);
       Toast.fire({
         icon: "success",

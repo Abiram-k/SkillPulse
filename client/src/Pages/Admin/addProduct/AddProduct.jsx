@@ -157,9 +157,7 @@ const AddProduct = () => {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
-    console.log(formErrors);
     setMessage(formErrors);
-    console.log(productImage);
     const formData = new FormData();
     formData.append("productName", name);
     formData.append("productDescription", description);

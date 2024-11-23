@@ -85,7 +85,6 @@ function EditCategory() {
         title: `${response.data.message}`,
       });
 
-      console.log(response.data);
       navigate("/admin/category");
     } catch (error) {
       console.log(error?.response?.data?.message);
@@ -94,7 +93,6 @@ function EditCategory() {
         icon: "error",
         title: `${error?.response?.data?.message}`,
       });
-      // alert(error?.response?.data?.message);
     }
   };
 

@@ -62,7 +62,6 @@ const BannerManagement = () => {
     })();
   }, [message]);
 
-  console.log(banner);
   const handleAddBanner = async (e) => {
     e.preventDefault();
     const formError = validateForm();
@@ -73,7 +72,6 @@ const BannerManagement = () => {
     const formData = new FormData();
     formData.append("description", description);
     formData.append("file", image);
-    console.log(image, "<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>");
     try {
       if (Object.keys(formError).length == 0) {
         setSpinner(true);

@@ -1,7 +1,6 @@
 import React from "react";
 
 function Pagination({ totalPosts, postsPerPage, setCurrentPage, currentPage }) {
-  // console.log(totalPosts, postsPerPage, setCurrentPage);
   let pages = [];
   for (let i = 1; i <= Math.ceil(totalPosts / postsPerPage); i++) {
     pages.push(i);

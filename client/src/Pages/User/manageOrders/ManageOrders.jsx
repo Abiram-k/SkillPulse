@@ -398,9 +398,9 @@ const ManageOrders = () => {
             <h2 className="text-sm lg:text-base">No orders found</h2>
           </div>
         )}
+
       </div>
     </main>
-
     // </div>
   );
 };

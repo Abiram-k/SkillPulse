@@ -12,7 +12,6 @@ export default function Dashboard() {
     (async () => {
       try {
         const response = await axios.get(`/admin/recentSales?filter=${filter}`);
-        // console.log(filter, response.data.orders);
         setRecentSales(response.data.orders);
       } catch (error) {
         console.log(error?.response?.data?.message);
@@ -93,7 +92,6 @@ export default function Dashboard() {
       }))
       .sort((a, b) => b.quantity - a.quantity);
 
-    console.log(recentSales);
     return topTenSellingBrandArray;
   };
 

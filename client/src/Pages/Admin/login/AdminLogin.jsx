@@ -32,19 +32,15 @@ const AdminLogin = () => {
     e.preventDefault();
     setMessage({});
     const errors = formValidate();
-    console.log("Error object for validation:", errors);
-
     if (Object.keys(errors).length > 0) {
       setMessage(errors);
       return;
     }
     try {
-      console.log(email, password);
-      const response = await axios.post(
-        "/admin/adminLogin",
-        { email, password }
-        
-      );
+      const response = await axios.post("/admin/adminLogin", {
+        email,
+        password,
+      });
       if (response.status === 200) {
         dispatch(addAdmin(response.data.adminData));
         setMessage({ response: response?.data?.message });

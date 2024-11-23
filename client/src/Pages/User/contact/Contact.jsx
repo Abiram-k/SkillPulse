@@ -73,7 +73,6 @@ const Contact = () => {
       formData.append("access_key", web3key);
 
       const object = Object.fromEntries(formData);
-      console.log("Form Data Object:", object);
       const json = JSON.stringify(object);
       if (Object.keys(formErrors).length == 0) {
         const res = await fetch("https://api.web3forms.com/submit", {
@@ -87,7 +86,6 @@ const Contact = () => {
 
         if (res.success) {
           setSpinner(false);
-          console.log("Success", res);
           Toast.fire({
             icon: "success",
             title: `${"Form submitted successfully"}`,

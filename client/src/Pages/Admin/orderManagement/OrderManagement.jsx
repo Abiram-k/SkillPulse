@@ -28,13 +28,10 @@ const OrderManagement = () => {
 
   const user = useSelector((state) => state.users.user);
 
-  console.log(user);
-
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get(`/admin/order?filter=${filterOrders}`);
-        console.log(response.data?.orderData, "test");
         setOrders(response.data?.orderData);
       } catch (error) {
         if (
@@ -52,13 +49,6 @@ const OrderManagement = () => {
   const handleUpdatedStatus = (status) => {
     if (status) setUpdatedStatus(status);
   };
-
-  // const handleCancelOrder = async () => {
-  //   const response = axios.post(
-  //     `http://localhost:3000/cancelOrder?id=${user._id}`
-  //   );
-  // };
-  console.log("From fronend", orders);
 
   const getStatusColor = (status) => {
     if (status === "processing") return "text-yellow-500";

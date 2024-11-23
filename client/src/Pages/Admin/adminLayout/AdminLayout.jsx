@@ -54,10 +54,8 @@ export default function Dashboard() {
             return acc;
           }, 0);
         });
-        // setLoading(false);
       } catch (error) {
         console.error("Error fetching returned products:", error);
-        // setLoading(false);
       }
     };
 
@@ -134,7 +132,6 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2 ">
-              {/* <div className="w-8 h-8 bg-gray-300 text-black rounded-full" /> */}
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntF7sVICaZX72XQZ9FTjq_uRbZlN8t9uqwA&s"
                 alt="admin logo"

@@ -28,7 +28,6 @@ export default function Chart({ orders, filter }) {
   useEffect(() => {
     if (orders && orders.length > 0) {
       processData();
-      // console.log(chartData, "<<<<<<<>>>>>>>>>>>>");
     }
   }, [orders, filter, selectedMonth]);
 

@@ -70,7 +70,6 @@ const Category = () => {
     })();
   }, [categories]);
 
-  console.log(categories);
   const handleAddCategory = async (e) => {
     e.preventDefault();
     const formError = validateForm();

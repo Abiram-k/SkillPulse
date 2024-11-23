@@ -68,7 +68,6 @@ const CouponManagement = () => {
     (async () => {
       try {
         const response = await axios.get(`/admin/coupon`);
-        console.log(response?.data, "Coupons for management");
         setCoupons(response?.data);
       } catch (error) {
         console.log(error);
@@ -113,7 +112,6 @@ const CouponManagement = () => {
   };
   const getDate = (couponDate) => {
     const date = new Date(couponDate);
-    console.log(date);
     const formattedDate = `${
       date.getMonth() + 1
     }/${date.getDate()}/${date.getFullYear()}`;

@@ -37,8 +37,6 @@ const OrderReport = () => {
           `/admin/recentSales?filter=${filter}&startDate=${startDate}&endDate=${endDate}`
         );
         setOrders(response?.data?.orders);
-        console.log("hellooooo", response?.data?.orders || []);
-
         const updatedSalesData = [];
 
         response?.data?.orders.forEach((order) => {
@@ -90,7 +88,6 @@ const OrderReport = () => {
   };
 
   const downloadExcel = () => {
-    console.log(salesData, "EXcell data");
     const worksheet = XLSX.utils.json_to_sheet(salesData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, `${filter} Sales Report`);
@@ -127,9 +124,7 @@ const OrderReport = () => {
     return acc;
   }, {});
 
-
   const topSellingProduct = () => {
-    
     const productQuantities = {};
     orders.forEach((order) => {
       order.orderItems.forEach((item) => {
@@ -150,7 +145,6 @@ const OrderReport = () => {
       }
     }
     return { topSellingProduct, maxQuantity };
-
   };
 
   const costumers = {};

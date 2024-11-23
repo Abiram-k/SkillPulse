@@ -6,7 +6,6 @@ const Breadcrumbs = () => {
   const pathnames = pathname
     .split("/")
     .filter((x) => x && x != "user" && !/[0-9]/.test(x));
-  console.log("pathnames:", pathnames);
   let breadcrumbPath = "";
   if (
     pathname === "/user/home" ||

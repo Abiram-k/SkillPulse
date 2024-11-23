@@ -35,7 +35,6 @@ export const ChangeStatus = ({
         productId,
         updatedStatus,
       });
-      console.log(response.data.message);
       Toast.fire({
         icon: "success",
         title: `${response.data.message}`,

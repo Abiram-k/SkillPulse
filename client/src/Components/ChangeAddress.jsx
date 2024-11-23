@@ -21,7 +21,6 @@ export const ChangeAddress = ({ addresses = [], onSelectedAddress }) => {
     if (addresses.length > 0 && !selectedAddress) {
       setSelectedAddress(addresses[0]._id);
     }
-    console.log("Received addresses:", addresses);
   }, [addresses, selectedAddress]);
 
   const handleAddressChange = (e) => {
@@ -81,7 +80,6 @@ export const ChangeAddress = ({ addresses = [], onSelectedAddress }) => {
             <Button
               type="submit"
               disabled={!selectedAddress}
-              onClick={() => console.log("Saved address:", selectedAddress)}
               className={`font-mono rounded ${
                 selectedAddress ? "bg-red-700" : "bg-gray-400"
               } text-white`}

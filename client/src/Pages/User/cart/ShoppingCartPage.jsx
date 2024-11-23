@@ -29,7 +29,6 @@ const ShoppingCartPage = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [isDelete, setIsDelete] = useState(false);
-  console.log(user);
   useEffect(() => {
     setCouponMessage("");
     (async () => {
@@ -37,7 +36,6 @@ const ShoppingCartPage = () => {
         const response = await axios.get(`/cart/${user._id}`);
         setCartItems(response.data.cartItems);
 
-        console.log("Cart itmes : ", response.data.cartItems);
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());
@@ -147,23 +145,6 @@ const ShoppingCartPage = () => {
       navigate("/user/checkout");
     }
   };
-
-  // const handleCouponDelete = async () => {
-  //   try {
-  //     const response = await axios.patch(`/cartCouponRemove/${user._id}`);
-  //     setTrigger((prev) => prev + 1);
-  //     Toast.fire({
-  //       icon: "success",
-  //       title: `${response.data.message}`,
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //     Toast.fire({
-  //       icon: "error",
-  //       title: `${error?.response?.data.message}`,
-  //     });
-  //   }
-  // };
   const totalPrice = () => {
     return cartItems[0]?.products.reduce(
       (acc, item) => acc + item.product?.salesPrice * item.quantity,
