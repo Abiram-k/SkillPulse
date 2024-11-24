@@ -104,16 +104,10 @@ const Checkout = () => {
         `/cartCouponRemove/${user._id}`
       );
       setTrigger((prev) => prev + 1);
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      showToast("success",`${response.data.message}`)
     } catch (error) {
       console.log(error);
-      Toast.fire({
-        icon: "error",
-        title: `${error?.response?.data.message}`,
-      });
+      showToast("error",`${error?.response?.data.message}`)
     }
   };
   const handleGetSelectedCoupons = async (

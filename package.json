@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "razorpay": "^2.9.5",
-    "react-razorpay": "^3.0.1"
-  }
-}

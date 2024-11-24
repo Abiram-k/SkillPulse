@@ -21,9 +21,7 @@ const Wishlist = () => {
     (async () => {
       try {
         const response = await axios.get(`wishlist?user=${user._id}`);
-        console.log(response.data.wishlist[0]);
         setWishlist(response.data.wishlist);
-        console.log("Wishlist Items : ", response.data.wishlist);
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());

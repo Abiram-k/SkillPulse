@@ -91,23 +91,23 @@ function UserLayout() {
         </div>
       </div>
       <Outlet context={{ setCartCount }} />
-      <footer style={{fontfamily: "Montserrat"}} className="bg-black text-gray-400 py-8 flex flex-col space-y-11 border-t-2 border-gray-700">
+      <footer
+        style={{ fontfamily: "Montserrat" }}
+        className="bg-black text-gray-400 py-8 flex flex-col space-y-11 border-t-2 border-gray-700"
+      >
         <div className="flex flex-wrap justify-around gap-8">
-          {/* Shipping Section */}
           <div className="text-center flex flex-col items-center w-1/3 md:w-auto">
             <i className="fas fa-shipping-fast text-2xl mb-2"></i>
             <p className="font-semibold">EXPRESS SHIPPING</p>
             <p>Shipping in 24 Hours</p>
           </div>
 
-          {/* Tracking Section */}
           <div className="text-center flex flex-col items-center w-1/3 md:w-auto">
             <i className="fas fa-truck text-2xl mb-2"></i>
             <p className="font-semibold">SHIPPING TRACKING</p>
             <p>Online order tracking available</p>
           </div>
 
-          {/* Buy Safely Section */}
           <div className="text-center flex flex-col items-center w-1/3 md:w-auto">
             <i className="fas fa-shield-alt text-2xl mb-2"></i>
             <p className="font-semibold">BUY SAFELY</p>
@@ -115,9 +115,7 @@ function UserLayout() {
           </div>
         </div>
 
-        {/* Customer and Information Sections */}
         <div className="flex flex-wrap justify-around mt-8 gap-8">
-          {/* Customer Service */}
           <div className="text-center w-1/2 md:w-auto">
             <h3 className="font-bold">CUSTOMER SERVICE</h3>
             <ul className="mt-2 space-y-2">
@@ -128,7 +126,6 @@ function UserLayout() {
             </ul>
           </div>
 
-          {/* Information */}
           <div className="text-center w-1/2 md:w-auto">
             <h3 className="font-bold">INFORMATION</h3>
             <ul className="mt-2 space-y-2">
@@ -139,7 +136,6 @@ function UserLayout() {
             </ul>
           </div>
 
-          {/* Follow Us */}
           <div className="text-center w-1/2 md:w-auto">
             <h3 className="font-bold">FOLLOW US</h3>
             <div className="flex justify-center space-x-4 mt-2">
@@ -149,7 +145,6 @@ function UserLayout() {
             </div>
           </div>
 
-          {/* Contact Us */}
           <div className="text-center w-1/2 md:w-auto">
             <h3 className="font-bold">CONTACT US</h3>
             <ul className="mt-2 space-y-2">
@@ -160,13 +155,15 @@ function UserLayout() {
           </div>
         </div>
 
-        {/* Payment Methods */}
         <div className=" mt-8 max-w-sm ">
           <img
             src={paymentTag || "https://placehold.co/100x50"}
             alt="Payment methods"
             className="mx-auto w-2/4"
           />
+          <p className="text-center text-gray-300 font-bold font-mono">
+            All Credit by <span className="uppercase">Abiram </span>
+          </p>
         </div>
       </footer>
     </>

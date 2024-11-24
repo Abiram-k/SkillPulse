@@ -33,19 +33,13 @@ const HomePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
-  // const wishlistedItems = useSelector((state) => state.users.wishlistItems);
   const [wishlistItems, setWishlistItems] = useState([]);
-  // console.log("Whishlist items...", wishlistedItems);
-  console.log(
-    "home page user",
-    useSelector((state) => state.users.user)
-  );
+ 
 
   const fetchWishlist = async () => {
     try {
       const response = await axios.get(`/wishlist?user=${user._id}`);
-      // console.log("TESTING RESPONSE>>>",response)
-      console.log(response.data.wishlist[0]);
+     
       const uniqueWishlistItems = [
         ...new Set(
           response.data.wishlist[0].products.map(
@@ -54,11 +48,9 @@ const HomePage = () => {
         ),
       ];
       uniqueWishlistItems.forEach((id) => {
-        // dispatch(wishlistItems(id));
         setWishlistItems((prev) => [...prev, id]);
       });
-      // dispatch(removefromWishlist());
-      console.log("Wishlist Items : ", response.data.wishlist);
+      
     } catch (error) {
       console.error(
         "Error fetching wishlist:",
@@ -75,7 +67,6 @@ const HomePage = () => {
   };
   const goToDetails = (product) => {
     dispatch(setProductDetails(product));
-    console.log("productDetails :", product);
     navigate("/user/productDetails");
   };
 
@@ -102,7 +93,6 @@ const HomePage = () => {
         const response = await axios.get("/products", {
           params: { newArrivals: true, user },
         });
-        console.log("product from homepage:", products);
         setProducts(response.data.products);
         setCategory(response.data.categoryDoc);
       } catch (error) {

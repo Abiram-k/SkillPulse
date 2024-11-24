@@ -7,12 +7,11 @@ const Razorpay = ({
   PayAmount,
   handlePlaceOrder,
   isAddressSelected = null,
-  retry =false
+  retry = false,
 }) => {
   const [razorpayOrderId, setRazorpayOrderId] = useState(null);
 
   useEffect(() => {
-    alert(retry)
     if (!isNaN(PayAmount) && PayAmount > 0) {
       const fetchOrderId = async () => {
         try {
@@ -74,9 +73,13 @@ const Razorpay = ({
     razorpayInstance.on("payment.failed", (response) => {
       handlePlaceOrder(true, orderId);
     });
-    if (isAddressSelected.firstName && retry)
-       razorpayInstance.open();
-    else alert("Order failed");
+    console.log(isAddressSelected?.firstName || retry);
+    if (isAddressSelected?.firstName || retry) {
+      console.log("Opening Razorpay instance");
+      razorpayInstance.open();
+    } else {
+      alert("Order failed");
+    }
   };
 
   return (

@@ -25,8 +25,6 @@ function Login() {
     }
     if (!password.trim()) {
       error.password = "Password is required.";
-      // } else if (password.length < 8) {
-      //   error.password = "Password is incorrect";
     }
     if (referralCode.trim() !== "" && referralCode.length != 8) {
       error.referralCode = "referralCode is incorrect";
@@ -36,6 +34,7 @@ function Login() {
 
   useEffect(() => {
     localStorage.removeItem("otpTimer");
+    localStorage.removeItem("productDetails");
     dispatch(passwordReseted());
   }, []);
   const handleLogin = async (e) => {
