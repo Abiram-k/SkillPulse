@@ -41,31 +41,31 @@ function UserLayout() {
           } flex-col lg:flex-row lg:flex lg:space-x-4 lg:items-center absolute lg:static bg-black lg:bg-transparent top-16 left-0 w-full lg:w-auto z-10 text-center space-y-8 lg:space-y-0 pb-8 lg:p-0`}
         >
           <Link
-            to="home"
+            to="/user/home"
             className="text-white no-underline hover:bg-slate-600 rounded p-1 transition duration-200"
           >
             HOME
           </Link>
           <Link
-            to="shop"
+            to="/user/shop"
             className="text-white no-underline hover:bg-slate-600 rounded p-1 transition duration-200"
           >
             SHOP
           </Link>
           <Link
-            to="shop"
+            to="/user/shop"
             className="text-white no-underline hover:bg-slate-600 rounded p-1 transition duration-200"
           >
             CATEGORY
           </Link>
           <Link
-            to="contact"
+            to="/user/contact"
             className="text-white no-underline hover:bg-slate-600 rounded p-1"
           >
             CONTACT
           </Link>
           <a
-            href="about"
+            href="/user/about"
             className="text-white no-underline hover:bg-slate-600 rounded p-1"
           >
             ABOUT US

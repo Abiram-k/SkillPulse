@@ -10,10 +10,14 @@ const userRouter = require('./routes/userRoutes')
 const adminRouter = require('./routes/adminRoutes')
 const nodeMailer = require("nodemailer");
 const passport = require("passport");
+const app = express();
+
 require('./config/passport');
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-const app = express();
+
+
+
 const PORT = process.env.PORT || 3000;
 const SESSION_SECRETE = process.env.SESSION_KEY;
 app.use(cookieParser());
@@ -39,6 +43,20 @@ app.use(passport.session());
 
 app.use('/', userRouter)
 app.use("/admin", adminRouter);
+
+
+const buildPath = path.join(__dirname, '../client/dist');
+
+app.use(express.static(buildPath));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'), (error) => {
+        if (error) {
+            res.status(500).send(error);
+        }
+    });
+})
+
 
 mongoose.connect(process.env.MONGO_URL).then(() => {
     console.log("SuccessFully connected to mongoDB")

@@ -18,7 +18,6 @@ const User = require("../models/userModel");
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
-router.get('/', userController.baseRoute);
 router.post('/signUp', userController.signUp);
 router.post('/login', userController.login);
 router.post('/otp', userController.otp);

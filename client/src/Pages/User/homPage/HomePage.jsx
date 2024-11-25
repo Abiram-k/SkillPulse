@@ -146,7 +146,7 @@ const HomePage = () => {
         Categories
       </h5>
       <section className="flex flex-wrap justify-center gap-6 py-8 px-4 bg-black border-b border-gray-500">
-  {category.length > 0 ? (
+  {category?.length > 0 ? (
     category.slice(0, 4).map(
       (cat) =>
         cat.isListed && (
@@ -215,7 +215,7 @@ const HomePage = () => {
 
       <h2 className="text-md lg:text-xl  ps-8 font-bold ">New Arrivals</h2>
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black ">
-        {products.length > 0 ? (
+        {products?.length > 0 ? (
           products.map(
             (product) =>
               product.isListed &&

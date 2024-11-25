@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/tailwind.css",
+    "watch:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/tailwind.css --watch",
+
+    "build": "npm run build:css && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "vite"

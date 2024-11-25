@@ -4,6 +4,7 @@ import Pagination from "../../../Components/Pagination";
 import { User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logoutAdmin } from "@/redux/adminSlice";
+import { showToast } from "@/Components/ToastNotification";
 
 const Customers = () => {
   const [users, setUsers] = useState([]);
@@ -104,14 +105,7 @@ const Customers = () => {
                 <option value="Z-A">Z-A</option>
               </select>
             </div>
-            {/* <div>
-              <label htmlFor="filter" className="mr-2">
-                Filter
-              </label>
-              <select id="filter" className="border rounded p-1">
-                <option></option>
-              </select>
-            </div> */}
+            
           </div>
           <div className="table-container  p-5 rounded ">
             <table className="w-full table-auto ">

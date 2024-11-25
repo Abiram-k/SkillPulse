@@ -3,11 +3,13 @@ import { useState } from "react";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import { Link } from "react-router-dom";
 import Chart from "./Chart";
+import { useDispatch } from "react-redux";
+import { logoutAdmin } from "@/redux/adminSlice";
 
 export default function Dashboard() {
   const [recentSales, setRecentSales] = useState([]);
   const [filter, setFilter] = useState("Yearly");
-
+  const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       try {
@@ -15,6 +17,12 @@ export default function Dashboard() {
         setRecentSales(response.data.orders);
       } catch (error) {
         console.log(error?.response?.data?.message);
+        if (
+          error?.response.data.message == "Token not found" ||
+          error?.response.data.message == "Failed to authenticate Admin"
+        ) {
+          dispatch(logoutAdmin());
+        }
       }
     })();
   }, [filter]);

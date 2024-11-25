@@ -732,7 +732,7 @@ exports.getAllOrders = async (req, res) => {
                 break;
             }
             default: {
-                console.log("No filter option was found");
+                console.log("");
             }
         }
         

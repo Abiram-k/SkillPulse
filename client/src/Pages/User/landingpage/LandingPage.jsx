@@ -199,7 +199,7 @@ const LandingPage = () => {
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-8 bg-black">
-        {products.length > 0 ? (
+        {products?.length > 0 ? (
           products.map(
             (product) =>
               product.isListed &&
