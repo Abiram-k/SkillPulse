@@ -10,8 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@/Components/ui/alert-dialog";
+import { Button } from "@/Components/ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import axiosInstance from "@/axiosIntercepters/AxiosInstance";

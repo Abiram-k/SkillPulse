@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog"; // Adjust the path if needed
+} from "@/Components/ui/alert-dialog"; // Adjust the path if needed
 
 const AlertDialogueButton = ({ name, onClick }) => {
   return (
