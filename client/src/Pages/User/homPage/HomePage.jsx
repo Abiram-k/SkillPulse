@@ -20,7 +20,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel.jsx";
+} from "@/Components/ui/carousel.jsx";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
