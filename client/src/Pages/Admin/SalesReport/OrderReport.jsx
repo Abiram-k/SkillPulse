@@ -129,9 +129,9 @@ const OrderReport = () => {
     orders.forEach((order) => {
       order.orderItems.forEach((item) => {
         if (productQuantities[item.product.productName]) {
-          productQuantities[item.product.productName] += item.quantity;
+          productQuantities[item.product.productName] += Number(item.quantity);
         } else {
-          productQuantities[item.product.productName] = item.quantity;
+          productQuantities[item.product.productName] = Number(item.quantity);
         }
       });
     });

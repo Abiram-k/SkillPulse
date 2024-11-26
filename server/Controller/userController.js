@@ -466,15 +466,17 @@ exports.updateUser = async (req, res) => {
 
 exports.getUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.query;
         const userData = await User.findById(id);
-    
         return res.status(200).json({ message: "User successfully fetched", userData });
+
     } catch (error) {
         console.log(error.message);
+        console.log(error)
         return res.status(500).json({ message: "Failed to fetch user data !" })
     }
 }
+
 
 exports.addAddress = async (req, res) => {
     try {

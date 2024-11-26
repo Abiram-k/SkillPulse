@@ -38,10 +38,10 @@ router.get('/auth/google', (req, res, next) => {
 router.get('/googleUser', userController.getUserData);
 router.get('/auth/google/callback',
     passport.authenticate('google',
-        { failureRedirect: 'http://localhost:5173/login' }),
+        { failureRedirect: 'http://localhost:3000/login' }),
     async (req, res) => {
         try {
-            console.log("hello")
+            // console.log("hello")
             const state = JSON.parse(req.query.state || '{}');
             const method = state.method;
             const email = req.user?.email;
@@ -57,7 +57,7 @@ router.get('/auth/google/callback',
             }
             const existingUser = await User.findOne({ email });
 
-            console.log(existingUser);
+            // console.log(existingUser);
             if (!existingUser.referralCode) {
                 existingUser.referralCode = generateReferralCode();
                 await existingUser.save();
@@ -73,7 +73,7 @@ router.get('/auth/google/callback',
             }
             if (method == 'signup') {
                 if (existingUser) {
-                    return res.redirect('http://localhost:5173/login?error=user_exists');
+                    return res.redirect('http://localhost:3000/login?error=user_exists');
                 }
             }
             const token = jwt.sign({
@@ -89,10 +89,10 @@ router.get('/auth/google/callback',
                 sameSite: 'Lax',
                 maxAge: 3600000
             });
-            res.redirect('http://localhost:5173/googleRedirect')
+            res.redirect('http://localhost:3000/googleRedirect')
         } catch (error) {
             console.error("Authentication error:", error);
-            res.redirect('http://localhost:5173/signup?error=server_error');
+            res.redirect('http://localhost:3000/signup?error=server_error');
         }
     });
 
@@ -102,7 +102,9 @@ router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
 router.get("/brand-category-info/:id", userController.getBrandCategoryInfo);
 
 router.post("/user", verifyUser, isBlocked, uploadImage.single("file"), userController.updateUser);
-router.get("/user/:id", verifyUser, isBlocked, userController.getUser);
+
+router.get("/user", verifyUser, isBlocked, userController.getUser);
+
 router.post("/address", verifyUser, isBlocked, uploadImage.none(), userController.addAddress);
 router.patch("/password/:id", verifyUser, isBlocked, userController.changePassword);
 

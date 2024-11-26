@@ -109,7 +109,7 @@ const AccountOverview = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`/user/${user._id}`);
+        const response = await axios.get(`/user?id=${user._id}`);
         setFirstName(response.data.userData.firstName);
         setSecondName(response.data.userData.lastName);
         setDateOfBirth(response.data.userData.dateOfBirth);

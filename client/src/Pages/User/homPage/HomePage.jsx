@@ -65,10 +65,12 @@ const HomePage = () => {
       });
     }
   };
+
   const goToDetails = (product) => {
     dispatch(setProductDetails(product));
     navigate("/user/productDetails");
   };
+
 
   const handleAddToWishList = async (product) => {
     try {
@@ -79,6 +81,7 @@ const HomePage = () => {
     }
   };
 
+
   const handleRemoveFromWishlist = async (product) => {
     try {
       await removeFromWishlist(product, user, dispatch);
@@ -87,6 +90,7 @@ const HomePage = () => {
       console.log(error);
     }
   };
+  
   useEffect(() => {
     (async () => {
       try {

@@ -13,7 +13,7 @@ const Order = require('../models/orderModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
-let orderCounter = 0; 
+let orderCounter = 0;
 
 const generateOrderId = () => {
     orderCounter += 1;
@@ -67,7 +67,7 @@ exports.addOrder = async (req, res) => {
                 user.appliedCoupons = [];
             }
             const deliveryAddressId = user.deliveryAddress;
-           
+
             if (!deliveryAddressId && user.address.length == 0)
                 return res.status(400).json({ message: "Add a delivery Address" });
 
@@ -242,11 +242,15 @@ exports.returnOrderRequest = async (req, res) => {
     try {
         const { id, itemId } = req.query;
         const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
-
+        console.log(order)
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
+
         if (orderIndex == -1)
-            order.orderItems[orderIndex].returnDescription = returnDescription;
+            return res.status(404).json({ message: "Failed to find ordered Item" });
+
+        order.orderItems[orderIndex].returnDescription = returnDescription;
         order.orderItems[orderIndex].returnedAt = new Date();
+        
         await order.save();
         return res.status(200).json({ message: "Return request sended successfully" });
 

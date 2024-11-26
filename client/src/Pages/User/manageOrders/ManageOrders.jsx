@@ -339,6 +339,7 @@ const ManageOrders = () => {
                             {item.productStatus}
                           </span>
                         </div>
+
                         <div className="text-xs lg:text-base">
                           <strong>Date:</strong> {order.orderDate}
                         </div>
@@ -354,6 +355,7 @@ const ManageOrders = () => {
                               />
                             </div>
                           )}
+                          
                         {item.productStatus === "delivered" &&
                           item.returnDescription === "" && (
                             <div className="bg-red-500 text-white p-2 rounded-md">

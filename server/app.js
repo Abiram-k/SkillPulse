@@ -57,12 +57,12 @@ app.get('*', (req, res) => {
     });
 })
 
-
 mongoose.connect(process.env.MONGO_URL).then(() => {
     console.log("SuccessFully connected to mongoDB")
 }).catch((error) => {
     console.log(`Error occured with mongodb ${error.name}`)
-})
+});
+
 app.listen(PORT, () => {
     console.log(`Server Is Running At Port : ${PORT}`);
 })
