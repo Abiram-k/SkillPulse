@@ -23,7 +23,7 @@ import ToastNotification from "./Components/ToastNotification";
 import ForgotPassword from "./Pages/User/forgotPassword/ForgotPassword";
 import EmailVerification from "./Pages/User/forgotPassword/EmailVerification";
 import EditBrand from "./Pages/Admin/brandManagement/EditBrand";
-import { Toaster } from "./Components/ui/Toaster";
+import { Toaster } from "./Components/ui/toaster.jsx";
 import ProtectCheckout from "./Protected/ProtectCheckout";
 
 const HomePage = lazy(() => import("./Pages/User/homPage/HomePage"));
