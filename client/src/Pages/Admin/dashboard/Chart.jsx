@@ -19,7 +19,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/Components/ui/card";
 
 export default function Chart({ orders, filter }) {
   const [chartData, setChartData] = useState([]);
