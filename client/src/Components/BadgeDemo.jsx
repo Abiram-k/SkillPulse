@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge.jsx";
+import { Badge } from "@/Components/ui/badge.jsx";
 
 export function BadgeDemo({ quantity }) {
   return (
