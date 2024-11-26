@@ -126,7 +126,7 @@ export default function Dashboard() {
               onClick={() => navigate("/admin/notifications")}
             >
               <Bell className="h-6 w-6 text-yellow-700" />
-              <div className="absolute -top-1 -right-1 font-mono flex items-center justify-center h-4 w-4 bg-red-600 text-white text-xs rounded-full">
+              <div className="absolute -top-1 -right-1 font-mono flex items-center justify-center h-4 w-4 bg-red-600 text-white text-xs rounded">
                 {notificationCount || 0}
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function Dashboard() {
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntF7sVICaZX72XQZ9FTjq_uRbZlN8t9uqwA&s"
                 alt="admin logo"
                 n
-                className="w-8 h-8 bg-gray-500 text-black rounded-full "
+                className="w-8 h-8 bg-gray-500 text-black rounded "
               />
               <span className="text-black">Abiram</span>
             </div>
@@ -159,7 +159,7 @@ function NavItem({ icon: Icon, text, active, redirect }) {
       <Link
         to={redirect}
         onClick={text == "Logout" && handleLogout}
-        className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+        className={`flex items-center gap-3 w-full p-2 rounded transition-colors ${
           active
             ? "bg-gray-800 text-white"
             : "hover:bg-gray-800 hover:text-white"

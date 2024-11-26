@@ -1,5 +1,4 @@
 import Wishlist from "@/Pages/User/wishlist/Wishlist";
-import { Password } from "@mui/icons-material";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {

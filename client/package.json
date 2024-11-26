@@ -7,7 +7,6 @@
     "dev": "vite",
     "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/tailwind.css",
     "watch:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/tailwind.css --watch",
-
     "build": "npm run build:css && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -18,7 +17,6 @@
     "@cloudinary/url-gen": "^1.21.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^6.1.5",
     "@mui/material": "^6.1.5",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
