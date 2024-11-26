@@ -64,7 +64,7 @@ const ShoppingCartPage = lazy(() =>
 );
 const Checkout = lazy(() => import("./Pages/User/checkout/CheckOut"));
 const ManageOrders = lazy(() =>
-  import("./Pages/User/manageOrders/manageOrders")
+  import("./Pages/User/manageOrders/ManageOrders")
 );
 const OrderManagement = lazy(() =>
   import("./Pages/Admin/orderManagement/OrderManagement")
