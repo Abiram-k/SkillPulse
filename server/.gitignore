@@ -4,7 +4,6 @@
 # Node.js dependencies
 node_modules
 
-
 # Lint/cache files
 .eslintcache
 .stylelintcache
