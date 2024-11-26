@@ -13,7 +13,7 @@ import ProtectedAuthAdmin from "./Protected/ProtectedAuthAdmin";
 import ProtectedDashboardAdmin from "./Protected/ProtectedDashboard";
 import ProtectedOtp from "./Protected/ProtectOtp";
 import Breadcrumbs from "./Components/Breadcrumbs";
-import GoogleAuthComponent from "./Pages/User/googleAuthComponent/googleAuthComponent";
+import GoogleAuthComponent from "./Pages/User/googleAuthComponent/GoogleAuthComponent";
 import UserLayout from "./Pages/User/userLayout/UserLayout";
 import ProtectUserHome from "./Protected/ProtectUserHome";
 import ProtectAuthUser from "./Protected/ProtectAuthUser";
