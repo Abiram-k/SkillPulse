@@ -5,12 +5,11 @@ const jwt = require('jsonwebtoken');
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 
-
 exports.isBlocked = async (req, res, next) => {
     const { authUser } = req.body;
     try {
 
-        if (authUser.isBlocked) {
+        if (authUser?.isBlocked) {
             req.body.isBlocked = true;
             return res.status(404).json({ message: `No access ,${authUser.firstName} were blocked by admin`, isBlocked: req.body.isBlocked });
         }

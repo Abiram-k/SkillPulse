@@ -110,16 +110,16 @@ const AccountOverview = () => {
     (async () => {
       try {
         const response = await axios.get(`/user?id=${user._id}`);
-        setFirstName(response.data.userData.firstName);
-        setSecondName(response.data.userData.lastName);
-        setDateOfBirth(response.data.userData.dateOfBirth);
-        setEmail(response.data.userData.email);
-        setMobileNumber(response.data.userData.mobileNumber);
-        setUserProfile(response.data.userData);
-        setProfileImage(response.data.userData.profileImage);
-        setRefferal(response.data.userData.referralCode);
+        setFirstName(response.data?.userData.firstName);
+        setSecondName(response.data?.userData.lastName);
+        setDateOfBirth(response.data?.userData.dateOfBirth);
+        setEmail(response.data?.userData?.email);
+        setMobileNumber(response.data?.userData.mobileNumber);
+        setUserProfile(response.data?.userData);
+        setProfileImage(response.data?.userData.profileImage);
+        setRefferal(response.data?.userData.referralCode);
       } catch (error) {
-        if (error?.response.data.isBlocked) {
+        if (error?.response.data?.isBlocked) {
           dispatch(logoutUser());
         }
         console.log(error?.response?.data?.message);
@@ -151,10 +151,10 @@ const AccountOverview = () => {
         },
       });
       setSpinner(false);
-      setProfileImage(response.data.updatedUser);
+      setProfileImage(response.data?.updatedUser);
       Toast.fire({
         icon: "success",
-        title: `${response.data.message}`,
+        title: `${response.data?.message}`,
       });
     } catch (error) {
       setSpinner(false);
@@ -162,7 +162,7 @@ const AccountOverview = () => {
       console.log(error?.response?.data?.message);
       Toast.fire({
         icon: "error",
-        title: `${error?.response.data.message || "Error occured"}`,
+        title: `${error?.response.data?.message || "Error occured"}`,
       });
     }
   };

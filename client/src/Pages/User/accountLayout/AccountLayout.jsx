@@ -24,12 +24,13 @@ function AccountLayout() {
     (async () => {
       try {
         const response = await axios.get(`/user/${user._id}`);
-        setProfileImage(response.data.userData.profileImage);
+        setProfileImage(response.data?.userData.profileImage);
       } catch (error) {
         console.log(error?.response?.data?.message);
       }
     })();
   }, []);
+  
   return (
     <div className="min-h-screen text-white ">
       <div className="container mx-auto p-4">
