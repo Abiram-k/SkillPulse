@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import OtpInput from "./otpInputBox";
+import OtpInput from "./OtpInputBox";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import "./otp.css";
 import { useNavigate } from "react-router-dom";
