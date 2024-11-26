@@ -466,9 +466,7 @@ exports.updateUser = async (req, res) => {
 
 exports.getUser = async (req, res) => {
     try {
-        console.log("HEY")
         const { id } = req.query;
-        console.log(id)
         const userData = await User.findById(id);
         return res.status(200).json({ message: "User successfully fetched", userData });
 

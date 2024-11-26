@@ -6,7 +6,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@/components/ui/toast";
+} from "@/Components/ui/Toast.jsx";
 import { CopyCheck } from "lucide-react";
 
 export function Toaster() {
