@@ -19,7 +19,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/Components/ui/card";
+} from "@/Components/ui/card.jsx";
 
 export default function Chart({ orders, filter }) {
   const [chartData, setChartData] = useState([]);
@@ -29,7 +29,7 @@ export default function Chart({ orders, filter }) {
     if (orders && orders.length > 0) {
       processData();
     }
-  }, [orders, filter, selectedMonth]);
+  }, [orders, filter, selectedMonth])
 
   const processData = () => {
     if (filter === "Yearly") {
