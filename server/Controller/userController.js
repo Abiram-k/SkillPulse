@@ -11,27 +11,119 @@ const { isBlocked } = require('../Middleware/isBlockedUser');
 const { listCategory, blockUser } = require('./adminController');
 const Cart = require('../models/cartModel');
 const Wallet = require('../models/walletModel');
-
+const RefreshToken = require('../models/refreshTokenModel');
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
+const BlacklistedToken = require("../models/blacklistModel")
+// const redisClient = require("../config/redis");
 
 
-exports.baseRoute = (req, res) => {
-    res.status(200).send("SERVER IS RUNNING...");
-}
-
-function generateOTP() {
+//helper function to generate otp
+const generateOTP = () => {
     const otp = Math.floor(100000 + Math.random() * 900000);
     return otp;
 }
 
+//helper function to generate Refreshtoken
+const generateRefreshToken = async (userId, req) => {
+    const token = jwt.sign({ id: userId }, process.env.REFRESH_TOKEN, { expiresIn: "7d" });
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    const device = req.headers['user-agent'];
+
+    await RefreshToken.create({
+        token,
+        userId,
+        device,
+        expiresAt
+    });
+    // await redisClient.set(token, 'active', 'EX', 7 * 24 * 60 * 60);//tried to use redis, will work later
+
+    return token;
+}
+
+//helper fuction to generate accesstoken
+const generateAccessToken = (userId) => {
+    const token = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN, { expiresIn: "15m" });
+    return token;
+}
+
+//helper fucntion to generate new access token when access token expires
+exports.generateNewToken = async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+        console.log('Refresh token not found')
+        return res.status(401).json({ message: 'Refresh token not found' });
+    }
+
+    try {
+        const hasAccess = await RefreshToken.findOne({ token: refreshToken });
+
+        if (!hasAccess) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        }
+
+        const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN);
+
+        const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN, { expiresIn: '15m' });
+
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.json({ message: 'Access token refreshed' });
+
+    } catch (err) {
+        res.status(403).json({ message: 'Invalid refresh token' });
+    }
+}
+
+// user logout
+exports.logout = async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return res.status(400).json({ message: "No refresh token provided" });
+
+    try {
+        await RefreshToken.deleteOne({ token: refreshToken }).catch((error) => console.log("Error while deleting refresh token from db", error));
+
+        const ttl = 60 * 60 * 24 * 7;
+        // redisClient.setEx(refreshToken, ttl, "blacklisted");
+
+        await BlacklistedToken.create({ token: refreshToken });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None"
+        });
+
+        res.json({ message: "Logged out successfully" });
+
+    } catch (error) {
+        console.error("Error blacklisting refresh token:", error);
+        res.status(500).json({ message: "Failed to log out" });
+    }
+}
+
+//basic route to illustrate the server is currently running
+exports.baseRoute = (req, res) => {
+    res.status(200).send("SERVER IS RUNNING...");
+}
+
+//this is a middleware to make service for gmail
 const transporter = nodeMailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
+        user: process.env.NODEMAILER_EMAIL, // Email id of use
+        pass: process.env.NODEMAILER_PASSWORD,// Password for nodemailer
     }
 });
 
+//its an helper function for to send otp
 const sendOTPEmail = async (email, otp, name) => {
     console.log("OTP IS:", otp);
     try {
@@ -62,6 +154,7 @@ const sendOTPEmail = async (email, otp, name) => {
 
 
 exports.signUp = async (req, res) => {
+
     const { firstName, email } = req.body;
 
     const existingUser = await User.findOne({
@@ -70,6 +163,7 @@ exports.signUp = async (req, res) => {
     })
 
     if (existingUser) {
+
         return res.status(400).json({ message: "User already exists" });
     } else {
         const otp = generateOTP();
@@ -80,10 +174,6 @@ exports.signUp = async (req, res) => {
         }
         req.session.user = req.body;
         req.session.otp = otp;
-
-        // setTimeout(() => {
-        //     delete req.session.otp;
-        // }, 60000);
 
         return res.status(200).json({ message: "Proceeded to Otp verification" })
     }
@@ -100,7 +190,7 @@ exports.otp = async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
         else if (req.session.otp == otp) {
-            function generateReferralCode(length = 8) {
+            function generateReferralCode(length = 8) { // helper function for generate unique referral id to the users
                 const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 let referralCode = "";
 
@@ -110,11 +200,12 @@ exports.otp = async (req, res) => {
                 }
                 return referralCode;
             }
-            req.session.user.referralCode = generateReferralCode();
+            req.session.user.referralCode = generateReferralCode();// storing it in session for further use
             const user = await User.create(req.session.user)
             res.status(200).json({ message: "User Created Succesfully", user })
             req.session.otp = null;
         } else {
+
             return res.status(400).json({ message: "Incorrect Otp !" })
         }
     } catch (error) {
@@ -126,11 +217,10 @@ exports.otp = async (req, res) => {
 
 exports.resendOtp = async (req, res) => {
     try {
-        const otp = generateOTP();
-        req.session.otp = otp;
 
-        //toMake New Otp As Valide
-        req.session.save((err) => {
+        const otp = generateOTP();
+        req.session.otp = otp; // re assaigning the otp with new otp
+        req.session.save((err) => { // this ensure the session is successfully saved
             if (err) {
                 console.error("Session save error:", err);
                 return res.status(500).json({ message: "Failed to store session" });
@@ -154,6 +244,7 @@ exports.resendOtp = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+//helper function for password reset
 const passResetEmail = async (email, otp, name) => {
     console.log("OTP IS:", otp);
     try {
@@ -187,7 +278,7 @@ exports.verifyEmail = async (req, res) => {
         const { email } = req.body;
         const user = await User.findOne({ email });
         if (!user)
-            return res.status(401).json({ message: "Email id not found" })
+            return res.status(400).json({ message: "Email id not found" })
         const otp = generateOTP()
         req.session.resetPassOtp = otp;
         const otpSuccess = await passResetEmail(email, otp, user.firstName)
@@ -199,6 +290,7 @@ exports.verifyEmail = async (req, res) => {
         return res.status(500).json({ message: "Error occured while verifying email" })
     }
 }
+
 exports.verifyResetOtp = async (req, res) => {
     try {
         const { otp } = req.body;
@@ -212,10 +304,22 @@ exports.verifyResetOtp = async (req, res) => {
         return res.status(500).json({ message: "Error occured while verifying otp" })
     }
 }
+
 exports.forgotPassword = async (req, res) => {
+
     try {
-        const { email, newPassword } = req.body;
+        const { newPassword } = req.body;
+        const email = req.body.email.replace(/"/g, '').trim();
+        console.log(email)
+        console.log(newPassword)
         const user = await User.findOne({ email });
+        console.log(user)
+
+        const existingPass = await bcrypt.compare(newPassword, user.password);
+        
+        if (existingPass)
+            return res.status(404).json({ message: "This password is already in use" })
+
         if (!user)
             return res.status(404).json({ message: "User not found" })
         user.password = newPassword;
@@ -249,15 +353,15 @@ exports.login = async (req, res) => {
             }
             if (referralCode) {
                 if (user.isreferredUser) {
-                    return res.status(401).json({ message: "You already a reffered user" })
+                    return res.status(400).json({ message: "You already a reffered user" })
                 }
                 if (user.referralCode == referralCode) {
-                    return res.status(401).json({ message: "You cannot use your own code" })
+                    return res.status(400).json({ message: "You cannot use your own code" })
                 } else {
                     const refUser = await User.findOne({ referralCode });
                     if (!refUser || refUser._id == user._id) {
                         console.log("Ref user not found")
-                        return res.status(401).json({ message: "Ref user not found" });
+                        return res.status(400).json({ message: "Ref user not found" });
                     } else {
                         const refWallet = await Wallet.findOne({ user: refUser._id })
                         if (!refWallet)
@@ -282,27 +386,35 @@ exports.login = async (req, res) => {
                 }
             }
             const isValidPassword = await bcrypt.compare(password, user.password);
+
             if (!isValidPassword) {
+
                 return res.status(400).json({ message: "Password is incorrect" });
             }
             else if (user.isBlocked) {
+
                 return res.status(400).json({ message: "User were blocked " });
             }
             else {
+                const refreshToken = await generateRefreshToken(user?._id, req);//calling function to generate new refresh token
+                const accessToken = generateAccessToken(user?._id);//calling function to generate new access token
 
-                // jwt token sign
-                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE, { expiresIn: '3d' })
-                res.cookie('userToken',
-                    token,
-                    {
-                        httpOnly: true,
-                        secure: false,
-                        sameSite: 'Lax',
-                        maxAge: 36000000
-                    });
+                res.cookie('accessToken', accessToken, {
+                    httpOnly: true,//
+                    secure: true,
+                    sameSite: 'None',
+                    maxAge: 15 * 60 * 1000,
+                });
+
+                res.cookie('refreshToken', refreshToken, {
+                    httpOnly: true,//flag restricts the cookie to be accessible only via HTTP(S)
+                    secure: true,// flag ensures that the cookie is sent only over HTTPS connections.
+                    sameSite: 'None',//The cookie is sent with both same-site and cross-site requests.
+                    maxAge: 7 * 24 * 60 * 60 * 1000,//life span of a cookie
+                });
+
                 return res.status(200).json({ message: "Successfully Logged in", user });
             }
-
         }
     } catch (error) {
         console.log(error);
@@ -310,14 +422,14 @@ exports.login = async (req, res) => {
     }
 }
 
+//its for setting data for google user
 exports.getUserData = async (req, res) => {
     try {
-        const token = req.cookies.userToken;
+        const token = req.cookies.refreshToken;
         if (!token) return res.status(401).send("Unauthorized");
-        const decoded = jwt.verify(token, process.env.JWT_SECRETE);
+        const decoded = jwt.verify(token, process.env.REFRESH_TOKEN);
         const user = await User.findById(decoded.id).select("-password");
         res.status(200).json(user);
-
     } catch (error) {
         res.status(400).json({ message: "Failed to retrieve user data", error });
     }
@@ -326,8 +438,8 @@ exports.getUserData = async (req, res) => {
 
 
 //Product Fetching for listing
-
 exports.getProducts = async (req, res) => {
+
     try {
         const { brand, category, price, newArrivals, offer } = req.query;
         const query = {};
@@ -401,6 +513,7 @@ exports.getProducts = async (req, res) => {
 
 
 exports.getSimilarProduct = async (req, res) => {
+
     try {
         const { id } = req.params;
         const productData = await Product.findById(id);
@@ -416,6 +529,7 @@ exports.getSimilarProduct = async (req, res) => {
 }
 
 exports.getBrandCategoryInfo = async (req, res) => {
+
     try {
         const { id } = req.params;
 
@@ -439,8 +553,8 @@ exports.getBrandCategoryInfo = async (req, res) => {
 
 /////////////////// User Profile ////////////////////////
 
-
 exports.updateUser = async (req, res) => {
+
     try {
         const { firstName, lastName, mobileNumber, dateOfBirth } = req.body;
         const { id } = req.query;
@@ -449,15 +563,16 @@ exports.updateUser = async (req, res) => {
         const validDateOfBirth = dateOfBirth && !isNaN(Date.parse(dateOfBirth))
             ? new Date(dateOfBirth)
             : null;
-
         const userData = {
             firstName, lastName, mobileNumber, profileImage, dateOfBirth: validDateOfBirth
         };
 
 
         const updatedUser = await User.findByIdAndUpdate(id, { $set: userData }, { new: true, upsert: true });
-        if (updatedUser)
+
+        if (updatedUser) {
             return res.status(200).json({ message: "Profile successfully updated", updatedUser });
+        }
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ message: "Filed to update your profile" })
@@ -466,14 +581,17 @@ exports.updateUser = async (req, res) => {
 
 exports.getUser = async (req, res) => {
     try {
-        const { id } = req.query;
+        const id = req.body.authUser._id
+        // const { id } = req.query;
         const userData = await User.findById(id);
         return res.status(200).json({ message: "User successfully fetched", userData });
 
     } catch (error) {
+
         console.log(error.message);
-        console.log(error)
-        return res.status(500).json({ message: "Failed to fetch user data !" })
+        console.log(error);
+        return res.status(500).json({ message: "Failed to fetch user data !" });
+
     }
 }
 
@@ -565,7 +683,7 @@ exports.editAddress = async (req, res) => {
             address
         } = req.body;
 
-       
+
         const { id } = req.query;
 
         const user = await User.findOne({ "address._id": id });
@@ -624,7 +742,7 @@ exports.changePassword = async (req, res) => {
         const { id } = req.params;
         const { currentPassword, newPassword } = req.body;
 
-        
+
 
         const user = await User.findById(id);
         if (!user) {
@@ -637,7 +755,7 @@ exports.changePassword = async (req, res) => {
         const isValidPassword = await bcrypt.compare(currentPassword, user.password);
         if (!isValidPassword) {
             console.log("Current password is incorrect");
-            return res.status(401).json({ message: "Please enter the correct password" });
+            return res.status(400).json({ message: "Please enter the correct password" });
         }
 
         console.log("Current password is correct, hashing new password...");
@@ -667,7 +785,7 @@ exports.addToCart = async (req, res) => {
         let cart = await Cart.findOne({ user: userId }).populate("appliedCoupon")
 
         if (cart) {
-   cart.products.push({ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice: product.salesPrice });
+            cart.products.push({ product: id, quantity: 1, totalPrice: product.salesPrice, offeredPrice: product.salesPrice });
             cart.grandTotal = cart.products.reduce((acc, product, index) => product.totalPrice + acc, 0);
             cart.totalDiscount = 0;
             cart.appliedCoupon = null

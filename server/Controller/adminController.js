@@ -12,6 +12,8 @@ const mongoose = require("mongoose")
 const { listenerCount } = require("process");
 const Coupon = require("../models/couponModel.");
 const Wallet = require("../models/walletModel");
+const RefreshToken = require("../models/refreshTokenModel");
+const BlacklistedToken = require("../models/blacklistModel");
 
 exports.login = async (req, res) => {
     try {
@@ -25,15 +27,18 @@ exports.login = async (req, res) => {
         if (!isMatch)
             return res.status(400).json({ message: "Check the password" })
 
-        const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRETE, { expiresIn: '3d' });
+
+        const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRETE, { expiresIn: '30d' });
+
         res.cookie('adminToken',
             token,
             {
                 httpOnly: true,
-                secure: false,
-                sameSite: 'Lax',
-                maxAge: 36000000
+                secure: true,
+                sameSite: 'None',
+                maxAge: 30 * 24 * 60 * 60 * 1000
             });
+
         const adminData = {
             email, password
         }
@@ -315,10 +320,9 @@ exports.listCategory = async (req, res) => {
 exports.getProduct = async (req, res) => {
     try {
         const { filter } = req.query;
-        const products = await Product.find().populate([
-            { path: "category" },
-            { path: "brand" }
-        ]);
+        const products = res.locals.results?.data;
+        res.locals.results.products = products;
+        // console.log(res.locals.results)
         if (filter == "Recently Added")
             products.sort((a, b) => b.createdAt - a.createdAt);
         else if (filter == "High-Low")
@@ -330,7 +334,9 @@ exports.getProduct = async (req, res) => {
         } else if (filter === "Z-A") {
             products.sort((a, b) => b.productName.localeCompare(a.productName));
         }
-        return res.status(200).json({ message: "successfully fetched all products", products });
+        const results = res.locals.results;
+        return res.status(200).json({ message: "successfully fetched all products", results });
+
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: error.message || "Failed to fetch data" })
@@ -491,7 +497,7 @@ exports.editStatus = async (req, res) => {
     try {
         const { id } = req.query;
         const { orderId, productId, updatedStatus } = req.body;
-       
+
         const updatingOrder = await Orders.findOne({ orderId })
         if (updatedStatus == "cancelled") {
             const walletData = {
@@ -600,11 +606,17 @@ exports.getOrder = async (req, res) => {
 
 exports.returnOrder = async (req, res) => {
     try {
-        const { id, itemId } = req.body;
-        const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
-        const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
+        const { itemId } = req.body;
+
+        const order = await Orders.findOne({ orderItems: { $elemMatch: { _id: itemId } } })
+        if (!order) {
+            console.log("Filed to find order");
+            return res.status(404);
+        }
+        const id = order.user;
+        const orderIndex = order?.orderItems?.findIndex(item => item._id.toString() == itemId);
         if (orderIndex == -1)
-            console.log("Failed to find order")
+            console.log("Failed to find order Item")
         order.orderItems[orderIndex].productStatus = "returned";
         await order.save();
         const refundPrice = order.orderItems[orderIndex]?.price;
@@ -619,6 +631,7 @@ exports.returnOrder = async (req, res) => {
             return res.status(400).json({ message: "Wallet not found to refund money " });
 
         return res.status(200).json({ message: "Order Returned successfully" });
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error occured while returning the order" })
@@ -735,7 +748,7 @@ exports.getAllOrders = async (req, res) => {
                 console.log("");
             }
         }
-        
+
         const query = {};
 
         if (from && to) {
@@ -755,5 +768,17 @@ exports.getAllOrders = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error occred while fetching order details" });
+    }
+}
+
+exports.logout = async (req, res) => {
+    try {
+        const token = req.cookies.adminToken;
+        await BlacklistedToken.create({ token, role: "Admin" }).then(() => console.log("Black listed successfully")).catch((error) => console.log("Failed to black list token", error))
+        res.clearCookie('adminToken');
+        return res.status(200).json({ message: "Successfully logged out" })
+    } catch (error) {
+        console.log(error);
+        return res.status(501).json({ message: "Failed to logout admin" });
     }
 }

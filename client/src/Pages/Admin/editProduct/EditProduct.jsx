@@ -49,7 +49,29 @@ const EditProduct = () => {
 
   const error = {};
   const validateForm = () => {
-    // Form validation logic
+    const salesPriceInt = Number(salesPrice);
+    const regularPriceInt = Number(regularPrice);
+    const unitsInt = Number(units);
+    if (name.trim() === "") error.name = "Name is required *";
+    if (category.trim() === "") error.category = "Category is required *";
+    if (description.trim() === "")
+      error.description = "description is required *";
+    if (String(regularPrice)?.trim() === "")
+      error.regularPrice = "regularPrice is required *";
+    else if (isNaN(regularPriceInt))
+      error.regularPrice = "regular price must a number";
+
+    if (isNaN(offerPrice)) error.offerPrice = "offerPrice price must a number";
+    else if (offerPrice < 0 || offerPrice > 100)
+      error.offerPrice = "offerPrice must between 0% and 100%";
+
+    if (brand.trim() === "") error.brand = "brand is required *";
+    if (String(units).trim() === "") error.units = "units is required *";
+    else if (isNaN(unitsInt)) error.units = "Units  must a number";
+
+    if (Object.values(productImage).some((value) => !value)) {
+      error.image = "Upload at least three images *";
+    }
     return error;
   };
 
@@ -77,17 +99,16 @@ const EditProduct = () => {
     setImages((prevImages) => ({ ...prevImages, [field]: imageUrl })); // Update preview
 
     setProductImage((prevImages) => {
-        const fieldIndex = field === "image1" ? 0 : field === "image2" ? 1 : 2;
-        const updatedImages = [...prevImages];
-        updatedImages[fieldIndex] = croppedImage;
-        return updatedImages;
+      const fieldIndex = field === "image1" ? 0 : field === "image2" ? 1 : 2;
+      const updatedImages = [...prevImages];
+      updatedImages[fieldIndex] = croppedImage;
+      return updatedImages;
     });
 
     // Close cropping modal and reset currentImage
     setCropping(false);
     setCurrentImage(null);
-};
-
+  };
 
   const handleEditProduct = async (e) => {
     e.preventDefault();
@@ -132,7 +153,7 @@ const EditProduct = () => {
   };
 
   return (
-    <form className="bg-gray-200 text-black p-8 shadow-md rounded-lg font-sans">
+    <form className="bg-gray-200 text-black p-8 shadow-md rounded font-sans">
       {spinner && (
         <div className="spinner-overlay">
           <div className="spinner"></div>
@@ -240,7 +261,7 @@ const EditProduct = () => {
           {["image1", "image2", "image3"].map((field, index) => (
             <div
               key={field}
-              className="border rounded-lg p-4 flex flex-col items-center"
+              className="border rounded p-4 flex flex-col items-center"
             >
               <label htmlFor={`fileInput${index}`}>
                 <img
@@ -308,13 +329,13 @@ const EditProduct = () => {
           </div>
         </div>
       )}
-            <button
-              className="bg-green-500 text-white p-4 rounded w-full flex justify-center"
-              type="submit"
-              onClick={handleEditProduct}
-            >
-              {spinner ? "Adding Product ..." : "Submit"}
-            </button>
+      <button
+        className="bg-green-500 text-white p-4 rounded w-full flex justify-center"
+        type="submit"
+        onClick={handleEditProduct}
+      >
+        {spinner ? "Adding Product ..." : "Submit"}
+      </button>
     </form>
   );
 };

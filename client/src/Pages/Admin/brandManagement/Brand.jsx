@@ -87,15 +87,11 @@ const Brand = () => {
     try {
       if (Object.keys(formError).length === 0) {
         setSpinner(true);
-        const response = await axios.post(
-          "admin/brand",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            }
-          }
-        );
+        const response = await axios.post("admin/brand", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         setSpinner(false);
         navigate("/admin/brand");
         Toast.fire({
@@ -117,9 +113,7 @@ const Brand = () => {
     const result = confirm("Are you sure to restore brand");
     try {
       if (result) {
-        const response = await axios.patch(
-          `/admin/brandRestore/${id}`,
-        );
+        const response = await axios.patch(`/admin/brandRestore/${id}`);
         alert(response.data.message);
       }
     } catch (error) {
@@ -131,9 +125,7 @@ const Brand = () => {
     const result = confirm("Are you sure to delete brand");
     try {
       if (result) {
-        const response = await axios.delete(
-          `/admin/brand/${id}`
-                  );
+        const response = await axios.delete(`/admin/brand/${id}`);
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,
@@ -154,9 +146,7 @@ const Brand = () => {
 
   const handleListing = async (id) => {
     try {
-      const response = await axios.patch(
-        `/admin/brandListing/${id}`
-      );
+      const response = await axios.patch(`/admin/brandListing/${id}`);
       if (response.data.brand.isListed) {
         Swal.fire({
           title: "Listed",
@@ -191,7 +181,7 @@ const Brand = () => {
           <div className="spinner"></div>
         </div>
       )}
-      <div className="bg-gray-200 p-4 rounded-lg shadow-md text-black h-80 overflow-y-scroll">
+      <div className="bg-gray-200 p-4 rounded shadow-md text-black h-80 overflow-y-scroll">
         <table className="w-full text-left ">
           <thead>
             <tr className="bg-orange-500 ">
@@ -267,7 +257,7 @@ const Brand = () => {
           </tbody>
         </table>
       </div>
-      <div className="bg-gray-200 p-4 mt-8 rounded-lg shadow-md text-black">
+      <div className="bg-gray-200 p-4 mt-8 rounded shadow-md text-black">
         <h2 className="text-xl font-bold mb-4">Add New Brand</h2>
         <form className="flex flex-col space-y-6">
           <div className="flex flex-col lg:flex-row lg:space-x-8 space-y-6 lg:space-y-0">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import paymentTag from "../../../assets/paymentTags.png";
 import { BadgeDemo } from "@/Components/BadgeDemo";
@@ -6,7 +6,6 @@ import { BadgeDemo } from "@/Components/BadgeDemo";
 function UserLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-
   return (
     <>
       <div className="bg-[#1C1C1C] text-white p-4 flex justify-between items-center sticky top-0 z-50 ">
@@ -139,9 +138,30 @@ function UserLayout() {
           <div className="text-center w-1/2 md:w-auto">
             <h3 className="font-bold">FOLLOW US</h3>
             <div className="flex justify-center space-x-4 mt-2">
-              <i className="fab fa-facebook-f"></i>
-              <i className="fab fa-instagram"></i>
-              <i className="fab fa-linkedin-in"></i>
+              <a
+                href="https://www.linkedin.com/in/abiram-k-711358248"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-blue-600"
+              >
+                <i className="fab fa-facebook-f"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/abiram-k-711358248"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-pink-600"
+              >
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/abiram-k-711358248"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-blue-500"
+              >
+                <i className="fab fa-linkedin-in"></i>
+              </a>
             </div>
           </div>
 

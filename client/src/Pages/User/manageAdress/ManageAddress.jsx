@@ -1,7 +1,9 @@
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 import { SkeletonDemo } from "@/Components/SkeletonDemo";
 import { Toast } from "@/Components/Toast";
+import { showToast } from "@/Components/ToastNotification";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { logoutUser } from "@/redux/userSlice";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -14,9 +16,14 @@ const ManageAddress = () => {
     (async () => {
       try {
         const response = await axios.get(`/address?id=${user?._id}`);
-        console.log(response.data);
         setAddresses(response.data.addresses);
       } catch (error) {
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
+          dispatch(logoutUser());
+        }
         console.log(error);
       }
     })();
@@ -25,11 +32,7 @@ const ManageAddress = () => {
   const handleDeleteAddress = async (id) => {
     try {
       const response = await axios.delete(`/address?id=${id}`);
-      console.log(response.data);
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      showToast("success", response.data.message);
     } catch (error) {
       console.log(error);
       Toast.fire({
@@ -70,7 +73,7 @@ const ManageAddress = () => {
                   </span>
                   <div className="space-x-4">
                     <Link
-                      to={`/user/profile/editAddress/${address._id}`} 
+                      to={`/user/profile/editAddress/${address._id}`}
                       className="text-gray-400 hover:text-white transition duration-200"
                     >
                       Edit

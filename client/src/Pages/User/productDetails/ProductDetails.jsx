@@ -18,7 +18,6 @@ const ProductDetails = () => {
   const dispatch = useDispatch();
   const product = useSelector((state) => state.users.details);
   const user = useSelector((state) => state.users.user);
-  console.log(product, "From product details page");
 
   const [goToCart, setGoToCart] = useState(false);
   const [cartProduct, setCartProduct] = useState([]);
@@ -47,6 +46,12 @@ const ProductDetails = () => {
             setIsAvailable(response.data.isAvailable);
           }
       } catch (error) {
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
+          dispatch(logoutUser());
+        }
         console.log(error.message);
       }
     })();
@@ -110,7 +115,13 @@ const ProductDetails = () => {
     [magnifierPosition.x, magnifierPosition.y]
   );
 
-  const gotoDetails = (product) => dispatch(setProductDetails(product));
+  const gotoDetails = (product) => {
+    dispatch(setProductDetails(product));
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const handleAddToCart = async () => {
     try {

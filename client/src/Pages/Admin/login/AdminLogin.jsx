@@ -12,6 +12,11 @@ const AdminLogin = () => {
   const [message, setMessage] = useState({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
   let error = {};
   const formValidate = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -57,7 +62,7 @@ const AdminLogin = () => {
       </h1>
       {message.response && <Notification message={message.response} />}
       <div
-        className="bg-[#1C1C1C] rounded-lg shadow-lg flex flex-col sm:flex-row items-center p-6 sm:p-8"
+        className="bg-[#1C1C1C] rounded shadow-lg flex flex-col sm:flex-row items-center p-6 sm:p-8"
         style={{
           width: "100%",
           maxWidth: "600px",
@@ -84,21 +89,32 @@ const AdminLogin = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="p-2 w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none rounded"
               />
+            </div>
               {message.email && (
                 <p className="error text-red-500">{message.email}</p>
               )}
-            </div>
-            <div className="flex flex-col">
+            <div className="flex ">
               <input
-                type="password"
+                type={isPasswordVisible ? "text" : "password"}
                 placeholder="Enter password"
                 onChange={(e) => setPassword(e.target.value)}
-                className="p-2 w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none rounded"
+                className="p-2 w-full bg-gray-800 text-white border-b-2 border-gray-600 focus:outline-none "
               />
+               <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="  p-1 bg-gray-800 border-b-2 border-gray-600"
+              >
+                {isPasswordVisible ? (
+                  <i class="fa-solid fa-eye"></i>
+                ) : (
+                  <i class="fa-solid fa-eye-slash"></i>
+                )}
+              </button>
+            </div>
               {message.password && (
                 <p className="error text-red-500">{message.password}</p>
               )}
-            </div>
             <div className="flex justify-center">
               <button
                 type="submit"

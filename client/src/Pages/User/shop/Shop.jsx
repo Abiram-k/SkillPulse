@@ -18,6 +18,7 @@ import {
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState([]);
+  const [spinner, setSpinner] = useState(false);
   const [brand, setBrand] = useState([]);
   const [filter, setFilter] = useState({
     category: "",
@@ -40,13 +41,16 @@ const Shop = () => {
 
   const fetchProducts = async () => {
     try {
+      setSpinner(true);
       const response = await axios.get("/products", {
         params: filter,
       });
+      setSpinner(false);
       setProducts(response.data.products);
       setCategory(response.data.categoryDoc);
       setBrand(response.data.brandDoc);
     } catch (error) {
+      setSpinner(false);
       if (error?.response.data.isBlocked) {
         dispatch(logoutUser());
       }
@@ -77,19 +81,26 @@ const Shop = () => {
   const currentProduct = filteredProduct.slice(firstPostIndex, lastPostIndex);
 
   const handleAddToWishList = async (product) => {
-    setTrigger((prev) => prev + 1);
     try {
+      setSpinner(true);
       await addToWishList(product, user, dispatch);
+      setSpinner(false);
+      setTrigger((prev) => prev + 1);
     } catch (error) {
+      setSpinner(false);
       console.log(error);
     }
   };
 
   const handleRemoveFromWishlist = async (product) => {
     try {
+      setSpinner(true);
       await removeFromWishlist(product, user, dispatch);
       setTrigger((prev) => prev + 1);
+      window.location.reload();
+      setSpinner(false);
     } catch (error) {
+      setSpinner(false);
       console.log(error);
     }
   };
@@ -97,7 +108,6 @@ const Shop = () => {
   const fetchWishlist = async () => {
     try {
       const response = await axios.get(`/wishlist?user=${user._id}`);
-      console.log(response.data.wishlist[0]);
       const uniqueWishlistItems = [
         ...new Set(
           response.data.wishlist[0].products.map(
@@ -108,8 +118,6 @@ const Shop = () => {
       uniqueWishlistItems.forEach((id) => {
         setWishlistItems((prev) => [...prev, id]);
       });
-      // dispatch(removefromWishlist());
-      console.log("Wishlist Items : ", response.data.wishlist);
     } catch (error) {
       console.error(
         "Error fetching wishlist:",
@@ -122,6 +130,11 @@ const Shop = () => {
   };
   return (
     <div>
+      {spinner && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <div
         className="py-8 bg-cover bg-center mb-10 w-full h-96 md:h-[500px] lg:h-[600px] relative"
         style={{
@@ -141,7 +154,7 @@ const Shop = () => {
           </h1>
         </div>
       </div>
-     
+
       <div className="filters grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gray-950 rounded-lg shadow-lg border-b-2 border-t-2 border-gray-800 mb-10">
         <div>
           <p className="font-bold text-2xl mb-4">Category</p>

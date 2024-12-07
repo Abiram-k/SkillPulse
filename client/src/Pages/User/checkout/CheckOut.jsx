@@ -32,15 +32,16 @@ const Checkout = () => {
   const [couponCode, setCouponCode] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [trigger, setTrigger] = useState(0);
+  const [spinner, setSpinner] = useState(false);
 
   const openPopup = () => setIsPopupOpen(true);
   const closePopup = () => setIsPopupOpen(false);
   const totalPrice = () => {
-    return cartItems[0]?.products.reduce(
-      (acc, item) => acc + item.product?.salesPrice * item.quantity,
-      0
-    );
+    return cartItems[0]?.products
+      .reduce((acc, item) => acc + item.product?.salesPrice * item.quantity, 0)
+      .toFixed();
   };
+
   const calculateDeliveryCharge = () => {
     if (totalPrice() < 14999) return Math.round((2 / 100) * totalPrice());
     else return 0;
@@ -58,18 +59,23 @@ const Checkout = () => {
   const cartTotalPrice = () => {
     const gstRate = 18;
     const total =
-      totalPrice() + calculateGST(gstRate) + calculateDeliveryCharge();
+      +totalPrice() +
+      //  calculateGST(gstRate) +
+        calculateDeliveryCharge();
     return total;
   };
 
   const calculations = () => {
     const calcs = {};
-    calcs.totalItems = checkoutItems.reduce(
+    calcs.totalItems = checkoutItems[0]?.products?.reduce(
       (acc, item) => acc + item.quantity,
       0
     );
 
-    calcs.totalPrice = cartItems[0]?.totalDiscount || cartItems[0]?.grandTotal;
+    calcs.totalPrice =
+      checkoutItems[0]?.totalDiscount === 0
+        ? checkoutItems[0]?.grandTotal
+        : checkoutItems[0]?.totalDiscount;
 
     if (calcs?.totalPrice < 1000)
       calcs.deliveryCharge = Math.round((2 / 100) * calcs.totalPrice);
@@ -89,25 +95,34 @@ const Checkout = () => {
   };
 
   const offerPrice = (couponAmount = 0, couponType) => {
-    const totalPrice = Math.abs(
-      cartItems[0]?.totalDiscount || cartItems[0]?.grandTotal
-    );
+    const basePrice =
+      cartItems[0]?.totalDiscount !== 0
+        ? cartItems[0]?.totalDiscount
+        : cartItems[0]?.grandTotal;
 
     const gstRate = 18;
-    const total =
-      totalPrice + calculateGST(gstRate) + calculateDeliveryCharge();
-    return total;
+    const totalPrice = Math.abs(
+      parseInt(basePrice) +
+        // parseInt(calculateGST(gstRate)) +
+        parseInt(calculateDeliveryCharge()) -
+        parseInt(couponAmount)
+    );
+
+    return totalPrice;
   };
   const handleCouponDelete = async () => {
     try {
+      setSpinner(true);
       const response = await axiosInstance.patch(
         `/cartCouponRemove/${user._id}`
       );
       setTrigger((prev) => prev + 1);
-      showToast("success",`${response.data.message}`)
+      setSpinner(false);
+      showToast("success", `${response.data.message}`);
     } catch (error) {
       console.log(error);
-      showToast("error",`${error?.response?.data.message}`)
+      setSpinner(false);
+      showToast("error", `${error?.response?.data.message}`);
     }
   };
   const handleGetSelectedCoupons = async (
@@ -121,11 +136,14 @@ const Checkout = () => {
     setMinPurchaseAmount(minPurchaseAmount);
     setCouponCode(couponCode);
     try {
+      setSpinner(true);
       const response = await axios.patch(
         `/cartCouponApply?id=${user._id}&couponId=${selectedCoupon}`
       );
       setTrigger((prev) => prev + 1);
+      setSpinner(false);
     } catch (error) {
+      setSpinner(false);
       console.log(error);
     }
   };
@@ -133,7 +151,8 @@ const Checkout = () => {
     (async () => {
       try {
         const response = await axios.get(`/cart/${user._id}`);
-        setCartItems(response.data.cartItems); 
+        setCartItems(response.data.cartItems);
+        console.log("CART ITEMS :", response.data.cartItems);
       } catch (error) {
         if (error?.response.data.isBlocked) {
           dispatch(logoutUser());
@@ -155,7 +174,7 @@ const Checkout = () => {
       }
     })();
     const calcs = calculations();
-
+    console.log(calcs, "CALCS");
     if (Object.keys(calcs).length > 0) {
       setSummary(calculations());
       return;
@@ -170,15 +189,14 @@ const Checkout = () => {
             selectedAddressId ? `&addrId=${selectedAddressId}` : ""
           }`
         );
-        setAddresses(response.data.addresses);
+        setAddresses(response?.data.addresses);
         setSelectedAddress(response.data.selectedAddress);
       } catch (error) {
-        if (error?.response.data.isBlocked) {
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
           dispatch(logoutUser());
-          Toast.fire({
-            icon: "error",
-            title: `${error?.response.data.message}`,
-          });
         }
         console.log(error);
       }
@@ -190,13 +208,21 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async (paymentFailed) => {
-    if (paymentMethod == "cod" && summary.checkoutTotal >= 5000) {
+    if (
+      paymentMethod == "cod" &&
+      offerPrice(
+        cartItems[0]?.appliedCoupon?.couponAmount,
+        cartItems[0]?.appliedCoupon?.couponType
+      ) >= 5000
+    ) {
       showToast("error", "Cash on delivery is not applicable");
       return;
-    } else if (!selectedAddress) {
+    }
+    if (!selectedAddress) {
       showToast("error", "Add an address");
       return;
     }
+
     try {
       const response = await axios.post(`/order/${user._id}`, cartItems, {
         params: {
@@ -225,6 +251,11 @@ const Checkout = () => {
   };
   return !checkoutComplete ? (
     <div className="min-h-screen bg-black text-white mt-5 font-mono">
+      {spinner && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="w-full md:w-2/3">
@@ -241,7 +272,7 @@ const Checkout = () => {
               cartItems[0].products.map((item) => (
                 <div
                   className="flex items-start space-x-4 mb-8"
-                  key={item.product._id}
+                  key={item.product?._id}
                 >
                   <img
                     src={
@@ -393,23 +424,37 @@ const Checkout = () => {
                       <span className="text-green-500">
                         {" "}
                         ₹{" "}
-                        {walletData.totalAmount ? walletData.totalAmount : "0"}
+                        {walletData.totalAmount
+                          ? walletData.totalAmount.toFixed(2)
+                          : "0"}
                       </span>
                     </p>
                     <p>
                       Product Amount :
                       <span
                         className={`${
-                          walletData.totalAmount < summary.checkoutTotal
+                          walletData.totalAmount <
+                          offerPrice(
+                            cartItems[0]?.appliedCoupon?.couponAmount,
+                            cartItems[0]?.appliedCoupon?.couponType
+                          ).toFixed()
                             ? "text-red-600"
                             : "text-green-500"
                         }`}
                       >
                         {" "}
-                        ₹ {Math.round(summary.checkoutTotal)}
+                        ₹{" "}
+                        {offerPrice(
+                          cartItems[0]?.appliedCoupon?.couponAmount,
+                          cartItems[0]?.appliedCoupon?.couponType
+                        ).toFixed()}
                       </span>
                     </p>
-                    {walletData.totalAmount < summary.checkoutTotal && (
+                    {walletData.totalAmount <
+                      offerPrice(
+                        cartItems[0]?.appliedCoupon?.couponAmount,
+                        cartItems[0]?.appliedCoupon?.couponType
+                      ).toFixed() && (
                       <p className="text-red-600">
                         Insufficient wallet balance, Try different payment
                         method !
@@ -429,7 +474,11 @@ const Checkout = () => {
                   onClick={handlePlaceOrder}
                   disabled={
                     paymentMethod == "wallet" &&
-                    walletData.totalAmount < summary.checkoutTotal
+                    walletData.totalAmount <
+                      offerPrice(
+                        cartItems[0]?.appliedCoupon?.couponAmount,
+                        cartItems[0]?.appliedCoupon?.couponType
+                      ).toFixed()
                   }
                 >
                   Place order
@@ -454,7 +503,7 @@ const Checkout = () => {
             </div>
           </div>
           <div className="w-full md:w-80 ">
-            <div className="bg-red-600 text-center text-white p-4 rounded mb-4">
+            <div className="bg-red-600 text-center text-white p-4 rounded mb-4 hidden lg:block">
               Checkout Details
             </div>
             <div className="bg-pink-50 text-black p-6 rounded">
@@ -478,11 +527,11 @@ const Checkout = () => {
                       : calculateDeliveryCharge() + " ₹"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                {/* {<div className="flex justify-between">
                   <span>GST Amount (18%)</span>
                   <span>{calculateGST(18)} ₹</span>
-                </div>
-               
+                </div>} */}
+
                 {cartItems[0]?.appliedCoupon && (
                   <div className="flex justify-between">
                     <div className="flex gap-2 items-center">
@@ -507,14 +556,12 @@ const Checkout = () => {
                       <span className="text-sm font-mono">Saved Amount </span>{" "}
                       <span className="text-green-500">
                         -
-                        {
-                          Math.round(
-                            parseFloat(
-                              cartItems[0]?.grandTotal -
-                                cartItems[0]?.totalDiscount
-                            )
+                        {Math.round(
+                          parseFloat(
+                            cartItems[0]?.grandTotal -
+                              cartItems[0]?.totalDiscount
                           )
-                        }
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
@@ -523,7 +570,7 @@ const Checkout = () => {
                         {offerPrice(
                           cartItems[0]?.appliedCoupon?.couponAmount,
                           cartItems[0]?.appliedCoupon?.couponType
-                        ).toFixed()}
+                        )}
                       </span>
                     </div>
                   </>
@@ -592,7 +639,7 @@ const Checkout = () => {
         update you with your order in email
       </p>
       <Link
-        to={"/user/profile/shop"}
+        to={"/user/shop"}
         className="bg-red-600 text-white rounded px-6 py-2"
       >
         Continue Shopping

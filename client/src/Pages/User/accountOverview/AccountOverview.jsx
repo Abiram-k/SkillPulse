@@ -10,13 +10,12 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../redux/userSlice";
-// import axios from "axios";
 import { Toast } from "../../../Components/Toast";
-import { Link } from "react-router-dom";
 import { ChangePassword } from "@/Components/ChangePassword";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { showToast } from "@/Components/ToastNotification";
 
 const AccountOverview = () => {
   const user = useSelector((state) => state.users.user);
@@ -31,6 +30,7 @@ const AccountOverview = () => {
   const [spinner, setSpinner] = useState(false);
   const [message, setMessage] = useState({});
   const [editMode, setEditMode] = useState(false);
+
   const [referral, setRefferal] = useState();
   const dispatch = useDispatch();
 
@@ -39,17 +39,16 @@ const AccountOverview = () => {
     const firstnameFirstCharecter = firstName.charAt(0);
     const lastnameFirstCharecter = secondName.charAt(0);
 
-    if (firstName.trim() == "") error.firstName = "first name is required *";
+    if (firstName?.trim() == "") error.firstName = "first name is required *";
     else if (!isNaN(firstnameFirstCharecter)) {
       error.firstName = "Name must start with a charecter *";
     }
 
-    if (!isNaN(lastnameFirstCharecter)) {
+    if (!isNaN(lastnameFirstCharecter) && lastnameFirstCharecter?.trim()) {
       error.lastName = "Last name must start with a charecter *";
     }
-    if (!mobileNumber.trim())
-      error.mobileNumber = "Mobile number is required *";
-    else if (mobileNumber.length !== 10) {
+
+    if (mobileNumber?.trim() && mobileNumber?.length !== 10) {
       error.mobileNumber = "Please enter a 10-digit mobile number *";
     }
     return error;
@@ -109,7 +108,8 @@ const AccountOverview = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`/user?id=${user._id}`);
+        setSpinner(true);
+        const response = await axios.get(`/user`);
         setFirstName(response.data?.userData.firstName);
         setSecondName(response.data?.userData.lastName);
         setDateOfBirth(response.data?.userData.dateOfBirth);
@@ -118,8 +118,13 @@ const AccountOverview = () => {
         setUserProfile(response.data?.userData);
         setProfileImage(response.data?.userData.profileImage);
         setRefferal(response.data?.userData.referralCode);
+        setSpinner(false);
       } catch (error) {
-        if (error?.response.data?.isBlocked) {
+        setSpinner(false);
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
           dispatch(logoutUser());
         }
         console.log(error?.response?.data?.message);
@@ -151,15 +156,12 @@ const AccountOverview = () => {
         },
       });
       setSpinner(false);
+      setEditMode(false);
       setProfileImage(response.data?.updatedUser);
-      Toast.fire({
-        icon: "success",
-        title: `${response.data?.message}`,
-      });
+      showToast("success", response?.data?.message);
     } catch (error) {
       setSpinner(false);
-      alert(error.message);
-      console.log(error?.response?.data?.message);
+
       Toast.fire({
         icon: "error",
         title: `${error?.response.data?.message || "Error occured"}`,
@@ -170,8 +172,12 @@ const AccountOverview = () => {
   const handleEditMode = () => {
     setEditMode((editMode) => !editMode);
   };
+
   return (
-    <div className="flex-1 bg-black rounded-lg p-4 sm:p-6 font-mono"style={{fontFamily: "Montserrat"}}>
+    <div
+      className="flex-1 bg-black rounded-lg p-4 sm:p-6 font-mono"
+      style={{ fontFamily: "Montserrat" }}
+    >
       {spinner && (
         <div className="spinner-overlay">
           <div className="spinner"></div>
@@ -204,11 +210,13 @@ const AccountOverview = () => {
           <span className="font-semibold">{user.firstName || "Abiram k"}</span>
         </div>
         <div className="flex gap-3">
-          <ChangePassword
-            name="Change Password"
-            className="mt-5"
-            id={user._id}
-          />
+          {!user.googleid && (
+            <ChangePassword
+              name="Change Password"
+              className="mt-5"
+              id={user._id}
+            />
+          )}
           <button
             className="bg-green-500 rounded p-2 hover:scale-110 transition-all duration-100 flex gap-2 justify-center items-center"
             onClick={handleEditMode}
@@ -227,9 +235,9 @@ const AccountOverview = () => {
           </button>
         </div>
       </div>
-  
+
       {message.image && <p className="text-red-600 mb-4">{message.image}</p>}
-  
+
       <h2 className="text-xl font-semibold mb-6">
         {editMode ? (
           <>
@@ -239,7 +247,7 @@ const AccountOverview = () => {
           "Personal Information"
         )}
       </h2>
-  
+
       <form className="space-y-6 font-mono">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -268,15 +276,17 @@ const AccountOverview = () => {
               <p className="text-red-600">{message.lastName}</p>
             )}
           </div>
-          <div>
-            <label className="block mb-2">Password</label>
-            <input
-              type="password"
-              className="w-full bg-gray-700 rounded-lg p-2"
-              defaultValue={"* * * * * * * *"}
-              disabled
-            />
-          </div>
+          {!user.googleid && (
+            <div>
+              <label className="block mb-2">Password</label>
+              <input
+                type="password"
+                className="w-full bg-gray-700 rounded-lg p-2"
+                defaultValue={"* * * * * * * *"}
+                disabled
+              />
+            </div>
+          )}
           <div>
             <label className="block mb-2">Referral Code</label>
             <div className="flex items-center">
@@ -296,7 +306,7 @@ const AccountOverview = () => {
             </div>
           </div>
         </div>
-  
+
         <div>
           <label className="block mb-2">Date of Birth</label>
           <input
@@ -307,16 +317,16 @@ const AccountOverview = () => {
             disabled={!editMode}
           />
         </div>
-  
+
         <h3 className="text-lg font-semibold pt-4">Contact Information</h3>
-  
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block mb-2">Mobile Number</label>
             <input
               type="tel"
               className="w-full bg-gray-700 rounded-lg p-2"
-              value={mobileNumber}
+              value={mobileNumber ? mobileNumber : ""}
               onChange={(e) => setMobileNumber(e.target.value)}
               disabled={!editMode}
             />
@@ -334,7 +344,7 @@ const AccountOverview = () => {
             />
           </div>
         </div>
-  
+
         {editMode && (
           <button
             className="bg-green-600 text-white px-6 py-2 rounded-lg w-full sm:w-auto"
@@ -346,7 +356,6 @@ const AccountOverview = () => {
       </form>
     </div>
   );
-  
 };
 
 export default AccountOverview;

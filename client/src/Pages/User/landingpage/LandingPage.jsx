@@ -8,12 +8,12 @@ import axios from "@/axiosIntercepters/AxiosInstance";
 const LandingPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [category, setCategories] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const goToDetails = (product) => {
-    dispatch(setProductDetails(product));
+    // dispatch(setProductDetails(product));
     navigate("/user/productDetails");
   };
 
@@ -21,14 +21,14 @@ const LandingPage = () => {
     (async () => {
       try {
         const response = await axios.get("/products");
-        console.log("fdsfasdfasdf", response.data.products);
-        setProducts(response.data.products);
-        setCategories(response.data.category);
+        setProducts(response.data?.products);
+        setCategories(response.data?.categoryDoc);
       } catch (error) {
         console.log(error.message);
       }
     })();
   }, []);
+
   return (
     <div>
       <header className="flex justify-between items-center p-4 bg-[#1C1C1C]">
@@ -114,58 +114,55 @@ const LandingPage = () => {
           <p className="text-base sm:text-lg md:text-xl mt-2 ">
             Deserve best interpret your music differently
           </p>
-          <button className="mt-4 px-6 py-2 bg-red-600 text-white font-bold rounded text-center font-mono ">
+          <button
+            className="mt-4 px-6 py-2 bg-red-600 text-white font-bold rounded text-center font-mono "
+            onClick={() => goToDetails()}
+          >
             ORDER NOW
           </button>
         </div>
       </section>
 
-      <section className="flex flex-wrap justify-around py-8 bg-black border-gray-500 border-b-2 gap-6">
-        {categories?.length > 0 ? (
-          categories.map(
-            (category) =>
-              category.isListed && (
+      <section className="flex flex-wrap justify-center gap-6 py-8 px-4 bg-black border-b border-gray-500">
+        {category?.length > 0 ? (
+          category.slice(0, 4)?.map(
+            (cat) =>
+              cat.isListed && (
                 <div
-                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
-                  key={category._id}
+                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900  shadow-lg hover:shadow-xl transition-shadow  rounded duration-300"
+                  key={cat._id}
+                  onClick={() => goToDetails()}
                 >
                   <img
-                    src={category.image || "https://placehold.co/150x150"}
+                    src={cat.image || "https://placehold.co/150x150"}
                     className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
-                    alt={category.name}
+                    alt={cat.name}
                   />
                   <p className="text-white text-sm md:text-base font-semibold">
-                    {category.name}
+                    {cat.name}
                   </p>
                 </div>
               )
           )
         ) : (
           <>
-            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
-              <img
-                src="https://placehold.co/150x150"
-                alt="RazorClaw X"
-                className="mx-auto"
-              />
-              <p className="text-white">RazorClaw X</p>
-            </div>
-            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
-              <img
-                src="https://placehold.co/150x150"
-                alt="HyperVox Graphics card"
-                className="mx-auto"
-              />
-              <p className="text-white">HyperVox Graphics card</p>
-            </div>
-            <div className="w-full sm:w-1/2 md:w-1/4 text-center mb-4">
-              <img
-                src="https://placehold.co/150x150"
-                alt="Vortex Controller"
-                className="mx-auto"
-              />
-              <p className="text-white">Vortex Controller</p>
-            </div>
+            {["RazorClaw X", "HyperVox Graphics card", "Vortex Controller"].map(
+              (placeholder, index) => (
+                <div
+                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  key={index}
+                >
+                  <img
+                    src="https://placehold.co/150x150"
+                    alt={placeholder}
+                    className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
+                  />
+                  <p className="text-white text-sm md:text-base font-semibold">
+                    {placeholder}
+                  </p>
+                </div>
+              )
+            )}
           </>
         )}
       </section>
@@ -179,21 +176,25 @@ const LandingPage = () => {
           })`,
         }}
       >
-        <div className="ps-12 bg-opacity-60  rounded-lg font-mono">
-          <h2 className="text-3xl font-bold text-white">
+        <div className="px-4 sm:px-8 md:px-12 lg:px-20 xl:px-32 bg-opacity-60 rounded-lg font-mono bg-black/50">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center lg:text-left">
             FireStrike Joystick – Unleash Precision Control
           </h2>
-          <p className="mt-4 text-gray-300 font-semibold">
+          <p className="mt-4 text-gray-300 font-semibold text-center lg:text-left">
             The FireStrike Joystick is engineered for gamers who crave
-            <br />
+            <br className="hidden lg:block" />
             precision, control, and immersive gameplay.
           </p>
-          <ul className="mt-4 space-y-2 text-gray-300">
-            <li>Solo Pro wireless joystick</li>
-            <li>Carrying Case</li>
-            <li>Lightning to USB-A charging cable</li>
-            <li>Quick Start Guide</li>
-            <li>Warranty Cart</li>
+          <ul className="mt-4 space-y-2 text-gray-300 text-sm sm:text-base md:text-lg">
+            <li className="text-center lg:text-left">
+              Solo Pro wireless joystick
+            </li>
+            <li className="text-center lg:text-left">Carrying Case</li>
+            <li className="text-center lg:text-left">
+              Lightning to USB-A charging cable
+            </li>
+            <li className="text-center lg:text-left">Quick Start Guide</li>
+            <li className="text-center lg:text-left">Warranty Cart</li>
           </ul>
         </div>
       </section>

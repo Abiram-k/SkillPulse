@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/Components/ui/carousel.jsx";
+import { showToast } from "@/Components/ToastNotification";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -28,21 +29,20 @@ const HomePage = () => {
   const [isBlocked, setIsBlocked] = useState(false);
   const [addedToWishlist, setAddedToWishlist] = useState(false);
   const [banners, setBanners] = useState([]);
-
+  const [spinner, setSpinner] = useState(false);
   const [trigger, setTrigger] = useState(0);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.users.user);
   const [wishlistItems, setWishlistItems] = useState([]);
- 
 
   const fetchWishlist = async () => {
     try {
-      const response = await axios.get(`/wishlist?user=${user._id}`);
-     
+      const response = await axios.get(`/wishlist`);
+
       const uniqueWishlistItems = [
         ...new Set(
-          response.data.wishlist[0].products.map(
+          response.data.wishlist[0].products?.map(
             (product) => product.product._id
           )
         ),
@@ -50,13 +50,15 @@ const HomePage = () => {
       uniqueWishlistItems.forEach((id) => {
         setWishlistItems((prev) => [...prev, id]);
       });
-      
     } catch (error) {
       console.error(
         "Error fetching wishlist:",
         error.response || error.message
       );
-      if (error?.response.data.isBlocked) {
+      if (
+        error?.response.data.isBlocked ||
+        error?.response.data.message == "token not found"
+      ) {
         dispatch(logoutUser());
       }
       Toast.fire({
@@ -71,45 +73,38 @@ const HomePage = () => {
     navigate("/user/productDetails");
   };
 
-
   const handleAddToWishList = async (product) => {
     try {
+      setSpinner(true);
       await addToWishList(product, user, dispatch);
+      setSpinner(false);
       setTrigger((prev) => prev + 1);
     } catch (error) {
+      setSpinner(false);
       console.log(error);
     }
   };
-
 
   const handleRemoveFromWishlist = async (product) => {
     try {
       await removeFromWishlist(product, user, dispatch);
       setTrigger((prev) => prev + 1);
+      window.location.reload();
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   useEffect(() => {
     (async () => {
       try {
         const response = await axios.get("/products", {
-          params: { newArrivals: true, user },
+          params: { newArrivals: true },
         });
         setProducts(response.data.products);
         setCategory(response.data.categoryDoc);
       } catch (error) {
-        if (
-          error?.response.data.isBlocked ||
-          error?.response.data.message == "token not found"
-        ) {
-          dispatch(logoutUser());
-        }
-        Toast.fire({
-          icon: "error",
-          title: `${error?.response?.data.message}`,
-        });
+        showToast("error", error?.response?.data.message);
         console.log(error.message);
       }
       try {
@@ -124,6 +119,11 @@ const HomePage = () => {
   }, [trigger]);
   return (
     <div>
+      {spinner && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <section className="relative overflow-hidden h-80 lg:h-auto">
         <img
           src={banner}
@@ -150,77 +150,76 @@ const HomePage = () => {
         Categories
       </h5>
       <section className="flex flex-wrap justify-center gap-6 py-8 px-4 bg-black border-b border-gray-500">
-  {category?.length > 0 ? (
-    category.slice(0, 4).map(
-      (cat) =>
-        cat.isListed && (
-          <div
-            className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900  shadow-lg hover:shadow-xl transition-shadow  rounded duration-300"
-            key={cat._id}
-          >
-            <img
-              src={cat.image || "https://placehold.co/150x150"}
-              className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
-              alt={cat.name}
-            />
-            <p className="text-white text-sm md:text-base font-semibold">
-              {cat.name}
-            </p>
-          </div>
-        )
-    )
-  ) : (
-    <>
-      {["RazorClaw X", "HyperVox Graphics card", "Vortex Controller"].map(
-        (placeholder, index) => (
-          <div
-            className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
-            key={index}
-          >
-            <img
-              src="https://placehold.co/150x150"
-              alt={placeholder}
-              className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
-            />
-            <p className="text-white text-sm md:text-base font-semibold">
-              {placeholder}
-            </p>
-          </div>
-        )
-      )}
-    </>
-  )}
-</section>
+        {category?.length > 0 ? (
+          category.slice(0, 4)?.map(
+            (cat) =>
+              cat.isListed && (
+                <div
+                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900  shadow-lg hover:shadow-xl transition-shadow  rounded duration-300"
+                  key={cat._id}
+                >
+                  <img
+                    src={cat.image || "https://placehold.co/150x150"}
+                    className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
+                    alt={cat.name}
+                  />
+                  <p className="text-white text-sm md:text-base font-semibold">
+                    {cat.name}
+                  </p>
+                </div>
+              )
+          )
+        ) : (
+          <>
+            {["RazorClaw X", "HyperVox Graphics card", "Vortex Controller"].map(
+              (placeholder, index) => (
+                <div
+                  className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  key={index}
+                >
+                  <img
+                    src="https://placehold.co/150x150"
+                    alt={placeholder}
+                    className="mx-auto rounded-full w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover mb-4 hover:scale-105 transition-transform duration-300"
+                  />
+                  <p className="text-white text-sm md:text-base font-semibold">
+                    {placeholder}
+                  </p>
+                </div>
+              )
+            )}
+          </>
+        )}
+      </section>
 
-
-<section className="w-screen flex justify-center p-4 h-auto">
-  <Carousel className="relative w-full text-black">
-    <CarouselContent className="relative w-full">
-      {banners.map((banner, index) => (
-        <CarouselItem
-          key={banner._id || index}
-          className="relative flex items-center justify-center"
-        >
-          <p className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg sm:text-2xl font-semi-bold font-mono text-white text-center z-20">
-            {/* {banner.description} */}
-          </p>
-          <img
-            src={banner.image || "https://placehold.co/300x300"}
-            alt={`Banner ${banner._id || index}`}
-            className="object-cover w-full h-[200px] sm:h-[300px] lg:h-[400px]"
-          />
-        </CarouselItem>
-      ))}
-    </CarouselContent>
-    <CarouselPrevious className="absolute top-1/2 left-4 -translate-y-1/2 bg-gray-600 text-green-400 z-10 p-2 rounded-full" />
-    <CarouselNext className="absolute top-1/2 right-4 -translate-y-1/2 bg-gray-600 text-white z-10 p-2 rounded-full" />
-  </Carousel>
-</section>
+      <section className="w-screen flex justify-center p-4 h-auto">
+        <Carousel className="relative w-full text-black">
+          <CarouselContent className="relative w-full">
+            {banners?.map((banner, index) => (
+              <CarouselItem
+                key={banner._id || index}
+                className="relative flex items-center justify-center"
+              >
+                <p className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg sm:text-2xl font-semi-bold font-mono text-white text-center z-20">
+                  {/* {banner.description} */}
+                </p>
+                <img
+                  src={banner.image || "https://placehold.co/300x300"}
+                  alt={`Banner ${banner._id || index}`}
+                  className="object-cover w-full h-[200px] sm:h-[300px] lg:h-[400px]"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute top-1/2 left-4 -translate-y-1/2 bg-gray-600 text-green-400 z-10 p-2 rounded-full" />
+          <CarouselNext className="absolute top-1/2 right-4 -translate-y-1/2 bg-gray-600 text-white z-10 p-2 rounded-full" />
+        </Carousel>
+      </section>
 
       <h2 className="text-md lg:text-xl  ps-8 font-bold ">New Arrivals</h2>
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8 bg-black ">
         {products?.length > 0 ? (
-          products.map(
+          products?.map(
             (product) =>
               product.isListed &&
               !product.isDeleted && (

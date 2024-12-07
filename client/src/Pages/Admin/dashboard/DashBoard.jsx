@@ -9,13 +9,19 @@ import { logoutAdmin } from "@/redux/adminSlice";
 export default function Dashboard() {
   const [recentSales, setRecentSales] = useState([]);
   const [filter, setFilter] = useState("Yearly");
+  const [spinner, setSpinner] = useState(false);
+
   const dispatch = useDispatch();
+
   useEffect(() => {
+    setSpinner(true);
     (async () => {
       try {
         const response = await axios.get(`/admin/recentSales?filter=${filter}`);
         setRecentSales(response.data.orders);
+        setSpinner(false);
       } catch (error) {
+        setSpinner(false);
         console.log(error?.response?.data?.message);
         if (
           error?.response.data.message == "Token not found" ||
@@ -30,15 +36,15 @@ export default function Dashboard() {
   const topTenSellingProducts = () => {
     let topSellingProducts = {};
 
-    recentSales.forEach((order) => {
-      order.orderItems.forEach((item) => {
+    recentSales?.forEach((order) => {
+      order?.orderItems.forEach((item) => {
         let productName = item.product.productName;
         if (topSellingProducts[productName]) {
           topSellingProducts[productName][1] += parseInt(item.quantity);
         } else {
           topSellingProducts[productName] = [
-            ...item.product.productImage[0],
-            parseInt(item.quantity),
+            ...item?.product?.productImage[0],
+            parseInt(item?.quantity),
           ];
         }
       });
@@ -57,13 +63,13 @@ export default function Dashboard() {
   const topTenSellingCategory = () => {
     let topSellingCategory = {};
 
-    recentSales.forEach((order) => {
-      order.orderItems.forEach((item) => {
-        let categoryName = item.product.category.name;
+    recentSales?.forEach((order) => {
+      order?.orderItems.forEach((item) => {
+        let categoryName = item.product?.category.name;
         if (topSellingCategory[categoryName]) {
           topSellingCategory[categoryName][1] += 1;
         } else {
-          topSellingCategory[categoryName] = [item.product.category.image, 1];
+          topSellingCategory[categoryName] = [item?.product?.category.image, 1];
         }
       });
     });
@@ -81,13 +87,13 @@ export default function Dashboard() {
   const topTenSellingBrand = () => {
     let topSellingBrand = {};
 
-    recentSales.forEach((order) => {
-      order.orderItems.forEach((item) => {
-        let brandName = item.product.brand.name;
+    recentSales?.forEach((order) => {
+      order?.orderItems?.forEach((item) => {
+        let brandName = item?.product?.brand.name;
         if (topSellingBrand[brandName]) {
           topSellingBrand[brandName][1] += 1;
         } else {
-          topSellingBrand[brandName] = [item.product.brand.image, 1];
+          topSellingBrand[brandName] = [item?.product?.brand.image, 1];
         }
       });
     });
@@ -106,6 +112,11 @@ export default function Dashboard() {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {spinner && (
+          <div className="spinner-overlay">
+            <div className="spinner"></div>
+          </div>
+        )}
         <StatsCard
           title="Total Sales"
           value={recentSales.reduce(
@@ -132,7 +143,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full ">
-        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+        <div className="lg:col-span-2 bg-white p-6 rounded shadow">
           <div className="mb-4 flex space-x-4 font-mono">
             {["Monthly", "Yearly"].map((option) => (
               <button
@@ -150,7 +161,7 @@ export default function Dashboard() {
           </div>
           <Chart orders={recentSales} filter={filter} />
         </div>
-        <div className="bg-white p-6 rounded-lg  shadow h-auto ">
+        <div className="bg-white p-6 rounded  shadow h-auto ">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl  text-gray-400 font-bold ">Recent Sales</h2>
           </div>
@@ -214,7 +225,7 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="flex flex-col lg:flex-row mt-10 gap-6">
-        <div className="bg-white p-6 rounded-lg  shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3">
+        <div className="bg-white p-6 rounded  shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl text-gray-400 font-bold">
               Top 10 Products
@@ -263,7 +274,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg  shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3">
+        <div className="bg-white p-6 rounded  shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl text-gray-400 font-bold">
               Top 10 Category
@@ -314,7 +325,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3 ">
+        <div className="bg-white p-6 rounded shadow-lg hover:scale-105 duration-300 w-full lg:w-2/3 ">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl text-gray-400 font-bold">
               Top 10 Brands
@@ -372,7 +383,7 @@ export default function Dashboard() {
 
 function StatsCard({ title, value, bgColor }) {
   return (
-    <div className={`${bgColor} p-6 rounded-lg`}>
+    <div className={`${bgColor} p-6 rounded`}>
       <h3 className="text-gray-600 mb-2">{title}</h3>
       <p className="text-2xl font-semibold">{value}</p>
     </div>

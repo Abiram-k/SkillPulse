@@ -18,9 +18,13 @@ const Signup = () => {
   const [serverMessage, setServerMessage] = useState();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
 
   //Form Validation
-
   let error = {};
   const formValidate = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -74,7 +78,6 @@ const Signup = () => {
 
     try {
       const formErrors = formValidate();
-      console.log("FormErrors: ", formErrors);
       if (Object.keys(formErrors).length > 0) {
         setMessage(formErrors);
         return;
@@ -97,7 +100,6 @@ const Signup = () => {
         );
 
         setSpinner(false);
-        console.log("Response data is:", response.data);
         if (response.status === 200) {
           dispatch(signUpSuccess(response.data.message));
           navigate("/otp");
@@ -111,7 +113,7 @@ const Signup = () => {
     }
   };
   const handleGoogleAuth = () => {
-    window.location.href = `http://localhost:3000/auth/google?method=signup`;
+    window.location.href = `https://skillpulseapi.abiram.website/auth/google?method=signup`;
   };
   return (
     <div className="text-white text-center my-6 lg:my-10 px-4 lg:px-0">
@@ -130,7 +132,9 @@ const Signup = () => {
           <div className="spinner"></div>
         </div>
       )}
-      <h1 className="text-4xl lg:text-5xl font-bold mb-6 lg:mb-10">SKILL PULSE</h1>
+      <h1 className="text-4xl lg:text-5xl font-bold mb-6 lg:mb-10">
+        SKILL PULSE
+      </h1>
       <div
         className="bg-gray-900 p-6 lg:p-8 rounded-lg shadow-lg w-full max-w-sm lg:w-96 mx-auto font-mono"
         style={{ boxShadow: "0 0 20px rgba(255, 0, 0, 0.5)" }}
@@ -181,16 +185,28 @@ const Signup = () => {
             <p className="error text-sm">{message.mobile}</p>
           )}
 
+          <div className="flex gap-1">
+            <input
+              type={isPasswordVisible ? "text" : "password"}
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-transparent border-b border-gray-600 focus:outline-none w-full py-2"
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="  p-1  border-gray-600"
+            >
+              {isPasswordVisible ? (
+                <i class="fa-solid fa-eye"></i>
+              ) : (
+                <i class="fa-solid fa-eye-slash"></i>
+              )}
+            </button>
+          </div>
           <input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="bg-transparent border-b border-gray-600 focus:outline-none w-full py-2"
-          />
-
-          <input
-            type="password"
+            type={isPasswordVisible ? "text" : "password"}
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -208,7 +224,7 @@ const Signup = () => {
           </button>
         </form>
         <p className="mt-4 text-sm lg:text-base">
-          Existing User?{' '}
+          Existing User?{" "}
           <Link to="/login" className="text-blue-500">
             Login in
           </Link>

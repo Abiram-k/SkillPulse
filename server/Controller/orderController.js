@@ -31,25 +31,47 @@ const generateOrderDate = () => {
 
 
 exports.addOrder = async (req, res) => {
-
     try {
-
-        const { paymentMethod, totalAmount, appliedCoupon, paymentFailed, isRetryPayment, deliveryCharge } = req.query;
+        const { paymentMethod, totalAmount, appliedCoupon, isRetryPayment, deliveryCharge = 0 } = req.query;
         const { id } = req.params;
+
+        const paymentFailed = req.query.paymentFailed ?? false;
+        console.log(paymentFailed)
         if (isRetryPayment) {
             const { checkoutItems } = req.body;
             const order = await Orders.findOne({ user: id, _id: checkoutItems[0]._id })
             try {
-                if (paymentFailed === "true") {
-                    return res.status(400).json({ message: "Payment Failed" });
-                } else {
-                    order.paymentStatus = "Success"
+                if (paymentFailed == "false") {
+                    for (const item of checkoutItems[0].orderItems) {
+                        const productId = item.product;
+                        const product = await Product.findById(productId);
+
+                        if (!product) {
+                            return res.status(404).json({ message: `Product with ID ${productId} not found.` });
+                        }
+
+                        if (product.units < item.quantity) {
+                            return res.status(400).json({
+                                message: `Insufficient stock for product ${product.productName}. Available units: ${product.units}. Requested: ${item.quantity}.`
+                            });
+                        }
+                    }
+                    for (const item of checkoutItems[0].orderItems) {
+                        const productId = item.product;
+                        await Product.findByIdAndUpdate(productId, { $inc: { units: -item.quantity } });
+                    }
+
+                    order.paymentStatus = "Success";
                     await order.save();
-                    return res.status(200).json({ message: "Payment successfull" })
+
+                    return res.status(200).json({ message: "Payment successful" });
+                } else {
+                    return res.status(404).json({ message: "Payment Failed" });
                 }
             } catch (error) {
                 return res.status(500).json({ message: "Payment rejected" })
             }
+
         } else {
             const checkoutItems = req.body.map(item => {
                 const { authUser, ...rest } = item;
@@ -95,13 +117,16 @@ exports.addOrder = async (req, res) => {
             }
 
             for (const item of checkoutItems[0].products) {
+
                 try {
                     const orderItem = {
+
                         product: item.product._id,
                         quantity: item.quantity,
                         totalPrice: item.product.salesPrice * item.quantity,
                         price: item.offeredPrice,
                         paymentStatus
+
                     };
 
                     if (paymentMethod === "wallet") {
@@ -127,19 +152,23 @@ exports.addOrder = async (req, res) => {
 
                     totalQuantity += item.quantity;
 
-                    await Product.findByIdAndUpdate(item.product._id, { $inc: { units: -item.quantity } });
+                    if (paymentFailed == "false") {
+                        await Product.findByIdAndUpdate(item.product._id, { $inc: { units: -item.quantity } });
+                    }
+
                 } catch (error) {
                     console.error(error);
                     return res.status(500).json({ message: "Error processing item" });
                 }
             }
-            const totalDiscount = checkoutItems[0].totalDiscount;
+
+            const totalDiscount = checkoutItems[0].totalDiscount + deliveryCharge;
             const currentOrderData = {
                 user: id,
                 orderId: generateOrderId(),
                 orderDate: generateOrderDate(),
                 orderItems,
-                totalAmount,
+                totalAmount ,
                 totalQuantity,
                 address,
                 appliedCoupon,
@@ -148,6 +177,7 @@ exports.addOrder = async (req, res) => {
                 paymentStatus,
                 deliveryCharge
             };
+
             const newOrder = new Orders(currentOrderData);
             if (appliedCoupon) {
                 const coupon = await Coupon.findById(appliedCoupon);
@@ -172,13 +202,16 @@ exports.addOrder = async (req, res) => {
                 }
             }
             await user.save();
+
             await newOrder.save()
                 .then(async (order) => {
-                    const result = await Cart.deleteOne({ user: id });
-                    if (result.deletedCount === 1) {
-                        console.log("Order placed successfully");
-                    } else {
-                        console.log("Cart not found while attempting to delete");
+                    if (!isRetryPayment) {
+                        const result = await Cart.deleteOne({ user: id });
+                        if (result.deletedCount === 1) {
+                            console.log("Order placed successfully");
+                        } else {
+                            console.log("Cart not found while attempting to delete")
+                        }
                     }
                 })
                 .catch(error => console.error("Error saving order:", error));
@@ -189,10 +222,40 @@ exports.addOrder = async (req, res) => {
         return res.status(500).json({ message: "An error occurred while placing the order" });
     }
 };
+exports.getOrderDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
 
+        const orderDetails = await Order.findOne({ _id: id }).populate({
+            path: "orderItems.product",
+            populate: [
+                {
+                    path: "category",
+                    model: "category",
+                },
+                {
+                    path: "brand",
+                    model: "brand",
+                },
+            ],
+        });
+
+
+        if (!orderDetails) {
+            return res.status(400).json({ message: "Order not found" });
+        }
+        return res.status(200).json({ message: "Order Fetched", orderDetails });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Error occured while fetching order" });
+    }
+}
 exports.getOrder = async (req, res) => {
     try {
-        const { id } = req.query;
+        // console.log(req.body?.authUser?._id == req.query.id);
+        // const { id } = req.query;
+        const id = req.body?.authUser?._id
         const orderData = await Orders.find({ user: id }).populate({
             path:
                 "orderItems.product",
@@ -201,6 +264,7 @@ exports.getOrder = async (req, res) => {
                 model: "category"
             }
         });
+
         if (!orderData)
             console.log("No order were founded in this user id");
         return res.status(200).json({ message: "Orders fetched successfully", orderData });
@@ -242,7 +306,6 @@ exports.returnOrderRequest = async (req, res) => {
     try {
         const { id, itemId } = req.query;
         const order = await Orders.findOne({ user: id, orderItems: { $elemMatch: { _id: itemId } } })
-        console.log(order)
         const orderIndex = order.orderItems.findIndex(item => item._id.toString() == itemId);
 
         if (orderIndex == -1)
@@ -250,7 +313,7 @@ exports.returnOrderRequest = async (req, res) => {
 
         order.orderItems[orderIndex].returnDescription = returnDescription;
         order.orderItems[orderIndex].returnedAt = new Date();
-        
+
         await order.save();
         return res.status(200).json({ message: "Return request sended successfully" });
 
@@ -265,7 +328,7 @@ exports.verifyPayment = async (req, res) => {
         key_secret: process.env.RAZORPAY_KEY,
     });
 
-    const { paymentId, orderId, signature, actuallOrder } = req.body;
+    const { paymentId, orderId, signature, actuallOrder, retry } = req.body;
     try {
         const body = orderId + "|" + paymentId;
         const expectedSignature = crypto
@@ -273,9 +336,18 @@ exports.verifyPayment = async (req, res) => {
             .update(body.toString())
             .digest("hex");
 
+
+        // if (retry) {
+        //     const order = await Order.findById(actuallOrder);
+        //     console.log(order);
+        //     if (!order)
+        //         console.log("Order not found");
+        // } else {
         const order = await Cart.findById(actuallOrder);
         if (!order)
-            console.log("Order not found")
+            console.log("Order not found");
+        // }
+
         if (expectedSignature === signature) {
             res.status(200).json({ success: true });
 

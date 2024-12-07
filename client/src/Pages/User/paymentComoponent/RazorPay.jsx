@@ -1,4 +1,5 @@
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { showToast } from "@/Components/ToastNotification";
 import React, { useEffect, useState } from "react";
 const API_ID = import.meta.env.VITE_RAZORPAY_ID;
 const Razorpay = ({
@@ -40,6 +41,7 @@ const Razorpay = ({
       description: "Skill Pulse Order Transaction",
       handler: async (response) => {
         try {
+          
           const res = await axios.post(
             "/verify-payment",
             {
@@ -47,6 +49,7 @@ const Razorpay = ({
               orderId: response.razorpay_order_id,
               signature: response.razorpay_signature,
               actuallOrder: orderId,
+              retry
             },
             {
               headers: {
@@ -58,6 +61,7 @@ const Razorpay = ({
         } catch (error) {
           alert("Payment verification failed. Please try again.");
         }
+
       },
       prefill: {
         name: "Abiram k",
@@ -73,9 +77,12 @@ const Razorpay = ({
     razorpayInstance.on("payment.failed", (response) => {
       handlePlaceOrder(true, orderId);
     });
-    console.log(isAddressSelected?.firstName || retry);
+    if(!isAddressSelected?.firstName && !retry){
+      showToast("error","Add delivery address")
+      return;
+    }
+
     if (isAddressSelected?.firstName || retry) {
-      console.log("Opening Razorpay instance");
       razorpayInstance.open();
     } else {
       alert("Order failed");

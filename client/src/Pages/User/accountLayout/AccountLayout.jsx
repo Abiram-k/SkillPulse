@@ -4,6 +4,8 @@ import { Link, Outlet } from "react-router-dom";
 import { User, Package, MapPin, Wallet, LogOut } from "lucide-react";
 import { logoutUser } from "../../../redux/userSlice";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import axiosInstance from "@/axiosIntercepters/AxiosInstance";
+import { showToast } from "@/Components/ToastNotification";
 
 function AccountLayout() {
   const [profileImage, setProfileImage] = useState(null);
@@ -16,21 +18,34 @@ function AccountLayout() {
 
   const dispatch = useDispatch();
 
-  const handleLogout = () => {
-    dispatch(logoutUser());
+  const handleLogout = async () => {
+    try {
+      const response = await axiosInstance.post("/logout");
+      showToast("success", response.data.message);
+      dispatch(logoutUser());
+    } catch (error) {
+      console.log(error);
+      showToast("error", error.response.data.message);
+    }
   };
 
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`/user/${user._id}`);
+        const response = await axios.get(`/user`);
         setProfileImage(response.data?.userData.profileImage);
       } catch (error) {
-        console.log(error?.response?.data?.message);
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
+          dispatch(logoutUser());
+        }
+        console.log(error?.response?.data?.message, "Error");
       }
     })();
   }, []);
-  
+
   return (
     <div className="min-h-screen text-white ">
       <div className="container mx-auto p-4">
@@ -69,11 +84,10 @@ function AccountLayout() {
                 >
                   {profileImage ? (
                     <img
-                    aria-disabled
+                      aria-disabled
                       src={profileImage}
                       alt="Profile"
                       className="w-full h-full object-cover cursor-default"
-                      
                     />
                   ) : (
                     <User className="w-6 h-6 text-gray-800" />

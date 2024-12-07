@@ -1,45 +1,49 @@
-import { responsive } from "@cloudinary/react";
 import axios from "@/axiosIntercepters/AxiosInstance";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./manageOrder.css";
 import { Toast } from "@/Components/Toast";
-import { logoutUser } from "@/redux/userSlice";
+import { logoutUser, orderDetails } from "@/redux/userSlice";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 import { showToast } from "@/Components/ToastNotification";
-import axiosInstance from "@/axiosIntercepters/AxiosInstance";
 import Razorpay from "../paymentComoponent/RazorPay";
-import { Link } from "react-router-dom";
 import { ReturnProduct } from "@/Components/ReturnProduct";
 import { ArrowDown } from "lucide-react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import { normal } from "@cloudinary/url-gen/qualifiers/textDecoration";
+import { Link, useNavigate } from "react-router-dom";
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [cartItems, setCartItems] = useState({});
+  const [spinner, setSpinner] = useState(false);
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const user = useSelector((state) => state.users.user);
 
   useEffect(() => {
-    // if (orders.length == 0) {
     (async () => {
+      // setSpinner(true);
       try {
         const response = await axios.get(`/order?id=${user._id}`);
         setOrders(response.data?.orderData);
+        // setSpinner(false);
       } catch (error) {
-        if (error?.response.data.isBlocked) {
+        // setSpinner(false);
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "token not found"
+        ) {
           dispatch(logoutUser());
         }
         console.log(error.message);
       }
     })();
-    // }
-  }, [refresh, orders]);
+  }, [refresh,orders]);
 
   const handleCancelOrder = async (item) => {
     try {
@@ -50,6 +54,7 @@ const ManageOrders = () => {
 
       setRefresh((prev) => prev + 1);
     } catch (error) {
+      console.log(error);
       Toast.fire({
         icon: "error",
         title: `${error?.response?.data.message}`,
@@ -102,7 +107,7 @@ const ManageOrders = () => {
       (order, index) => order?._id.toString() == orderId
     );
     try {
-      const response = await axiosInstance.post(
+      const response = await axios.post(
         `/order/${user._id}`,
         { checkoutItems: orderForRetry },
         {
@@ -117,110 +122,23 @@ const ManageOrders = () => {
       );
       showToast("success", `${response?.data.message}`);
     } catch (error) {
-      showToast("error", `${error?.response?.data.message}`);
+      showToast("error", error?.response?.data.message);
     }
   };
 
-  const handleDownloadInvoice = (orderId) => {
-    const order = orders.find((order) => order._id.toString() === orderId);
-    if (!order) {
-      alert("Order not found");
-      return;
-    }
-    const doc = new jsPDF();
-
-    doc.setFillColor(240, 240, 240);
-    doc.rect(0, 0, 210, 297, "F");
-
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("Order Invoice", 14, 20);
-
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(18);
-    doc.text("Delivery Address:", 120, 20);
-
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(`Order ID: ${order.orderId}`, 14, 30);
-    doc.text(`Customer Name: ${order.address.firstName}`, 14, 40);
-    doc.text(`Order Date: ${order.orderDate}`, 14, 50);
-    doc.text(`Total Amount: Rs. ${order.totalAmount.toFixed(2)}`, 14, 60);
-
-    doc.setFontSize(10);
-    doc.text(`${order.address.firstName} ${order.address.lastName}`, 120, 30);
-    const addressLines = doc.splitTextToSize(order.address.address, 50);
-    doc.text(addressLines, 120, 35);
-    doc.text(
-      `${order.address.city}, ${order.address.state}`,
-      120,
-      45 + (addressLines.length - 1) * 5
-    );
-    doc.text(
-      `Pincode: ${order.address.pincode}`,
-      120,
-      50 + (addressLines.length - 1) * 5
-    );
-    doc.text(
-      `Phone: ${order.address.mobileNumber}`,
-      120,
-      55 + (addressLines.length - 1) * 5
-    );
-
-    const headers = [["Item", "Quantity", "Price", "Total"]];
-
-    const rows = order.orderItems.map((item) => [
-      item.product.productName,
-      item.quantity,
-      `Rs. ${item.price.toFixed(2)}`,
-      `Rs. ${(item.quantity * item.price).toFixed(2)}`,
-    ]);
-
-    doc.autoTable({
-      startY: 70,
-      head: headers,
-      body: rows,
-      styles: { fillColor: [230, 230, 250] },
-      headStyles: { textColor: [255, 255, 255], fillColor: [0, 102, 204] },
-      margin: { top: 10 },
-    });
-
-    const footerY = doc.lastAutoTable.finalY + 10;
-    const columnX = 14;
-
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("Summary", columnX, footerY);
-
-    doc.setFont("Helvetica", "normal");
-    const footerData = [
-      ["Delivery Charge:", `Rs. ${order.deliveryCharge ? deliveryCharge : 0}`],
-      ["Tax:", `Rs. ${"100.00"}`],
-      ["Total Amount:", `Rs. ${order.totalAmount.toFixed(2)}`],
-      [
-        "Discount Amount:",
-        `Rs. ${
-          order.discountAmount
-            ? (order.totalAmount - order.discountAmount).toFixed(2)
-            : "0.00"
-        }`,
-      ],
-    ];
-
-    footerData.forEach((item, index) => {
-      doc.text(item[0], columnX, footerY + 10 + index * 6);
-      doc.text(item[1], columnX + 100, footerY + 10 + index * 6);
-    });
-
-    doc.setFont("Helvetica", "italic");
-    doc.setFontSize(12);
-    doc.text(`Thank you for your purchase!`, 14, footerY + 40);
-    doc.save(`Invoice_${order.orderId}.pdf`);
+  const handleOrderDetails = (orderId) => {
+    dispatch(orderDetails(orderId));
+    navigate("/user/profile/myOrders/details");
   };
 
   return (
     // <div className="flex">
     <main className="w-full lg:w-full p-4 font-mono h-screen overflow-y-scroll no-scrollbar">
+      {spinner && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <h1 className="text-xl lg:text-3xl uppercase font-bold mb-4 lg:mb-14">
         Manage your orders
       </h1>
@@ -246,7 +164,10 @@ const ManageOrders = () => {
         {orders.length > 0 ? (
           filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
-              <div className="border-y border-gray-500 p-4 lg:p-6 rounded-lg shadow-md space-y-4 lg:space-y-6 bg-light-red">
+              <div
+                className="border-y border-gray-500 p-4 lg:p-6 rounded-lg shadow-md space-y-4 lg:space-y-6 bg-light-red"
+                key={order._id}
+              >
                 <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row justify-between items-start lg:items-center text-xs lg:text-base gap-4">
                   <div className="font-medium">
                     <strong>Order Date:</strong> {order.orderDate}
@@ -355,13 +276,25 @@ const ManageOrders = () => {
                               />
                             </div>
                           )}
-                          
+
                         {item.productStatus === "delivered" &&
-                          item.returnDescription === "" && (
+                          item.returnDescription === "" &&
+                          (() => {
+                            const [day, month, year] = order.orderDate
+                              .split("/")
+                              .map(Number);
+                              
+                            const orderDate = new Date(year, month - 1, day);
+                            const currentDate = new Date();
+                            const timeDiff = currentDate - orderDate;
+                            const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+                            return dayDiff <= 3;
+                          })() && (
                             <div className="bg-red-500 text-white p-2 rounded-md">
                               <ReturnProduct item={item} />
                             </div>
                           )}
+
                         {item.productStatus !== "returned" &&
                           item.returnDescription && (
                             <p className="text-orange-600">
@@ -373,17 +306,12 @@ const ManageOrders = () => {
                   ))}
                 </div>
 
-                <div className="text-center lg:text-end flex justify-center lg:justify-end">
-                  {order.status === "delivered" && (
-                    <button
-                      className="border border-gray-500 text-gray-300 hover:bg-gray-700 p-2 lg:p-3 rounded-md hover:scale-105 duration-150 flex items-center gap-2"
-                      onClick={(e) => handleDownloadInvoice(order._id)}
-                    >
-                      <ArrowDown />
-                      Download Invoice
-                    </button>
-                  )}
-                </div>
+                <button
+                  className="mb-0 inline-block hover:scale-105 duration-150 border-gray-500 text-gray-300 bg-gray-700 rounded p-2 lg:p-3 "
+                  onClick={() => handleOrderDetails(order?._id)}
+                >
+                  View more
+                </button>
               </div>
             ))
           ) : (

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToWishList, removeFromWishlist } from "./addRemoveWishlit";
 import AlertDialogueButton from "@/Components/AlertDialogueButton";
 import { Link } from "react-router-dom";
+import { showToast } from "@/Components/ToastNotification";
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState({});
@@ -19,11 +20,15 @@ const Wishlist = () => {
   const [trigger, setTrigger] = useState(0);
   useEffect(() => {
     (async () => {
+      
       try {
-        const response = await axios.get(`wishlist?user=${user._id}`);
-        setWishlist(response.data.wishlist);
+        const response = await axios.get(`/wishlist`);
+        setWishlist(response?.data.wishlist);
       } catch (error) {
-        if (error?.response.data.isBlocked) {
+        if (
+          error?.response.data.isBlocked ||
+          error?.response.data.message == "Token not found" 
+        ) {
           dispatch(logoutUser());
         }
         Toast.fire({
@@ -32,7 +37,7 @@ const Wishlist = () => {
         });
       }
     })();
-  }, [trigger]);
+  }, [trigger,wishlist]);
 
   const handleDeleteItem = async (product) => {
     try {
@@ -63,10 +68,7 @@ const Wishlist = () => {
         return prev;
       });
       setTrigger((prev) => prev + 1);
-      Toast.fire({
-        icon: "success",
-        title: `${response.data.message}`,
-      });
+      showToast("success",response.data.message)
     } catch (error) {
       if (error?.response.data.isBlocked) {
         dispatch(logoutUser());
