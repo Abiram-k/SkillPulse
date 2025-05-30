@@ -168,7 +168,7 @@ exports.addOrder = async (req, res) => {
                 orderId: generateOrderId(),
                 orderDate: generateOrderDate(),
                 orderItems,
-                totalAmount ,
+                totalAmount,
                 totalQuantity,
                 address,
                 appliedCoupon,
@@ -253,8 +253,7 @@ exports.getOrderDetails = async (req, res) => {
 }
 exports.getOrder = async (req, res) => {
     try {
-        // console.log(req.body?.authUser?._id == req.query.id);
-        // const { id } = req.query;
+
         const id = req.body?.authUser?._id
         const orderData = await Orders.find({ user: id }).populate({
             path:
@@ -263,7 +262,7 @@ exports.getOrder = async (req, res) => {
                 path: 'category',
                 model: "category"
             }
-        });
+        }).sort({ orderDate: -1 });
 
         if (!orderData)
             console.log("No order were founded in this user id");
