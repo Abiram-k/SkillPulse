@@ -1,11 +1,7 @@
 const Admin = require("../../models/adminModel");
-
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
 dotenv.config()
-
-
-
 const jwt = require('jsonwebtoken');
 const User = require("../../models/userModel");
 const BlacklistedToken = require("../../models/blacklistModel");
@@ -14,13 +10,19 @@ const BlacklistedToken = require("../../models/blacklistModel");
 
 exports.customers = async (req, res) => {
     try {
-        const { sort, startDate, endDate } = req.query;
+        const { sort, startDate, endDate, search } = req.query;
         const query = {};
         if (startDate && endDate) {
             query.createdAt = {
                 $gte: new Date(startDate),
                 $lte: new Date(endDate)
             };
+        }
+        if (search) {
+            query.$or = [
+                { email: { $regex: search, $options: "i" } },
+                { firstName: { $regex: search, $options: "i" } }
+            ];
         }
         const users = await User.find(query).sort({ createdAt: -1 });
 

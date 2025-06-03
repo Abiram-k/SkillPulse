@@ -169,7 +169,7 @@ const CouponManagement = () => {
               type="text"
               id="search"
               className="border p-2 px-4 rounded text-black focus:outline-none"
-              placeholder="Search by coupon type"
+              placeholder="Search by coupon code..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -218,7 +218,7 @@ const CouponManagement = () => {
                           {coupon.totalLimit}
                         </td>
                         <td className="px-6 py-4 text-black">
-                          {coupon.maxDiscount}
+                          {coupon.maxDiscount || "Nil"}
                         </td>
                         <td className="px-6 py-4 text-black">
                           {coupon.purchaseAmount}

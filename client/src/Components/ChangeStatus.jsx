@@ -37,6 +37,7 @@ export const ChangeStatus = ({
         updatedStatus,
       });
       showToast("success", response.data.message);
+      window.location.reload();
       setOpen(false);
     } catch (error) {
       console.log(error);
@@ -47,7 +48,7 @@ export const ChangeStatus = ({
       });
     }
   };
-  
+
   return (
     <Dialog className="mt-5" open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -76,6 +77,9 @@ export const ChangeStatus = ({
               {/* {currentStatus == "processing" && (
                 <option value="processing">processing</option>
               )} */}
+              <option value="" disabled hidden>
+                Select status
+              </option>
               {currentStatus == "processing" && (
                 <option value="shipped">shipped</option>
               )}

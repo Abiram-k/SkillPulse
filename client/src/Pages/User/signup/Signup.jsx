@@ -87,9 +87,14 @@ const Signup = () => {
     }
     if (!mobileNumber.trim()) {
       error.mobile = "Mobile number is required.";
-    } else if (mobileNumber.length != 10) {
-      error.mobile = "Please enter 10 digit mobile number.";
+    } else if (mobileNumber?.trim()) {
+      const isOnlyDigits = /^\d{10}$/.test(mobileNumber);
+      if (!isOnlyDigits) {
+        error.mobile =
+          "Please enter a valid 10-digit mobile number (digits only) *";
+      }
     }
+
     return error;
   };
 

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setProductDetails } from "../../../redux/userSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "@/axiosIntercepters/AxiosInstance";
+import { Toast } from "@/Components/Toast";
 const LandingPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [products, setProducts] = useState([]);
@@ -33,7 +34,10 @@ const LandingPage = () => {
   return (
     <div>
       <header className="flex justify-between items-center p-4 bg-[#1C1C1C]">
-        <div className="text-2xl lg:text-3xl font-bold">SKILL PULSE</div>
+        {/* <div className="text-2xl lg:text-3xl font-bold">SKILL PULSE</div> */}
+        <Link to={"/user/home"} className="text-2xl lg:text-3xl font-bold">
+          SKILL PULSE
+        </Link>
 
         <button
           id="menu-btn"
@@ -61,29 +65,29 @@ const LandingPage = () => {
             menuOpen ? "flex" : "hidden"
           } flex-col lg:flex-row lg:flex lg:space-x-4 lg:items-center absolute lg:static bg-black lg:bg-transparent top-16 left-0 w-full lg:w-auto z-10 text-center space-y-8 lg:space-y-0 pb-8 lg:p-0`}
         >
-          <a href="#" className="hover:text-gray-400">
+          {/* <Link to="/user/home" className="hover:text-gray-400">
             HOME
-          </a>
-          <a href="#" className="hover:text-gray-400">
+          </Link>
+          <Link to="/user/shop" className="hover:text-gray-400">
             SHOP
-          </a>
-          <a href="#" className="hover:text-gray-400">
+          </Link>
+          <Link to="/user/shop" className="hover:text-gray-400">
             CATEGORY
-          </a>
-          <a href="#" className="hover:text-gray-400">
+          </Link>
+          <Link to="/user/contact" className="hover:text-gray-400">
             CONTACT
-          </a>
-          <a href="#" className="hover:text-gray-400">
+          </Link>
+          <Link to="/user/about" className="hover:text-gray-400">
             ABOUT US
-          </a>
-          <div className="lg:flex space-x-1 align-middle justify-center hidden relative font-sans">
+          </Link> */}
+          {/* <div className="lg:flex space-x-1 align-middle justify-center hidden relative font-sans">
             <i className="fas fa-search absolute right-3 top-3.5 text-gray-200"></i>
             <input
               type="text"
               className="bg-transparent border-2 rounded border-gray-700 text-white p-2  focus:outline-none"
               placeholder="Search for products"
             />
-          </div>
+          </div> */}
           <div className="flex flex-col  lg:flex-row space-x-4 text-center space-y-8 lg:space-y-0 border-t-2 border-gray-500 lg:border-none p-1 lg:p-0">
             <a href="#"></a>
             <Link
@@ -117,7 +121,13 @@ const LandingPage = () => {
           </p>
           <button
             className="mt-4 px-6 py-2 bg-red-600 text-white font-bold rounded text-center font-mono "
-            onClick={() => goToDetails()}
+            onClick={() => {
+              Toast.fire({
+                icon: "warning",
+                title: "User not logged in, login now!",
+              });
+              navigate("/login");
+            }}
           >
             ORDER NOW
           </button>
@@ -132,7 +142,9 @@ const LandingPage = () => {
                 <div
                   className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 text-center mb-8 p-4 bg-gray-900  shadow-lg hover:shadow-xl transition-shadow  rounded duration-300"
                   key={cat._id}
-                  onClick={() => goToDetails()}
+                  onClick={() => {
+                    navigate(`/user/shop?categoryId=${cat._id}`);
+                  }}
                 >
                   <img
                     src={cat.image || "https://placehold.co/150x150"}
@@ -317,8 +329,12 @@ const LandingPage = () => {
           <div>
             <h3 className="font-bold">CUSTOMER SERVICE</h3>
             <ul className="mt-2 space-y-2">
-              <li>Contact us</li>
-              <li>Shipping & Returns</li>
+              <li>
+                <Link to={"/user/contact"}>Contact us</Link>
+              </li>
+              <li>
+                <Link to={"/user/profile/myOrders"}>Shipping & Returns</Link>
+              </li>
               <li>Terms & Conditions</li>
               <li>Delivery</li>
             </ul>
@@ -326,12 +342,14 @@ const LandingPage = () => {
           <div>
             <h3 className="font-bold">INFORMATION</h3>
             <ul className="mt-2 space-y-2">
-              <li>About</li>
+              <li>
+                <Link to={"/user/about"}>About</Link>
+              </li>
               <li>Affiliates</li>
               <li>Privacy Policy</li>
             </ul>
           </div>
-          <div>
+          {/* <div>
             <h3 className="font-bold">NEWSLETTER</h3>
             <input
               type="email"
@@ -341,10 +359,10 @@ const LandingPage = () => {
             <button className="w-full mt-2 px-4 py-2 bg-red-600 text-white font-bold rounded">
               Subscribe
             </button>
-          </div>
+          </div> */}
         </div>
         <p className="text-center mt-8">
-          © 2023 FutureTech. All rights reserved.
+          © {new Date().getFullYear()}. All rights reserved - Abiram.
         </p>
       </footer>
     </div>

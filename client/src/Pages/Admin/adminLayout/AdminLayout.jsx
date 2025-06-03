@@ -20,6 +20,8 @@ import { useDispatch } from "react-redux";
 import { logoutAdmin } from "../../../redux/adminSlice";
 import { Badge } from "@/Components/ui/badge";
 import axiosInstance from "@/axiosIntercepters/AxiosInstance";
+import { useLocation } from "react-router-dom";
+
 import { showToast } from "@/Components/ToastNotification";
 
 // Sample data for the chart
@@ -65,7 +67,7 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen flex bg-slate-200">
+    <div className="min-h-screen min-w-screen bg-slate-200">
       <button
         className="fixed top-4 left-4 z-20 text-black md:hidden"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -91,27 +93,68 @@ export default function Dashboard() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:block`}
       >
-        <div className="p-4 bg-slate-300 h-screen">
-          <button className="text-2xl font-bold mb-8">SkillPulse</button>
+        <div className="p-4 bg-slate-300 h-screen ">
+          <button className="text-2xl font-bold mb-8 mt-5">SkillPulse</button>
           <nav className="lg:space-y-12 flex flex-col ">
-            <div className="flex flex-col lg:space-y-3">
-              <NavItem icon={Menu} text="Dashboard" redirect="dashboard" />
-              <NavItem icon={Users} text="Customers" redirect="customers" />
-              <NavItem icon={Package} text="Products" redirect="products" />
-              <NavItem icon={FileText} text="Orders" redirect="orders" />
-              <NavItem icon={Image} text="Banner" redirect="bannerMangement" />
-              <NavItem icon={Tag} text="Coupon" redirect="coupon" />
-              <NavItem icon={CreditCard} text="Payments" redirect="dashboard" />
-              <NavItem icon={ShoppingBag} text="Category" redirect="category" />
-              <NavItem icon={Bandage} text="Brand" redirect="brand" />
+            <div className="flex flex-col lg:space-y-1 ">
+              <NavItem
+                icon={Menu}
+                text="Dashboard"
+                redirect="dashboard"
+                active={location.pathname.includes("/dashboard")}
+              />
+              <NavItem
+                icon={Users}
+                text="Customers"
+                redirect="customers"
+                active={location.pathname.includes("/customers")}
+              />
+              <NavItem
+                icon={Package}
+                text="Products"
+                redirect="products"
+                active={location.pathname.includes("/products")}
+              />
+              <NavItem
+                icon={FileText}
+                text="Orders"
+                redirect="orders"
+                active={location.pathname.includes("/orders")}
+              />
+              <NavItem
+                icon={Image}
+                text="Banner"
+                redirect="bannerMangement"
+                active={location.pathname.includes("/bannerMangement")}
+              />
+              <NavItem
+                icon={Tag}
+                text="Coupon"
+                redirect="coupon"
+                active={location.pathname.includes("/coupon")}
+              />
+              {/* <NavItem icon={CreditCard} text="Payments" redirect="dashboard" /> */}
+              <NavItem
+                icon={ShoppingBag}
+                text="Category"
+                redirect="category"
+                active={location.pathname.includes("/category")}
+              />
+              <NavItem
+                icon={Bandage}
+                text="Brand"
+                redirect="brand"
+                active={location.pathname.includes("/brand")}
+              />
               <NavItem
                 icon={Bell}
-                text="Notifications"
+                text="Return requests"
                 redirect="notifications"
+                active={location.pathname.includes("/notifications")}
               />
             </div>
             <div>
-              <NavItem icon={Settings} text="Settings" redirect="settings" />
+              {/* <NavItem icon={Settings} text="Settings" redirect="settings" /> */}
               <NavItem icon={LogOut} text="Logout" redirect="/admin/login" />
             </div>
           </nav>
@@ -139,7 +182,7 @@ export default function Dashboard() {
                 n
                 className="w-8 h-8 bg-gray-500 text-black rounded "
               />
-              <span className="text-black">Abiram</span>
+              <span className="text-black">Administrator</span>
             </div>
           </div>
         </div>
@@ -168,13 +211,16 @@ function NavItem({ icon: Icon, text, active, redirect }) {
       <Link
         to={redirect}
         onClick={text == "Logout" && handleLogout}
-        className={`flex items-center gap-3 w-full p-2 rounded transition-colors ${
+        className={`flex items-center gap-3  w-full lg:p-2 p-1 rounded transition-colors ${
           active
             ? "bg-gray-800 text-white"
-            : "hover:bg-gray-800 hover:text-white"
-        }`}
+            : "hover:bg-gray-600 hover:text-white"
+        } ${
+          text == "Logout" &&
+          "text-white font-semibold bg-red-600 hover:bg-red-700"
+        } ${location.pathname.includes(`/${redirect}`)}`}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="w-4 h-4" />
         <span>{text}</span>
       </Link>
     </>

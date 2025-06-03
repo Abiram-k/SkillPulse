@@ -128,6 +128,7 @@ router.get('/auth/google/callback',
     });
 
 router.get("/products", isBlocked, userController.getProducts);
+router.get("/product/:id", userController.getProductDetails)
 router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
 router.get("/brand-category-info/:id", userController.getBrandCategoryInfo);
 
@@ -155,7 +156,7 @@ router.delete("/wishlist", verifyUser, isBlocked, wishlistController.deleteWishl
 
 router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
 router.get("/order", verifyUser, isBlocked, orderController.getOrder);
-router.get("/order/details/:id", verifyUser, isBlocked, orderController.getOrderDetails)
+router.get("/order/details/:id", isBlocked, orderController.getOrderDetails)
 router.patch("/cancelOrderItem", verifyUser, isBlocked, orderController.cancelOrderItem);
 router.patch("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder)
 router.patch("/returnProduct", verifyUser, isBlocked, orderController.returnOrderRequest);

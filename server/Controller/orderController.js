@@ -8,12 +8,22 @@ const User = require("../models/userModel");
 const Product = require('../models/productModel');
 const Wallet = require('../models/walletModel');
 const Coupon = require('../models/couponModel.');
+const nodeMailer = require("nodemailer");
 const Razorpay = require("razorpay");
 const Order = require('../models/orderModel');
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 let orderCounter = 0;
+
+
+const transporter = nodeMailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.NODEMAILER_EMAIL, // Email id of use
+        pass: process.env.NODEMAILER_PASSWORD,// Password for nodemailer
+    }
+});
 
 const generateOrderId = () => {
     orderCounter += 1;
@@ -210,6 +220,9 @@ exports.addOrder = async (req, res) => {
                 }
             }
             await user.save();
+            let orderId = "";
+            let orderDate = "";
+            let orderAmount = totalDiscount || totalAmount
 
             await newOrder.save()
                 .then(async (order) => {
@@ -217,13 +230,47 @@ exports.addOrder = async (req, res) => {
                     if (!isRetryPayment) {
                         const result = await Cart.deleteOne({ user: id });
                         if (result.deletedCount === 1) {
-                            console.log("Order placed successfully");
+                            orderId = newOrder.orderId;
+                            orderDate = newOrder.orderDate;
+                            orderAmount = newOrder.
+                                console.log("Order placed successfully");
                         } else {
                             console.log("Cart not found while attempting to delete")
                         }
                     }
                 })
                 .catch(error => console.error("Error saving order:", error));
+
+
+            const mailCredentials = {
+                from: "abiramk0107@gmail.com",
+                to: user?.email,
+                subject: 'SKILL PULSE – Order Confirmation',
+                text: `Dear ${user?.firstName || "User"},
+
+Thank you for your order with SkillPulse!
+
+We’re excited to inform you that your order has been successfully placed. Below are the details of your order:
+
+Order ID: ${orderId}
+Order Date: ${orderDate}
+Total Amount: ₹${orderAmount}
+
+You will receive another email once your order is processed and shipped. If you have any questions, feel free to reach out to our support team.
+
+Thank you for choosing SkillPulse. We look forward to serving you again!
+
+Best regards,  
+The SkillPulse Team`,
+            };
+
+            try {
+                const info = await transporter.sendMail(mailCredentials);
+                console.log("Order confirmation email sent.", info.response);
+            } catch (err) {
+                console.error("Error sending order email:", err);
+            }
+
             return res.status(200).json({ message: "Order placed successfully" });
         }
     } catch (error) {

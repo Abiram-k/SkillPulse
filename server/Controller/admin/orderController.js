@@ -148,7 +148,7 @@ exports.editStatus = async (req, res) => {
 
 exports.getOrder = async (req, res) => {
     try {
-        const { search = "", filter = "", page = 1, limit = 5, startDate = null, endDate = null } = req.query;
+        const { search = "", filter = "", page = 1, limit = 5, startDate = null, endDate = null, isForReturned = false, } = req.query;
 
         const query = {};
         if (["cancelled", "shipped", "processing", "delivered", "returned"].includes(filter)) {
@@ -160,7 +160,6 @@ exports.getOrder = async (req, res) => {
                 $lte: new Date(endDate)
             };
         }
-
         const totalDocs = await Orders.countDocuments(query);
         const pageCount = Math.ceil(totalDocs / limit);
 
@@ -173,7 +172,7 @@ exports.getOrder = async (req, res) => {
                     model: "category",
                 },
             })
-            .populate("user");
+            .populate("user").sort({ createdAt: -1 })
         return res.status(200).json({ message: "Orders fetched successfully", orderData, pageCount });
     } catch (error) {
         console.error("Error fetching orders:", error.message);
