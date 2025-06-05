@@ -88,6 +88,10 @@ const ShoppingCartPage = () => {
               setTrigger((t) => t + 1);
             } catch (error) {
               setSpinner(false);
+              showToast(
+                "error",
+                error?.response?.data?.message || "Failed to update quantity"
+              );
               setCouponMessage(error?.response.data?.couponMessage);
               console.log(error);
             }
@@ -109,9 +113,11 @@ const ShoppingCartPage = () => {
     }
   };
 
+  console.log("CARTTTT : ", cartItems);
   const handleCheckout = () => {
-    if (!cartItems[0]) {
+    if (!cartItems || !cartItems.length || !cartItems[0].products.length) {
       showToast("error", "Add some items and checkout");
+      return;
     } else {
       dispatch(checkoutItems(cartItems));
       navigate("/user/checkout");

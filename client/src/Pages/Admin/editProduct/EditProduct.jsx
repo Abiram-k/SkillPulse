@@ -58,14 +58,17 @@ const EditProduct = () => {
     if (category.trim() === "") error.category = "Category is required *";
     if (description.trim() === "")
       error.description = "description is required *";
+
     if (String(regularPrice)?.trim() === "")
       error.regularPrice = "regularPrice is required *";
     else if (isNaN(regularPriceInt))
       error.regularPrice = "regular price must a number";
+    else if (regularPrice < 1)
+      error.regularPrice = "regular price must be greater than 1₹";
 
     if (isNaN(offerPrice)) error.offerPrice = "offerPrice price must a number";
-    else if (offerPrice < 0 || offerPrice > 100)
-      error.offerPrice = "offerPrice must between 0% and 100%";
+    else if (offerPrice < 0 || offerPrice > 99)
+      error.offerPrice = "offerPrice must between 0% and 99%";
 
     if (brand.trim() === "") error.brand = "brand is required *";
     if (String(units).trim() === "") error.units = "units is required *";

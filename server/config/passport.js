@@ -10,11 +10,21 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRETE,
     callbackURL: "https://skillpulseapi.abiram.website/auth/google/callback",
-    passReqToCallback: true    
+    passReqToCallback: true
 },
 
     async (request, accessToken, refreshToken, profile, done) => {
         try {
+            const email = profile.emails[0].value.toLowerCase().trim();
+            let userExisits = await User.findOne({ email });
+
+            if (userExisits) {
+                if (!userExisits.googleid) {
+                    userExisits.googleid = profile.id;
+                    await userExisits.save();
+                }
+                return done(null, userExisits);
+            }
 
             const user = await User.findOne({ googleid: profile.id })
             if (user) {
@@ -29,13 +39,13 @@ passport.use(new GoogleStrategy({
                     }
                     return referralCode;
                 }
-    
+
                 const newUser = new User({
                     googleid: profile.id,
                     firstName: profile.displayName,
                     email: profile.emails[0].value,
                     profileImage: profile.photos[0].value,
-                    referralCode:generateReferralCode()
+                    referralCode: generateReferralCode()
                 });
                 const user = await newUser.save();
                 return done(null, user);

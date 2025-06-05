@@ -154,9 +154,10 @@ const sendOTPEmail = async (email, otp, name) => {
 
 
 exports.signUp = async (req, res) => {
-
-    const { firstName, email } = req.body;
-
+    const { firstName, email: rawEmail } = req.body;
+    if (!rawEmail)
+        return res.status(400).json({ message: "Email id not found" })
+    email = rawEmail.toLowerCase();
     const existingUser = await User.findOne({
         email:
             { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
@@ -276,9 +277,11 @@ const passResetEmail = async (email, otp, name) => {
 exports.verifyEmail = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
-        if (!user)
+        if (!email)
             return res.status(400).json({ message: "Email id not found" })
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        if (!user)
+            return res.status(400).json({ message: "User not found" })
         const otp = generateOTP();
         req.session.resetPassOtp = otp;
         const otpSuccess = await passResetEmail(email, otp, user.firstName)
@@ -309,32 +312,44 @@ exports.forgotPassword = async (req, res) => {
 
     try {
         const { newPassword } = req.body;
-        const email = req.body.email.replace(/"/g, '').trim();
-        console.log(email)
-        console.log(newPassword)
+        const email = req.body.email?.replace(/"/g, '').trim().toLowerCase();
+        if (!newPassword)
+            return res.status(400).json({ message: "New password not found" });
+        if (!email)
+            return res.status(400).json({ message: "Email not found" });
+
         const user = await User.findOne({ email });
-        console.log(user)
-
-        const existingPass = await bcrypt.compare(newPassword, user.password);
-
-        if (existingPass)
-            return res.status(404).json({ message: "This password is already in use" })
 
         if (!user)
-            return res.status(404).json({ message: "User not found" })
+            return res.status(404).json({ message: "User not found " });
+
+        // if (user.googleid && !user.password) {
+        //     return res.status(404).json({ message: "You signed up using google! can't change password at this moment" });
+        // }
+
+        if (!user?.password && !user?.googleid)
+            return res.status(404).json({ message: "password missing" });
+
+        if (user?.password) {
+            const existingPass = await bcrypt.compare(newPassword, user?.password);
+            if (existingPass)
+                return res.status(404).json({ message: "This password is already in use" })
+        }
         user.password = newPassword;
         await user.save();
         return res.status(200).json({ message: "Password Reseted" })
     } catch (error) {
-
         console.log(error);
-        return res.status(500).json({ message: "Error occured while resetting password" })
+        return res.status(500).json({ message: "Error occured while resetting password" });
     }
 }
 
 exports.login = async (req, res) => {
     try {
-        const { email, password, referralCode } = req.body;
+        const { email: rawEmail, password, referralCode } = req.body;
+        if (!rawEmail)
+            return res.status(400).json({ message: "Email id not found" })
+        email = rawEmail.toLowerCase()
         const user = await User.findOne({
             email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }
         });
@@ -342,6 +357,9 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: "User not found !" });
         }
         else {
+            if (!user.password && user?.googleid) {
+                return res.status(400).json({ message: "Login using google!" });
+            }
             const walletDoc = await Wallet.findOne({ user: user._id })
             if (!walletDoc) {
                 const wallet = new Wallet({
@@ -353,15 +371,14 @@ exports.login = async (req, res) => {
             }
             if (referralCode) {
                 if (user.isreferredUser) {
-                    return res.status(400).json({ message: "You already a reffered user" })
+                    return res.status(400).json({ message: "Already claimed referral once!" })
                 }
                 if (user.referralCode == referralCode) {
                     return res.status(400).json({ message: "You cannot use your own code" })
                 } else {
                     const refUser = await User.findOne({ referralCode });
                     if (!refUser || refUser._id == user._id) {
-                        console.log("Ref user not found")
-                        return res.status(400).json({ message: "Ref user not found" });
+                        return res.status(400).json({ message: "Ref code not exists" });
                     } else {
                         const refWallet = await Wallet.findOne({ user: refUser._id })
                         if (!refWallet)
@@ -385,6 +402,12 @@ exports.login = async (req, res) => {
                     }
                 }
             }
+
+            if (!user.password || !password) {
+                console.log("User.password: ", user.password, "password: ", password)
+                return res.status(400).json({ message: "password is missing" })
+            }
+
             const isValidPassword = await bcrypt.compare(password, user.password);
 
             if (!isValidPassword) {
@@ -439,11 +462,9 @@ exports.getUserData = async (req, res) => {
 
 //Product Fetching for listing
 exports.getProducts = async (req, res) => {
-
     try {
-        const { brand, category, price, newArrivals, offer } = req.query;
+        const { brand, category, price, newArrivals, offer, search = "", page = 1, limit = 5, } = req.query;
         const query = {};
-
         if (category) {
             const categoryDoc = await Category.findOne({ name: category });
             if (categoryDoc) query.category = categoryDoc._id.toString();
@@ -452,6 +473,12 @@ exports.getProducts = async (req, res) => {
         if (brand) {
             const brandDoc = await Brand.findOne({ name: brand });
             if (brandDoc) query.brand = brandDoc._id.toString();
+        }
+        if (search) {
+            query.productName = {
+                $regex: `^${search}`,
+                $options: 'i'
+            };
         }
 
         if (price) {
@@ -490,8 +517,12 @@ exports.getProducts = async (req, res) => {
             sortOrder = { ...sortOrder, salesPrice: 1 };
         }
 
+        const totalDocs = await Product.countDocuments(query);
+        const pageCount = Math.ceil(totalDocs / limit);
+
         const products = await Product.find(query)
-            .sort(sortOrder)
+            .sort(sortOrder).skip((page - 1) * limit)
+            .limit(Number(limit))
             .populate('category')
             .populate('brand');
 
@@ -503,7 +534,8 @@ exports.getProducts = async (req, res) => {
             products,
             categoryDoc,
             brandDoc,
-            isBlocked: req.body.isBlocked || false
+            isBlocked: req.body.isBlocked || false,
+            pageCount
         });
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -759,8 +791,6 @@ exports.changePassword = async (req, res) => {
     try {
         const { id } = req.params;
         const { currentPassword, newPassword } = req.body;
-
-
 
         const user = await User.findById(id);
         if (!user) {

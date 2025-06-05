@@ -22,12 +22,12 @@ function EditCategory() {
   const validateForm = () => {
     if (name.trim() === "") error.name = "Category name is required *";
 
-    if (maxDiscount.trim() === "" && offer?.length > 0)
+    if (maxDiscount.trim() === "" && offer?.length > 0 && Number(offer) !== 0)
       error.maxDiscount = "Max discount is required *";
 
     if (isNaN(offer)) error.offer = "offer price must a number";
-    else if (offer < 0 || offer > 100)
-      error.offer = "offer must between 0% and 100%";
+    else if (offer < 0 || offer > 99)
+      error.offer = "offer must between 0% and 99%";
     return error;
   };
 
@@ -140,7 +140,7 @@ function EditCategory() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        {offer?.length > 0 && (
+        {offer?.length > 0 && Number(offer) !== 0 && (
           <>
             <label className="mr-2">Max Discount :</label>
             <input
