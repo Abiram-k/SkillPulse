@@ -403,10 +403,7 @@ const ManageOrders = () => {
                           return dayDiff <= 3;
                         })() && (
                           <div className="bg-red-500 text-white p-2 rounded-md">
-                            <ReturnProduct
-                              item={item}
-                              setTrigger={setTrigger}
-                            />
+                            <ReturnProduct item={item} setTrigger={setTrigger}/>
                           </div>
                         )}
 
