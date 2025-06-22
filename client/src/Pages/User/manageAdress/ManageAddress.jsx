@@ -15,7 +15,8 @@ const ManageAddress = () => {
   useEffect(() => {
     (async () => {
       try {
-        const response = await axios.get(`/address?id=${user?._id}`);
+        const response = await axios.get(`/address`);
+        // const response = await axios.get(`/address?id=${user?._id}`);
         setAddresses(response.data.addresses);
       } catch (error) {
         if (
@@ -33,7 +34,8 @@ const ManageAddress = () => {
     try {
       const response = await axios.delete(`/address?id=${id}`);
       showToast("success", response.data.message);
-      window.location.reload();
+      setAddresses((prev) => prev.filter((addr) => addr?._id != id));
+      // window.location.reload();
     } catch (error) {
       console.log(error);
       Toast.fire({

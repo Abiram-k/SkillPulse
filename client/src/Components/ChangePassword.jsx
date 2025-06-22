@@ -16,12 +16,16 @@ import axios from "@/axiosIntercepters/AxiosInstance";
 import { Toast } from "./Toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 export function ChangePassword({ id }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState({});
+  const [open, setOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -53,8 +57,14 @@ export function ChangePassword({ id }) {
       error.confirmPassword = "Password not matching";
 
     if (confirmPassword === newPassword) {
-      if (newPassword === currentPassword) {
-        error.confirmPassword = "This password has already been used once.";
+      if (
+        newPassword === currentPassword &&
+        newPassword.trim() &&
+        currentPassword.trim() &&
+        !error.confirmPassword &&
+        !error.newPassword
+      ) {
+        error.confirmPassword = "New password looks similar like current one!";
       }
     }
 
@@ -72,21 +82,25 @@ export function ChangePassword({ id }) {
     }
     try {
       if (Object.keys(formError).length == 0) {
-        const response = await axios.patch(`/password/${id}`, {
+        const response = await axios.patch(`/password`, {
           currentPassword,
           newPassword,
         });
+        // const response = await axios.patch(`/password/${id}`, {
+        //   currentPassword,
+        //   newPassword,
+        // });
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        window.location.reload();
+        setOpen(false);
         Toast.fire({
           icon: "success",
           title: `${response.data.message}`,
         });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Change password error: ", error);
       Toast.fire({
         icon: "error",
         title: `${error?.response.data.message}`,
@@ -94,7 +108,7 @@ export function ChangePassword({ id }) {
     }
   };
   return (
-    <Dialog className="mt-5">
+    <Dialog className="mt-5" open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="font-mono">
           Change Password
@@ -123,7 +137,7 @@ export function ChangePassword({ id }) {
           {message.currentPassword && (
             <p className="text-red-600">{message.currentPassword}</p>
           )}
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid grid-cols-4 items-center gap-4 relative">
             <Label htmlFor="username" className="text-right">
               Password
             </Label>
@@ -132,14 +146,22 @@ export function ChangePassword({ id }) {
               placeholder="Password"
               className="col-span-3 text-black bg-white rounded"
               value={newPassword}
+              type={showPassword ? "text" : "password"}
               onChange={(e) => setNewPassword(e.target.value)}
             />
+
+            <span
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </span>
           </div>
           {message.newPassword && (
             <p className="text-red-600">{message.newPassword}</p>
           )}
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid grid-cols-4 items-center gap-4 relative">
             <Label htmlFor="username" className="text-right">
               Confirm Password
             </Label>
@@ -148,8 +170,16 @@ export function ChangePassword({ id }) {
               placeholder=" Confirm Password"
               className="col-span-3 text-black bg-white rounded"
               value={confirmPassword}
+              type={showConfirmPassword ? "text" : "password"}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+
+            <span
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </span>
           </div>
           {message.confirmPassword && (
             <p className="text-red-600 ">{message.confirmPassword}</p>
@@ -158,7 +188,7 @@ export function ChangePassword({ id }) {
         <DialogFooter className={" font-mono font-bold"}>
           <Button
             type="submit"
-            className={"bg-blue-500 font-bold rounded"}
+            className={"bg-blue-500 hover:bg-blue-600 font-bold rounded"}
             onClick={handleChangePassword}
           >
             Confirm

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useAsyncError, useNavigate } from "react-router-dom";
 import { Toast } from "../../../Components/Toast";
 import Cropper from "react-easy-crop";
-import { getCroppedImg } from "../utils/cropImage"; 
+import { getCroppedImg } from "../utils/cropImage";
 import axios from "@/axiosIntercepters/AxiosInstance";
 
 const AddProduct = () => {
@@ -15,6 +15,7 @@ const AddProduct = () => {
   const [regularPrice, setRegularPrice] = useState("");
   const [salesPrice, setSalesPrice] = useState("");
   const [brands, setBrands] = useState([]);
+  
   const [units, setUnits] = useState("");
   const [categories, setCategories] = useState([]);
   const [offerPrice, setOfferPrice] = useState("0");
@@ -47,8 +48,8 @@ const AddProduct = () => {
       error.regularPrice = "regular price must a number";
 
     if (isNaN(offerPrice)) error.offerPrice = "offerPrice price must a number";
-    else if (offerPrice < 0 || offerPrice > 100)
-      error.offerPrice = "offerPrice must between 0% and 100%";
+    else if (offerPrice < 0 || offerPrice > 99)
+      error.offerPrice = "offerPrice must between 0% and 99%";
 
     if (brand.trim() === "") error.brand = "brand is required *";
     if (units.trim() === "") error.units = "units is required *";
@@ -57,6 +58,7 @@ const AddProduct = () => {
     if (Object.values(images).some((value) => !value)) {
       error.image = "Upload at least three images *";
     }
+
     return error;
   };
   useEffect(() => {
@@ -83,6 +85,7 @@ const AddProduct = () => {
   // Handle image file change and set image for cropping
   const handleImageChange = (e, field) => {
     const imageFile = e.target.files[0];
+    setMessage({});
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     const maxSize = 1 * 1024 * 1024 * 1024;
     if (
@@ -157,6 +160,7 @@ const AddProduct = () => {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
+    setImage(null);
     setMessage(formErrors);
     const formData = new FormData();
     formData.append("productName", name);
@@ -204,6 +208,7 @@ const AddProduct = () => {
             <input
               type="text"
               className="ml-2 p-2 border rounded w-full focus:outline-none"
+              placeholder="Enter product name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -219,6 +224,9 @@ const AddProduct = () => {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
+              <option value="" disabled>
+                Select category
+              </option>
               {categories.length > 0 ? (
                 categories.map((category) => (
                   <option key={category._id} value={category.name}>
@@ -242,6 +250,9 @@ const AddProduct = () => {
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
             >
+              <option value="" disabled>
+                Select Brand
+              </option>
               {brands.length > 0 ? (
                 brands.map((brand) => (
                   <>
@@ -263,6 +274,7 @@ const AddProduct = () => {
             <input
               type="text"
               className="ml-2 p-2 border rounded w-full focus:outline-none"
+              placeholder="Enter description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -271,39 +283,14 @@ const AddProduct = () => {
             <p className="text-red-600">{message.description}</p>
           )}
         </div>
-        {/* <div>
-          <label className="flex items-center">
-            Sale Price :
-            <input
-              type="text"
-              className="ml-2 p-2 border rounded w-full focus:outline-none"
-              value={salesPrice}
-              onChange={(e) => setSalesPrice(e.target.value)}
-            />
-          </label>
-          {message.salesPrice && (
-            <p className="text-red-600">{message.salesPrice}</p>
-          )}
-        </div> */}
-        {/* <div>
-          <label className="flex items-center">
-            Brand:
-            <input
-              type="text"
-              className="ml-2 p-2 border rounded w-full focus:outline-none"
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-            />
-          </label>
-          {message.brand && <p className="text-red-600">{message.brand}</p>} 
-        </div>
-          */}
+
         <div>
           <label className="flex items-center">
             Regular Price :
             <input
               type="text"
               className="ml-2 p-2 border rounded w-full focus:outline-none"
+              placeholder="Enter regular price"
               value={regularPrice}
               onChange={(e) => setRegularPrice(e.target.value)}
             />
@@ -318,6 +305,7 @@ const AddProduct = () => {
             <input
               type="text"
               className="ml-2 p-2 border rounded w-full focus:outline-none"
+              placeholder="Enter discount percentage"
               value={offerPrice}
               onChange={(e) => setOfferPrice(e.target.value)}
             />
@@ -332,6 +320,7 @@ const AddProduct = () => {
             <input
               type="text"
               className="ml-2 p-2 border rounded w-full focus:outline-none"
+              placeholder="Enter units "
               value={units}
               onChange={(e) => setUnits(e.target.value)}
             />
@@ -371,33 +360,35 @@ const AddProduct = () => {
         </div>
       </div>
 
-      {image && !message.image && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Crop Image</h3>
-            <div
-              className="crop-container"
-              style={{ width: "100%", height: "400px", position: "relative" }}
-            >
-              <Cropper
-                image={image}
-                crop={crop}
-                zoom={zoom}
-                aspect={2 / 3}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={handleCropComplete}
-              />
+      {image &&
+        message.image !=
+          "Please upload a JPEG, JPG, or PNG file under 1MB." && (
+          <div className="modal">
+            <div className="modal-content">
+              <h3>Crop Image</h3>
+              <div
+                className="crop-container"
+                style={{ width: "100%", height: "400px", position: "relative" }}
+              >
+                <Cropper
+                  image={image}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={2 / 3}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={handleCropComplete}
+                />
+              </div>
+              <button
+                onClick={saveCroppedImage}
+                className="mt-4 rounded bg-red-800 text-white p-3 ms-3 mb-5 "
+              >
+                Save Cropped Image
+              </button>
             </div>
-            <button
-              onClick={saveCroppedImage}
-              className="mt-4 rounded bg-red-800 text-white p-3 ms-3 mb-5 "
-            >
-              Save Cropped Image
-            </button>
           </div>
-        </div>
-      )}
+        )}
       <button
         className="bg-green-500 text-white p-4 rounded w-full flex justify-center"
         type="submit"

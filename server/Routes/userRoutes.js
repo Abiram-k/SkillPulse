@@ -132,20 +132,22 @@ router.get("/product/:id", userController.getProductDetails)
 router.get("/getSimilarProduct/:id", userController.getSimilarProduct);
 router.get("/brand-category-info/:id", userController.getBrandCategoryInfo);
 
-router.post("/user", verifyUser, isBlocked, uploadImage.single("file"), userController.updateUser);
+router.post("/user", uploadImage.single("file"), verifyUser, isBlocked, userController.updateUser);
 
 router.get("/user", verifyUser, isBlocked, userController.getUser);
 
-router.post("/address", verifyUser, isBlocked, uploadImage.none(), userController.addAddress);
-router.patch("/password/:id", verifyUser, isBlocked, userController.changePassword);
+router.patch("/password", verifyUser, isBlocked, userController.changePassword);
+// router.patch("/password/:id", verifyUser, isBlocked, userController.changePassword);
 
 router.get("/address", verifyUser, isBlocked, userController.getAddress);
+router.post("/address", uploadImage.none(), verifyUser, isBlocked, userController.addAddress);
 router.delete("/address", verifyUser, isBlocked, userController.deleteAddress);
 router.get("/editAddress", verifyUser, isBlocked, userController.getEditAddress);
-router.put("/address", verifyUser, isBlocked, uploadImage.none(), userController.editAddress);
+router.put("/address", uploadImage.none(), verifyUser, isBlocked, userController.editAddress);
 
 router.post("/addToCart/:id", verifyUser, isBlocked, userController.addToCart);
-router.get("/cart/:id", verifyUser, isBlocked, cartController.getCart);
+router.get("/cart", verifyUser, isBlocked, cartController.getCart);
+// router.get("/cart/:id", verifyUser, isBlocked, cartController.getCart);
 router.post("/updateQuantity/:productId", verifyUser, isBlocked, cartController.updateQuantity);
 router.delete("/cartItem/:productId", verifyUser, isBlocked, cartController.removeCartItem);
 
@@ -154,18 +156,21 @@ router.get("/wishlist", verifyUser, isBlocked, wishlistController.getwishlist);
 router.post("/wishlist", verifyUser, isBlocked, wishlistController.addToWishlist);
 router.delete("/wishlist", verifyUser, isBlocked, wishlistController.deleteWishlistItem);
 
-router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
+router.post("/order", verifyUser, isBlocked, orderController.addOrder);
+// router.post("/order/:id", verifyUser, isBlocked, orderController.addOrder);
 router.get("/order", verifyUser, isBlocked, orderController.getOrder);
 router.get("/order/details/:id", isBlocked, orderController.getOrderDetails)
 router.patch("/cancelOrderItem", verifyUser, isBlocked, orderController.cancelOrderItem);
 router.patch("/cancelOrder", verifyUser, isBlocked, orderController.cancelOrder)
 router.patch("/returnProduct", verifyUser, isBlocked, orderController.returnOrderRequest);
 
-router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet);
+router.get("/wallet", verifyUser, isBlocked, userController.getWallet);
+// router.get("/wallet/:id", verifyUser, isBlocked, userController.getWallet);
 
-router.get("/coupon", couponController.getCoupons);
+router.get("/coupon", verifyUser, isBlocked, couponController.getCoupons);
 router.patch("/cartCouponApply", verifyUser, cartController.applyCoupon);
-router.patch("/cartCouponRemove/:id", verifyUser, cartController.removeCoupon);
+router.patch("/cartCouponRemove", verifyUser, cartController.removeCoupon);
+// router.patch("/cartCouponRemove/:id", verifyUser, cartController.removeCoupon);
 
 router.post("/verify-payment", verifyUser, orderController.verifyPayment);
 

@@ -9,6 +9,7 @@ import { logoutAdmin } from "@/redux/adminSlice";
 import { useDispatch } from "react-redux";
 import ReactPaginate from "react-paginate";
 import { Calendar, Search } from "lucide-react";
+import AlertDialogueButton from "@/Components/AlertDialogueButton";
 const Category = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -172,46 +173,46 @@ const Category = () => {
   };
 
   const handleRestore = async (id) => {
-    const result = confirm("Are you sure to restore categorie");
+    // const result = confirm("Are you sure to restore categorie");
     try {
-      if (result) {
-        const response = await axios.patch(`/admin/categoryRestore/${id}`);
-        Toast.fire({
-          icon: "success",
-          title: `${response.data.message}`,
-        });
-        setCategories((prev) =>
-          prev?.map((cat) =>
-            cat?._id === id ? { ...cat, isDeleted: false } : cat
-          )
-        );
+      // if (result) {
+      const response = await axios.patch(`/admin/categoryRestore/${id}`);
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+      setCategories((prev) =>
+        prev?.map((cat) =>
+          cat?._id === id ? { ...cat, isDeleted: false } : cat
+        )
+      );
 
-        // window.location.reload();
-      }
+      // window.location.reload();
+      // }
     } catch (error) {
       alert(error.response?.data.message);
     }
   };
-  const handleDelete = async (id) => { 
-    const result = confirm("Are you sure to delete categorie");
+  const handleDelete = async (id) => {
+    // const result = confirm("Are you sure to delete categorie");
     try {
-      if (result) {
-        const response = await axios.delete(`/admin/category/${id}`);
-        setCategories((prev) =>
-          prev?.map((cat) =>
-            cat?._id === id ? { ...cat, isDeleted: true } : cat
-          )
-        );
-        Toast.fire({
-          icon: "success",
-          title: `${response.data.message}`,
-        });
-      } else {
-        Toast.fire({
-          icon: "success",
-          title: `Cancelled the deletion`,
-        });
-      }
+      // if (result) {
+      const response = await axios.delete(`/admin/category/${id}`);
+      setCategories((prev) =>
+        prev?.map((cat) =>
+          cat?._id === id ? { ...cat, isDeleted: true } : cat
+        )
+      );
+      Toast.fire({
+        icon: "success",
+        title: `${response.data.message}`,
+      });
+      // } else {
+      //   Toast.fire({
+      //     icon: "success",
+      //     title: `Cancelled the deletion`,
+      //   });
+      // }
     } catch (error) {
       Toast.fire({
         icon: "success",
@@ -354,6 +355,8 @@ const Category = () => {
               <th className="p-2">S.No</th>
               <th className="p-2">Category Name</th>
               <th className="p-2">Description</th>
+              <th className="p-2">Offer</th>
+              <th className="p-2">Max discount</th>
               <th className="p-2">image</th>
               <th className="p-2">List / Unlist</th>
             </tr>
@@ -361,7 +364,7 @@ const Category = () => {
           <tbody className="">
             {categories?.length > 0 ? (
               categories.map((category, index) => (
-                <tr className="border-t" key={category._id}>
+                <tr className="border-2 border-b-gray-300" key={category._id}>
                   <td
                     className={category.isDeleted ? "line-through p-2" : "p-2"}
                   >
@@ -375,7 +378,18 @@ const Category = () => {
                   <td
                     className={category.isDeleted ? "line-through p-2" : "p-2"}
                   >
-                    {category.description}
+                    {category.description?.slice(0, 12)}{" "}
+                    {category.description.length > 12 && "..."}
+                  </td>
+                  <td
+                    className={category.isDeleted ? "line-through p-2" : "p-2"}
+                  >
+                    {category?.offer} %
+                  </td>
+                  <td
+                    className={category.isDeleted ? "line-through p-2" : "p-2"}
+                  >
+                    {category?.maxDiscount || 0} ₹
                   </td>
                   <td className="p-2">
                     <img
@@ -407,24 +421,30 @@ const Category = () => {
                     )}
 
                     {category.isDeleted ? (
-                      <button
+                      <AlertDialogueButton
+                        name={
+                          <button className="rounded bg-green-600 p-1 font-mono">
+                            Restore
+                          </button>
+                        }
                         onClick={() => handleRestore(category._id)}
-                        className="rounded bg-green-600 p-1 font-mono"
-                      >
-                        Restore
-                      </button>
+                        className="text-white px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded shadow"
+                      />
                     ) : (
-                      <i
-                        className="fas fa-trash-alt"
+                      <AlertDialogueButton
+                        name={<i className="fas fa-trash-alt"></i>}
                         onClick={() => handleDelete(category._id)}
-                      ></i>
+                        className="text-white px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded shadow"
+                      />
                     )}
                   </td>
                 </tr>
               ))
             ) : (
               <tr className="border-t">
-                <td className="p-2 font-bold mt-10 ms-10 ">Loading ....</td>
+                <td className="p-2 font-bold mt-10 ms-10 ">
+                  No Categories added yet!
+                </td>
               </tr>
             )}
           </tbody>

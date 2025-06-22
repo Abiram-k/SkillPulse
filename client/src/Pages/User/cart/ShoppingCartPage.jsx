@@ -29,7 +29,8 @@ const ShoppingCartPage = () => {
     setCouponMessage("");
     (async () => {
       try {
-        const response = await axios.get(`/cart/${user._id}`);
+        // const response = await axios.get(`/cart/${user._id}`);
+        const response = await axios.get(`/cart`);
         setCartItems(response?.data.cartItems);
         console.log("Cart items: ", response?.data.cartItems);
       } catch (error) {
@@ -48,9 +49,9 @@ const ShoppingCartPage = () => {
   const removeItem = async (id) => {
     try {
       const response = await axios.delete(`/cartItem/${id}`, {
-        params: {
-          userId: user._id,
-        },
+        // params: {
+        //   userId: user._id,
+        // },
       });
       setTrigger((t) => t + 1);
       setSelectedCoupons("");
@@ -82,7 +83,8 @@ const ShoppingCartPage = () => {
               const response = await axios.post(
                 `/updateQuantity/${productId}`,
                 {},
-                { params: { userId: user._id, value } }
+                // { params: { userId: user._id, value } }
+                { params: { value } }
               );
               setSpinner(false);
               setTrigger((t) => t + 1);
@@ -113,7 +115,6 @@ const ShoppingCartPage = () => {
     }
   };
 
-  console.log("CARTTTT : ", cartItems);
   const handleCheckout = () => {
     if (!cartItems || !cartItems.length || !cartItems[0].products.length) {
       showToast("error", "Add some items and checkout");
@@ -148,9 +149,8 @@ const ShoppingCartPage = () => {
     );
   };
   const cartTotalPrice = () => {
-    const gstRate = 18;
     const total = totalPrice() + calculateDeliveryCharge();
-    return total;
+    return isNaN(total) ? 0 : Math.round(total);
   };
 
   const offerPrice = (couponAmount = 0, couponType) => {
@@ -160,7 +160,7 @@ const ShoppingCartPage = () => {
     const gstAmount = calculateGST(gstRate) || 0;
     const deliveryCharge = calculateDeliveryCharge() || 0;
     const total = totalPrice + gstAmount + deliveryCharge;
-    return isNaN(total) ? 0 : total;
+    return isNaN(total) ? 0 : Math.round(total);
   };
 
   const handleGetSelectedCoupons = async (
@@ -182,6 +182,7 @@ const ShoppingCartPage = () => {
       console.log(error);
     }
   };
+
   return (
     <div className="min-h-screen bg-black text-white font-mono">
       {spinner && (
@@ -304,11 +305,8 @@ const ShoppingCartPage = () => {
                       : calculateDeliveryCharge() + " ₹"}
                   </span>
                 </div>
-                {/* <div className="flex justify-between">
-                  <span>GST Amount (18%)</span>
-                  <span>{calculateGST(18)} ₹</span>
-                </div> */}
-                {cartItems[0]?.appliedCoupon && (
+
+                {/* {cartItems[0]?.appliedCoupon && (
                   <>
                     <div className="flex justify-between">
                       <span>
@@ -322,7 +320,7 @@ const ShoppingCartPage = () => {
                     </div>
                     <div className="flex justify-between font-bold">
                       <span>Sub Total</span>
-                      <span>{cartTotalPrice().toFixed(2)}</span>
+                      <span>{cartTotalPrice().toFixed(2)} ₹</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Saved Amount</span>
@@ -334,26 +332,20 @@ const ShoppingCartPage = () => {
                               cartItems[0]?.appliedCoupon?.couponAmount,
                               cartItems[0]?.appliedCoupon?.couponType
                             )
-                        )}
+                        )}{" "}
+                        ₹
                       </span>
                     </div>
-                    <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
-                      <span>Payable Amount</span>
-                      <span>
-                        {offerPrice(
-                          cartItems[0]?.appliedCoupon?.couponAmount,
-                          cartItems[0]?.appliedCoupon?.couponType
-                        ).toFixed(2)}
-                      </span>
-                    </div>
+                   
                   </>
-                )}
-                {!cartItems[0]?.appliedCoupon && (
-                  <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
-                    <span>Payable Amount</span>
-                    <span>{cartTotalPrice()}</span>
-                  </div>
-                )}
+                )} */}
+
+                {/* {!cartItems[0]?.appliedCoupon && ( */}
+                <div className="flex justify-between font-bold pt-3 border-t border-gray-200">
+                  <span>Payable Amount </span>
+                  <span>{cartTotalPrice()} ₹</span>
+                </div>
+                {/* {// )}} */}
               </div>
             </div>
           </div>

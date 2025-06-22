@@ -96,7 +96,9 @@ const BannerManagement = () => {
     try {
       setSpinner(true);
       const response = await axios.get(
-        `/admin/banner?search=${search}&page=${currentPage.current}&limit=${postPerPage}&startDate=${startDate}&endDate=${endDate}`
+        `/admin/banner?search=${search}&page=${
+          currentPage.current
+        }&limit=${postPerPage}&startDate=${startDate}&endDate=${endDate}&isAdmin=${true}`
       );
       setBanner(response?.data.banner);
       setPageCount(response.data?.pageCount);
@@ -273,7 +275,7 @@ const BannerManagement = () => {
           <tbody className="">
             {banner?.length > 0 ? (
               banner.map((banner, index) => (
-                <tr className="border-t" key={banner._id}>
+                <tr className="border-2 border-b-gray-300" key={banner._id}>
                   <td className={"p-2"}>{index + 1}</td>
 
                   <td className="p-2">
